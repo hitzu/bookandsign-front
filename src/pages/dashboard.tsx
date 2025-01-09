@@ -11,6 +11,7 @@ import UsersCharts from "@views/Dashboard/UsersCharts";
 import SocialWidgets from "@views/Dashboard/SocialWidgets";
 import RecentUsers from "@views/Dashboard/RecentUsers";
 import RecentTableData from "@views/Dashboard/RecentTableData";
+import withAuth from '../middleware/authGuard';
 
 const Dashboard = () => {
     return (
@@ -36,5 +37,5 @@ Dashboard.getLayout = (page: ReactElement) => {
     )
 };
 
-
+// export default withAuth(Dashboard);
 export default Dashboard;
