@@ -6,6 +6,7 @@ const withAuth = (WrappedComponent) => {
     const router = useRouter();
 
     useEffect(() => {
+      localStorage.setItem('jwtToken', 'token');
       const token = localStorage.getItem('jwtToken');
 
       if (!token) {

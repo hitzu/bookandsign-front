@@ -11,6 +11,7 @@ import Footer from './Footer';
 import VerticalTab from './Vertical-Tab';
 import HorizontalLayout from './HorizontalLayout/Header';
 import Moduler from './Moduler';
+import withAuth from '../middleware/authGuard';
 
 interface LayoutProps {
   children: ReactNode;
@@ -192,4 +193,5 @@ const Layout = ({ children }: LayoutProps) => {
     </>
   );
 };
-export default Layout
+
+export default withAuth(Layout);

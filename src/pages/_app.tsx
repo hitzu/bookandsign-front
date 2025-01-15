@@ -7,29 +7,6 @@ import { wrapper } from "../toolkit/index";
 import { AppProps } from "next/app";
 import type { NextPage } from "next";
 
-// Import Firebase Configuration file
-// import { initFirebaseBackend } from "Components/helpers/firebase_helper";
-
-// const firebaseConfig = {
-//   apiKey: process.env.NEXT_PUBLIC_APIKEY,
-//   authDomain: process.env.NEXT_PUBLIC_AUTHDOMAIN,
-//   databaseURL: process.env.NEXT_PUBLIC_DATABASEURL,
-//   projectId: process.env.NEXT_PUBLIC_PROJECTID,
-//   storageBucket: process.env.NEXT_PUBLIC_STORAGEBUCKET,
-//   messagingSenderId: process.env.NEXT_PUBLIC_MESSAGINGSENDERID,
-//   appId: process.env.NEXT_PUBLIC_APPID,
-//   measurementId: process.env.NEXT_PUBLIC_MEASUREMENTID,
-// };
-
-// // init firebase backend
-// initFirebaseBackend(firebaseConfig);
-
-// Fake backend
-// import fakeBackend from "Components/helpers/AuthType/fakeBackend";
-
-// Activating fake backend
-// fakeBackend();
-
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
 };

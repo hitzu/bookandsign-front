@@ -5,14 +5,14 @@ import { Row, Col } from "react-bootstrap";
 
 interface BreadcrumbItemProps {
   mainTitle: string;
-  subTitle: string;
+  subTitle?: string;
 }
 
 const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({ mainTitle, subTitle }) => {
   return (
     <React.Fragment>
     <Head>
-      <title>{subTitle} | Light Able NextJs Dashboard Template</title>
+      <title>{mainTitle} | Light Able NextJs Dashboard Template</title>
     </Head>
     <div className="page-header">
       <div className="page-block">
