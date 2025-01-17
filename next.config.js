@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental: {
-        reactRoot: 'react', // This line enables client components globally
-      },    
-}
+  experimental: {
+    // Aquí puedes habilitar características experimentales si es necesario
+  },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

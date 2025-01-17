@@ -12,7 +12,7 @@ import {
 import { ThemeState } from "./utils";
 
 export const initialState: ThemeState = {
-  themeMode: THEME_MODE.LIGHT,
+  themeMode: THEME_MODE.DARK,
   layoutTheme: LAYOUT_THEME.VERTICAL,
   sidebarTheme: SIDEBAR_THEME.LIGHT,
   sidebarThemeCaptions: SIDEBAR_THEME_CAPTION.CAPTION_SHOW,
