@@ -1,32 +1,27 @@
 import NonLayout from "@layout/NonLayout";
 import React, { ReactElement, useState } from "react";
 import Link from "next/link";
-import ApiService from "../utils/ApiService"; 
-import { Button, Card, Col, Form, Row } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
+import { login } from '../api/services/authService';
+import { useRouter } from 'next/router';
 
 const Loginv2 = () => {
+    const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [showToast, setShowToast] = useState(false);
 
     const handleLogin = async (event: React.FormEvent) => {
         event.preventDefault();
-    
         try {
           const payload = { email, password };
-          const response = await ApiService.post("/auth/login", payload); // Cambia el endpoint según tu API
-    
-          // Manejar la respuesta exitosa
-          console.log("Login successful:", response);
-    
-          // Guardar token y redirigir
-          if (response.token) {
-            localStorage.setItem("token", response.token);
-            window.location.href = "/dashboard"; // Cambia la ruta según tu aplicación
-          }
-        } catch (err) {
-          console.error("Error during login:", err);
-          setError("Invalid email or password. Please try again.");
+          const authInfo = await login(payload);
+          localStorage.setItem("authToken", authInfo.data.accessToken);
+          router.replace('/');
+        } catch (err: any) {
+          setError(`${JSON.stringify((err.response?.data?.message) || "Invalid email or password. Please try again.")}`.replace(/['"]+/g, ''));
+          setShowToast(true);
         }
       };
 
@@ -60,6 +55,24 @@ const Loginv2 = () => {
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                         />
+                                    </div>
+                                    {/* Toast */}
+                                    <div className="d-grid mt-4 text-center">
+                                        <div className={`toast-container w-100`} >
+                                            <div className={`toast ${showToast ? 'show' : ''} w-100`} 
+                                                role="alert" 
+                                                aria-live="assertive" 
+                                                aria-atomic="true"
+                                            >
+                                                <div className="toast-header bg-danger text-white">
+                                                    <strong className="me-auto">Error</strong>
+                                                    <button type="button" className="btn-close" onClick={() => setShowToast(false)}></button>
+                                                </div>
+                                                <div className="toast-body">
+                                                    {error}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="d-grid mt-4">
                                         <Button 
