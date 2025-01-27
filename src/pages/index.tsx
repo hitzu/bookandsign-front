@@ -6,23 +6,25 @@ import { Row, Card, CardBody, CardHeader, Form } from 'react-bootstrap'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getProspectsByUser } from '../api/services/prospectsService';
+import { GetProspectsResponse } from '../interfaces';
 
 const Index = () => {
-  const [prospects, setProspects] = useState(ListData);
+  const [prospects, setProspects] = useState<GetProspectsResponse[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    console.log("Use effect")
+    const getProspects = async () => {
+			const userProspects = await getProspectsByUser();
+			console.log(userProspects)
+			setProspects(userProspects);
+		};
+
     getProspects();
 }, []);
 
-  const getProspects = async () => {
-    const user_prospects = await getProspectsByUser();
-    console.log({ user_prospects })
-    setProspects(user_prospects);
-  }
+  
 
   const handleSearchChange = (e: any) => {
       setSearchQuery(e.target.value);
@@ -39,7 +41,7 @@ const Index = () => {
   };
 
   const filteredData = prospects.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      item.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / entriesPerPage);
