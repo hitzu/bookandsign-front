@@ -1,15 +1,28 @@
-import React, { useState, ReactElement } from "react";
+import React, { useEffect, useState, ReactElement } from "react";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import Layout from "@layout/index";
 import ListData from '@views/Membership/List/ListData'
 import { Row, Card, CardBody, CardHeader, Form } from 'react-bootstrap'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getProspectsByUser } from '../api/services/prospectsService';
 
 const Index = () => {
+  const [prospects, setProspects] = useState(ListData);
   const [searchQuery, setSearchQuery] = useState('');
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    console.log("Use effect")
+    getProspects();
+}, []);
+
+  const getProspects = async () => {
+    const user_prospects = await getProspectsByUser();
+    console.log({ user_prospects })
+    setProspects(user_prospects);
+  }
 
   const handleSearchChange = (e: any) => {
       setSearchQuery(e.target.value);
@@ -25,7 +38,7 @@ const Index = () => {
       setCurrentPage(pageNumber);
   };
 
-  const filteredData = ListData.filter((item) =>
+  const filteredData = prospects.filter((item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
