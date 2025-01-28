@@ -1,15 +1,25 @@
-import React, { useState, ReactElement } from "react";
+import React, { useEffect, useState, ReactElement } from "react";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import Layout from "@layout/index";
-import ListData from '@views/Membership/List/ListData'
 import { Row, Card, CardBody, CardHeader, Form } from 'react-bootstrap'
 import Link from 'next/link'
-import Image from 'next/image'
+import { getProspectsByUser } from '../api/services/prospectsService';
+import { GetProspectsResponse } from '../interfaces';
 
 const Index = () => {
+  const [prospects, setProspects] = useState<GetProspectsResponse[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [entriesPerPage, setEntriesPerPage] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    const getProspects = async () => {
+			const userProspects = await getProspectsByUser();
+			console.log(userProspects)
+			setProspects(userProspects);
+		};
+    getProspects();
+  }, []);
 
   const handleSearchChange = (e: any) => {
       setSearchQuery(e.target.value);
@@ -25,8 +35,8 @@ const Index = () => {
       setCurrentPage(pageNumber);
   };
 
-  const filteredData = ListData.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredData = prospects.filter((item) =>
+      item.firstName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / entriesPerPage);
@@ -79,14 +89,15 @@ const Index = () => {
                         </div>
                         <CardBody className='pt-3'>
                             <div className="table-responsive">
-                                <table className="table table-hover" id="pc-dt-simple">
+                            <table className="table table-hover" id="pc-dt-simple">
                                     <thead>
                                         <tr>
                                             <th>Nombre</th>
                                             <th>Telefono</th>
-                                            <th>Contacto</th>
-                                            <th>Status</th>
-                                            <th>Plan de interes</th>
+                                            <th>Email</th>
+                                            <th>Tipo de evento</th>
+                                            <th>Fecha del evento</th>
+                                            <th>Presupuesto</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -94,20 +105,12 @@ const Index = () => {
                                         {currentEntries.map((item: any, index: number) => {
                                             return (
                                                 <tr key={index}>
-                                                    <td>
-                                                        <div className="d-flex align-items-center">
-                                                            <div className="flex-shrink-0">
-                                                                <Image src={item.images} alt="user image" className="img-radius wid-40" style={{height:"40px",width:"40px"}} />
-                                                            </div>
-                                                            <div className="flex-grow-1 ms-3">
-                                                                <h6 className="mb-0">{item.name}</h6>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>{item.mobile_no}</td>
-                                                    <td>{item.start_date} <span className="text-muted text-sm d-block">{item.time}</span></td>
-                                                    <td className={item.textColor}><i className="fas fa-circle f-10 m-r-10"></i>{item.status}</td>
-                                                    <td><span className={`badge ${item.color}`}>{item.plan}</span></td>
+                                                    <td>{item.firstName} {item.lastName}</td>
+                                                    <td>{item.phoneCountryCode} {item.phoneNumber}</td>
+                                                    <td>{item.email}</td>
+                                                    <td>{item.eventType.name}</td>
+                                                    <td>{item.eventDate}</td>
+                                                    <td>{item.budget}</td>
                                                     <td>
                                                         <Link href="#" className="avtar avtar-xs btn-link-secondary">
                                                             <i className="ti ti-eye f-20"></i>
