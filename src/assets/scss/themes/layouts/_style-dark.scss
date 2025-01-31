@@ -83,6 +83,11 @@
   color: var(--bs-body-color);
 }
 
+.no-link-style {
+  color: inherit; /* Mantiene el color del texto original */
+  text-decoration: none; /* Elimina el subrayado */
+}
+
 .pct-c-btn {
   background: lighten($dark-layout-color, 5%);
   border-color: lighten($dark-layout-color, 5%);

@@ -10,3 +10,13 @@ export const getProspectsByUser = async (): Promise<GetProspectsResponse[]> => {
     throw error;
   }
 };
+
+export const getProspectById = async (id: number): Promise<GetProspectsResponse> => {
+  try {
+    const response = await axiosInstanceWithToken.get(`/prospects/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user prospects:', error);
+    throw error;
+  }
+};

@@ -104,21 +104,42 @@ const Index = () => {
                                     <tbody>
                                         {currentEntries.map((item: any, index: number) => {
                                             return (
-                                                <tr key={index}>
-                                                    <td>{item.firstName} {item.lastName}</td>
-                                                    <td>{item.phoneCountryCode} {item.phoneNumber}</td>
-                                                    <td>{item.email}</td>
-                                                    <td>{item.eventType.name}</td>
-                                                    <td>{item.eventDate}</td>
-                                                    <td>{item.budget}</td>
+                                                <tr key={item.id}>
                                                     <td>
-                                                        <Link href="#" className="avtar avtar-xs btn-link-secondary">
-                                                            <i className="ti ti-eye f-20"></i>
+                                                        <Link href={`/prospect/${item.id}`} passHref>
+                                                            {item.firstName} {item.lastName}
                                                         </Link>
-                                                        <Link href="#" className="avtar avtar-xs btn-link-secondary">
+                                                    </td>
+                                                    <td>
+                                                        <Link href={`/prospect/${item.id}`} passHref>
+                                                            {item.phoneCountryCode} {item.phoneNumber}
+                                                        </Link>
+                                                    </td>
+                                                    <td>
+                                                        <Link href={`/prospect/${item.id}`} passHref>
+                                                            {item.email}
+                                                        </Link>
+                                                    </td>
+                                                    <td>
+                                                        <Link href={`/prospect/${item.id}`} passHref>
+                                                            {item.eventType.name}
+                                                        </Link>
+                                                    </td>
+                                                    <td>
+                                                        <Link href={`/prospect/${item.id}`} passHref>
+                                                            {item.eventDate}
+                                                        </Link>
+                                                    </td>
+                                                    <td>
+                                                        <Link href={`/prospect/${item.id}`} passHref>
+                                                            {item.budget}
+                                                        </Link>
+                                                    </td>
+                                                    <td>
+                                                        <Link href={`/prospect/${item.id}`} className="avtar avtar-xs btn-link-secondary">
                                                             <i className="ti ti-edit f-20"></i>
                                                         </Link>
-                                                        <Link href="#" className="avtar avtar-xs btn-link-secondary">
+                                                        <Link href={`/prospect/${item.id}`} className="avtar avtar-xs btn-link-secondary">
                                                             <i className="ti ti-trash f-20"></i>
                                                         </Link>
                                                     </td>
