@@ -11,7 +11,7 @@ export interface GetProspectsResponse {
   address: string;
   city: string;
   userId: number;
-  eventTypeId: number;
+  eventTypeId: number | null;
   contactMethodId: number;
   eventDate: string;
   budget: string;
