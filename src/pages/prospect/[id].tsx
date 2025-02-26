@@ -1,11 +1,11 @@
 import { useRouter } from 'next/router';
 import { useEffect, ReactElement, useState } from 'react';
 import { GetProspectsResponse } from '../../interfaces';
-import { getProspectById } from '../../api/services/prospectsService';
+import { getProspectById, updateProspectById } from '../../api/services/prospectsService';
 import { getEventTypes } from '../../api/services/eventTypesService';
 import { getContactMethods } from '../../api/services/contactMethodsService';
 import Layout from "@layout/index";
-import { Card, CardBody, CardHeader, Col, Form, Row } from 'react-bootstrap';
+import { Button, Card, CardBody, CardHeader, Col, Form, Row } from 'react-bootstrap';
 import Select from 'react-select';
 
 const ProspectPage = () => {
@@ -14,7 +14,7 @@ const ProspectPage = () => {
   const [prospect, setProspect] = useState<GetProspectsResponse | null>(null);
   const [eventTypes, setEventTypes] = useState<{ value: number; label: string }[]>([]);
   const [contactMethods, setContactMethods] = useState<{ value: number; label: string }[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
+  const [disableEditing, setDisableEditing] = useState(true);
 
   const customStyles = {
     control: (base: any) => ({
@@ -67,7 +67,6 @@ const ProspectPage = () => {
             label: event.name
           }));
           setEventTypes(eventTypesList);
-          console.log(eventTypesList);
         } catch (error) {
           console.error('Error fetching event types:', error);
         }
@@ -81,7 +80,6 @@ const ProspectPage = () => {
             label: event.method
           }));
           setContactMethods(contactMethodsList);
-          console.log(contactMethodsList);
         } catch (error) {
           console.error('Error fetching event types:', error);
         }
@@ -95,20 +93,42 @@ const ProspectPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => { 
     if (!prospect) return; 
-    console.log({ e })
-    setProspect({ ...prospect, [e.target.name]: e.target.value }); 
+    const { name, value } = e.target; 
+    setProspect(prevState => prevState ? { ...prevState, [name]: value } : null);
    };
 
    const handleSelectChange = (fieldName: string, selectedOption: { value: number; } | null) => {
-    console.log({ selectedOption });
     setProspect(prospect ? {
         ...prospect,
         [fieldName]: selectedOption ? selectedOption.value : null,
       } : null);
-  };
+    };
 
-  const handleUpdate = async (event: React.FormEvent) => {
-        
+    const handleEditButton = () => { 
+        setDisableEditing(!disableEditing);
+    };
+    
+    const handleUpdate = async (event: React.FormEvent) => {
+        event.preventDefault();
+        try {
+            const payload = { 
+            "firstName": prospect?.firstName,
+            "lastName": prospect?.lastName,
+            "email": prospect?.email,
+            "phoneCountryCode": prospect?.phoneCountryCode,
+            "phoneNumber": prospect?.phoneNumber,
+            "contactMethodId": prospect?.contactMethodId,
+            "eventTypeId": prospect?.contactMethodId,
+            "address": prospect?.address,
+            "city": prospect?.city,
+            "budget": prospect?.budget,
+            "eventDate": prospect?.eventDate,
+            };
+            console.log({ payload })
+            await updateProspectById(Number(id), payload);
+        } catch (err: any) {
+            console.log({ err })
+        }
     };
 
   if (!prospect) {
@@ -120,21 +140,32 @@ const ProspectPage = () => {
           <div className="col-12">
               <Card>
                   <CardHeader>
-                      <h5 className="mb-0">Informacion del prospecto</h5>
+                    <Row className="justify-content-between align-items-center mb-3 g-3">
+                        <Col sm="auto">
+                            <h4 className="mb-0">Información del prospecto</h4>
+                        </Col>
+                        <Col sm="auto">
+                            <Button variant="light" className="btn btn-light-secondary btn-search"
+                                onClick={handleEditButton}>
+                                <i className="fas fa-user-edit me-2 fs-5"></i>
+                                {disableEditing ? "Editar prospecto" : "Cancelar edición"}
+                            </Button>
+                        </Col>
+                    </Row>
                   </CardHeader>
                   <CardBody>
                     <Form onSubmit={handleUpdate}>
                         <Row>
                           <Col md={6}>
-                          {isEditing}
                               <div className="mb-3">
                                   <label className="form-label">Nombre</label>
                                   <Form.Control 
                                     type="text"
+                                    name="firstName"
                                     placeholder="Nombre"
                                     value={prospect?.firstName || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                   />
                               </div>
                           </Col>
@@ -143,10 +174,11 @@ const ProspectPage = () => {
                                   <label className="form-label">Apellido</label>
                                   <Form.Control 
                                     type="text"
+                                    name="lastName"
                                     placeholder="Apellido"
                                     value={prospect?.lastName || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                   />
                               </div>
                           </Col>
@@ -157,10 +189,11 @@ const ProspectPage = () => {
                                   <label className="form-label">Correo electrónico</label>
                                   <Form.Control 
                                     type="text"
+                                    name="email"
                                     placeholder="Correo electrónico"
                                     value={prospect?.email || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                   />
                               </div>
                           </Col>
@@ -169,10 +202,11 @@ const ProspectPage = () => {
                                   <label className="form-label">Código</label>
                                   <Form.Control 
                                     type="text"
+                                    name="phoneCountryCode"
                                     placeholder="Código de país"
                                     value={prospect?.phoneCountryCode || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                   />
                               </div>
                           </Col>
@@ -181,10 +215,11 @@ const ProspectPage = () => {
                               <label className="form-label">Teléfono</label>
                               <Form.Control 
                                     type="number"
+                                    name="phoneNumber"
                                     placeholder="Teléfono"
                                     value={prospect?.phoneNumber || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                 />
                               </div>
                           </Col>
@@ -200,6 +235,7 @@ const ProspectPage = () => {
                                     value={contactMethods.find(option => option.value === prospect.contactMethodId) || null}
                                     onChange={(selectedOption) => handleSelectChange("contactMethodId", selectedOption)}
                                     styles={customStyles}
+                                    isDisabled={disableEditing}
                                   />
                               </div>
                           </Col>
@@ -213,6 +249,7 @@ const ProspectPage = () => {
                                     value={eventTypes.find(option => option.value === prospect.eventTypeId) || null}
                                     onChange={(selectedOption) => handleSelectChange("eventTypeId", selectedOption)}
                                     styles={customStyles}
+                                    isDisabled={disableEditing}
                                 />
                               </div>
                           </Col>
@@ -223,10 +260,11 @@ const ProspectPage = () => {
                                   <label className="form-label">Dirección</label>
                                   <Form.Control 
                                     type="text"
+                                    name="address"
                                     placeholder="Dirección"
                                     value={prospect?.address || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                   />
                               </div>
                           </Col>
@@ -235,10 +273,11 @@ const ProspectPage = () => {
                                   <label className="form-label">Ciudad</label>
                                   <Form.Control 
                                     type="text"
+                                    name="city"
                                     placeholder="Ciudad"
                                     value={prospect?.city || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                   />
                               </div>
                           </Col>
@@ -249,23 +288,33 @@ const ProspectPage = () => {
                                   <label className="form-label">Presupuesto</label>
                                   <Form.Control 
                                     type="number"
+                                    name="budget"
                                     placeholder="Presupuesto"
                                     value={prospect?.budget || ""}
                                     onChange={handleChange}
-                                    disabled={isEditing}
+                                    disabled={disableEditing}
                                   />
                               </div>
                           </Col>
                           <Col md={6}>
                               <div className="mb-3">
                                   <label className="form-label">Fecha del evento</label>
-                                  <input type="date" className="form-control" />
+                                  <input 
+                                    type="date"
+                                    name="eventDate"
+                                    value={prospect?.eventDate || ""}
+                                    onChange={handleChange}
+                                    disabled={disableEditing}
+                                    className="form-control"
+                                  />
                               </div>
                           </Col>
                         </Row>
-                        <Row>
+                        <Row className="mt-3">
                           <Col md={12} className="text-end">
-                              <button className="btn btn-primary">Submit</button>
+                              <button className="btn btn-primary" disabled={disableEditing}>
+                                Actualizar prospecto
+                              </button>
                           </Col>
                         </Row>
                     </Form>
