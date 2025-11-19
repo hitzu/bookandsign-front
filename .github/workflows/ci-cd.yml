@@ -55,13 +55,87 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Debug - Verify VERCEL_TOKEN Secret
+        run: |
+          echo "🔍 Checking VERCEL_TOKEN secret..."
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "❌ ERROR: VERCEL_TOKEN is empty or not set"
+            echo "Please check GitHub Secrets → VERCEL_TOKEN"
+            exit 1
+          else
+            TOKEN_LENGTH=${#VERCEL_TOKEN}
+            TOKEN_PREFIX="${VERCEL_TOKEN:0:10}"
+            TOKEN_SUFFIX="${VERCEL_TOKEN: -4}"
+            echo "✅ VERCEL_TOKEN is set"
+            echo "   Token length: ${TOKEN_LENGTH} characters"
+            echo "   Token starts with: ${TOKEN_PREFIX}..."
+            echo "   Token ends with: ...${TOKEN_SUFFIX}"
+            echo "   (Token value is hidden for security)"
+          fi
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Project
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Debug - Verify Environment Variables
+        run: |
+          echo "🔍 Checking environment variables..."
+          if [ -z "$NEXT_PUBLIC_API_URL" ]; then
+            echo "⚠️  NEXT_PUBLIC_API_URL is not set"
+            echo "   Will use default: https://bookandsign-api.onrender.com"
+          else
+            echo "✅ NEXT_PUBLIC_API_URL is set"
+            echo "   Value: $NEXT_PUBLIC_API_URL"
+          fi
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
+      - name: Debug - Check Vercel Project Link Status
+        run: |
+          echo "🔍 Checking Vercel project link status..."
+          if [ -f ".vercel/project.json" ]; then
+            echo "✅ .vercel/project.json exists"
+            echo "Project configuration:"
+            cat .vercel/project.json | jq '.' || cat .vercel/project.json
+          else
+            echo "⚠️  .vercel/project.json does not exist"
+            echo "   Project may not be linked. 'vercel pull' will attempt to link it."
+          fi
+
+          if [ -f ".vercel/org.json" ]; then
+            echo "✅ .vercel/org.json exists"
+            echo "Organization configuration:"
+            cat .vercel/org.json | jq '.' || cat .vercel/org.json
+          else
+            echo "⚠️  .vercel/org.json does not exist"
+          fi
+
+      - name: Pull Vercel Environment Information
+        run: |
+          echo "📥 Pulling Vercel environment information..."
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          echo "✅ Environment information pulled successfully"
+        continue-on-error: true
+
+      - name: Debug - Show Vercel Configuration After Pull
+        if: success() || failure()
+        run: |
+          echo "🔍 Checking Vercel configuration after pull..."
+          if [ -f ".vercel/project.json" ]; then
+            echo "Project ID:"
+            cat .vercel/project.json | jq -r '.projectId' 2>/dev/null || echo "Could not read project ID"
+            echo "Org ID:"
+            cat .vercel/org.json | jq -r '.orgId' 2>/dev/null || echo "Could not read org ID"
+          fi
+
+      - name: Build Project
+        run: |
+          echo "🔨 Building project with Vercel..."
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "✅ Build completed successfully"
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://bookandsign-api.onrender.com' }}
+
       - name: Deploy Project to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          echo "🚀 Deploying project to Vercel..."
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "✅ Deployment completed successfully"

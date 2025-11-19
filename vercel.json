@@ -1,0 +1,9 @@
+{
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "master": false
+    }
+  },
+  "ignoreCommand": "echo 'Builds are handled by GitHub Actions' && exit 0"
+}
