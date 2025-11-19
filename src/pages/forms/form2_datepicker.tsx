@@ -1,9 +1,12 @@
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import Layout from "@layout/index";
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useState, ComponentType } from "react";
 import { Card, Col, Form, InputGroup, Row } from "react-bootstrap";
-import DatePicker from "react-datepicker";
+import DatePickerOriginal from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
+// Type assertion to fix React 18 compatibility
+const DatePicker = DatePickerOriginal as ComponentType<any>;
 
 const Form2_datepicker = () => {
   const [startDate, setStartDate] = useState<any>(new Date());
@@ -41,7 +44,7 @@ const Form2_datepicker = () => {
                     <DatePicker
                       className="form-control"
                       selected={startDate}
-                      onChange={(date) => setStartDate(date)}
+                      onChange={(date: any) => setStartDate(date)}
                     />
                   </Col>
                 </div>
@@ -52,17 +55,17 @@ const Form2_datepicker = () => {
                   </Form.Label>
                   <Col lg={4} md={9} sm={12}>
                     <div className="input-group date">
-                        <DatePicker
+                      <DatePicker
                         selected={startDateInput}
                         onChange={(date: any) => setStartDateInput(date)}
                         className="form-control datepicker-input"
                         placeholderText="Select date"
                         id="pc-datepicker-2"
                       />
-                        <span className="input-group-text">
-                          <i className="feather icon-calendar"></i>
-                        </span>
-                      </div>
+                      <span className="input-group-text">
+                        <i className="feather icon-calendar"></i>
+                      </span>
+                    </div>
                   </Col>
                 </div>
                 <div className="mb-3 row">
@@ -74,11 +77,11 @@ const Form2_datepicker = () => {
                       <DatePicker
                         className="form-control datepicker-input"
                         selected={startDateHelp}
-                        onChange={(date) => setStartDateHelp(date)}
+                        onChange={(date: any) => setStartDateHelp(date)}
                       />
                       <span className="input-group-text">
-                          <i className="feather icon-calendar"></i>
-                        </span>
+                        <i className="feather icon-calendar"></i>
+                      </span>
                     </div>
                   </Col>
                 </div>
@@ -129,7 +132,7 @@ const Form2_datepicker = () => {
                       <DatePicker
                         className="form-control datepicker-input"
                         selected={startDateleft}
-                        onChange={(date) => setStartDateleft(date)}
+                        onChange={(date: any) => setStartDateleft(date)}
                       />
                       <span className="input-group-text">
                         <i className="feather icon-calendar"></i>
@@ -139,7 +142,7 @@ const Form2_datepicker = () => {
                       <DatePicker
                         className="form-control datepicker-input"
                         selected={startDateright}
-                        onChange={(date) => setStartDateright(date)}
+                        onChange={(date: any) => setStartDateright(date)}
                       />
                       <InputGroup.Text>
                         <i className="feather icon-calendar"></i>
@@ -149,7 +152,7 @@ const Form2_datepicker = () => {
                       <DatePicker
                         className="form-control datepicker-input"
                         selected={startDateBleft}
-                        onChange={(date) => setStartDateBleft(date)}
+                        onChange={(date: any) => setStartDateBleft(date)}
                       />
                       <InputGroup.Text>
                         <i className="feather icon-calendar"></i>
@@ -159,7 +162,7 @@ const Form2_datepicker = () => {
                       <DatePicker
                         className="form-control datepicker-input"
                         selected={startDateBright}
-                        onChange={(date) => setStartDateBright(date)}
+                        onChange={(date: any) => setStartDateBright(date)}
                       />
                       <InputGroup.Text>
                         <i className="feather icon-calendar"></i>

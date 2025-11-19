@@ -1,12 +1,15 @@
 import React, { useState } from 'react'
-import ShowAll from './ShowAll'
-import WebDesigner from './WebDesigner';
-import GraphicDesigner from './GraphicDesigner';
-import AnimationDesigner from './AnimationDesigner';
-import UXDesigner from './UXDesigner';
-import ProductDesigner from './ProductDesigner';
+import dynamic from 'next/dynamic'
 import Link from 'next/link';
 import { Card, CardBody, Col, Row } from 'react-bootstrap';
+
+// Dynamically import components that use react-responsive-masonry with SSR disabled
+const ShowAll = dynamic(() => import('./ShowAll'), { ssr: false })
+const WebDesigner = dynamic(() => import('./WebDesigner'), { ssr: false })
+const GraphicDesigner = dynamic(() => import('./GraphicDesigner'), { ssr: false })
+const AnimationDesigner = dynamic(() => import('./AnimationDesigner'), { ssr: false })
+const UXDesigner = dynamic(() => import('./UXDesigner'), { ssr: false })
+const ProductDesigner = dynamic(() => import('./ProductDesigner'), { ssr: false })
 
 const Masonary = () => {
     const [activeTab, setActiveTab] = useState('showall');

@@ -27,7 +27,7 @@ const Form2_daterangepicker = () => {
                     <ReactDatePicker
                       className="form-control"
                       selected={startDate}
-                      onChange={(date) => setStartDate(date)}
+                      onChange={(date: any) => setStartDate(date)}
                     />
                   </Col>
                 </div>
@@ -40,7 +40,7 @@ const Form2_daterangepicker = () => {
                       <ReactDatePicker
                         className="form-control"
                         selected={startDate}
-                        onChange={(date) => setStartDate(date)}
+                        onChange={(date: any) => setStartDate(date)}
                       />
                       <InputGroup.Text>
                         <i className="feather icon-calendar"></i>
@@ -68,7 +68,7 @@ const Form2_daterangepicker = () => {
                     <ReactDatePicker
                       className="form-control"
                       selected={startDate}
-                      onChange={(date) => setStartDate(date)}
+                      onChange={(date: any) => setStartDate(date)}
                       id="pc-date_range_picker-4"
                     />
                   </Col>
