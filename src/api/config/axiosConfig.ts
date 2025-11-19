@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 const axiosInstanceWithToken = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -7,7 +7,7 @@ const axiosInstanceWithToken = axios.create({
 
 axiosInstanceWithToken.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
