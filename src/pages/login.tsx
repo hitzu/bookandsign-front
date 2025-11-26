@@ -1,9 +1,10 @@
 import NonLayout from "@layout/NonLayout";
 import React, { ReactElement, useState } from "react";
-import Link from "next/link";
 import { Button, Form } from "react-bootstrap";
 import { login } from "../api/services/authService";
 import { useRouter } from "next/router";
+import { UserInfo } from "../interfaces";
+import { useAuthStore } from "../stores/authStore";
 
 const Loginv2 = () => {
   const router = useRouter();
@@ -11,13 +12,21 @@ const Loginv2 = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const { setUserInfo } = useAuthStore();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
       const payload = { email, password };
       const authInfo = await login(payload);
-      localStorage.setItem("authToken", authInfo.data.accessToken);
+      const { accessToken, refreshToken } = authInfo.data.accessAndRefreshToken;
+      if (!accessToken || !refreshToken) {
+        throw new Error("Invalid access token or refresh token");
+      }
+      localStorage.setItem("authToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+
+      setUserInfo(authInfo.data.userInfo as UserInfo);
       router.replace("/");
     } catch (err: any) {
       setError(

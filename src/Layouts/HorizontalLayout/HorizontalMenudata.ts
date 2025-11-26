@@ -17,36 +17,35 @@ const horizontalData = [
             id: "analytics",
             label: "Analytics",
             link: "/dashboard",
-            dataPage: "analytics"
+            dataPage: "analytics",
           },
           {
             id: "affiliate",
             label: "Affiliate",
             link: "/affiliate-dashboard",
-            dataPage: "affiliate"
+            dataPage: "affiliate",
           },
           {
             id: "finance",
             label: "Finance",
             link: "/finance-dashboard",
-            dataPage: "finance"
+            dataPage: "finance",
           },
           {
             id: "helpdesk",
             label: "Helpdesk",
             link: "/helpdesk-dashboard",
-            dataPage: "helpdesk"
+            dataPage: "helpdesk",
           },
           {
             id: "invoice",
             label: "Invoice",
             link: "/Invoice-dashboard",
-            dataPage: "invoice"
+            dataPage: "invoice",
           },
-        ]
+        ],
       },
-
-    ]
+    ],
   },
   {
     id: "widget",
@@ -60,30 +59,30 @@ const horizontalData = [
         label: "Statistics",
         icon: "ph-duotone ph-projector-screen-chart",
         link: "/widget/w_statistics",
-        dataPage: "w_statistics"
+        dataPage: "w_statistics",
       },
       {
         id: "user",
         label: "User",
         icon: "ph-duotone ph-identification-card",
         link: "/widget/w_user",
-        dataPage: "w_user"
+        dataPage: "w_user",
       },
       {
         id: "data",
         label: "Data",
         icon: "ph-duotone ph-database",
         link: "/widget/w_data",
-        dataPage: "w_data"
+        dataPage: "w_data",
       },
       {
         id: "chart",
         label: "Chart",
         icon: "ph-duotone ph-chart-pie",
         link: "/widget/w_chart",
-        dataPage: "w_chart"
-      }
-    ]
+        dataPage: "w_chart",
+      },
+    ],
   },
   {
     id: "application",
@@ -97,14 +96,14 @@ const horizontalData = [
         label: "Calendar",
         link: "/application/calendar",
         icon: "ph-duotone ph-calendar-blank",
-        dataPage: "calendar"
+        dataPage: "calendar",
       },
       {
         id: "chat",
         label: "Chat",
         link: "/application/chat",
         icon: "ph-duotone ph-chats-circle",
-        dataPage: "chat"
+        dataPage: "chat",
       },
       {
         id: "gallery",
@@ -116,15 +115,15 @@ const horizontalData = [
             id: "grid",
             label: "Grid",
             link: "/application/Gallary/grid",
-            dataPage: "grid"
+            dataPage: "grid",
           },
           {
             id: "masonry",
             label: "Masonry",
             link: "/application/Gallary/masonary",
-            dataPage: "masonry"
+            dataPage: "masonry",
           },
-        ]
+        ],
       },
       {
         id: "ecom",
@@ -137,33 +136,33 @@ const horizontalData = [
             id: "product",
             label: "Product",
             link: "/application/ecom_product",
-            dataPage: "ecom_product"
+            dataPage: "ecom_product",
           },
           {
             id: "productdetails",
             label: "Product details",
             link: "/application/ecom_product-details",
-            dataPage: "ecom_product-details"
+            dataPage: "ecom_product-details",
           },
           {
             id: "productlist",
             label: "Product List",
             link: "/application/ecom_product-list",
-            dataPage: "ecom_product-list"
+            dataPage: "ecom_product-list",
           },
           {
             id: "addnewproduct",
             label: "Add New Product",
             link: "/application/ecom_product-add",
-            dataPage: "ecom_product-add"
+            dataPage: "ecom_product-add",
           },
           {
             id: "checkout",
             label: "Checkout",
             link: "/application/ecom_checkout",
-            dataPage: "ecom_checkout"
-          }
-        ]
+            dataPage: "ecom_checkout",
+          },
+        ],
       },
       {
         id: "helpdesk",
@@ -181,29 +180,29 @@ const horizontalData = [
                 id: "create",
                 label: "Create",
                 link: "/application/Helpdesk/create",
-                dataPage: "create"
+                dataPage: "create",
               },
               {
                 id: "list",
                 label: "List",
                 link: "/application/Helpdesk/ticketlist",
-                dataPage: "list"
+                dataPage: "list",
               },
               {
                 id: "details",
                 label: "Details",
                 link: "/application/Helpdesk/details",
-                dataPage: "details"
-              }
-            ]
+                dataPage: "details",
+              },
+            ],
           },
           {
             id: "customer",
             label: "Customer",
             link: "/application/Helpdesk/customer",
-            dataPage: "customer"
+            dataPage: "customer",
           },
-        ]
+        ],
       },
       {
         id: "invoice1",
@@ -216,21 +215,21 @@ const horizontalData = [
             id: "invoicelist",
             label: "Invoice List",
             link: "/application/invoice-list",
-            dataPage: "invoice-list"
+            dataPage: "invoice-list",
           },
           {
             id: "create",
             label: "Create",
             link: "/application/invoice-create",
-            dataPage: "invoice-create"
+            dataPage: "invoice-create",
           },
           {
             id: "preview",
             label: "Preview",
             link: "/application/invoice-view",
-            dataPage: "invoice-view"
-          }
-        ]
+            dataPage: "invoice-view",
+          },
+        ],
       },
       {
         id: "invoice2",
@@ -243,34 +242,34 @@ const horizontalData = [
             id: "create",
             label: "Create",
             link: "/application/Invoice/create",
-            dataPage: "invoice-create"
+            dataPage: "invoice-create",
           },
           {
             id: "details",
             label: "Details",
             link: "/application/Invoice/details",
-            dataPage: "details"
+            dataPage: "details",
           },
           {
             id: "list",
             label: "List",
             link: "/application/Invoice/list",
-            dataPage: "list"
+            dataPage: "list",
           },
           {
             id: "edit",
             label: "Edit",
             link: "/application/Invoice/edit",
-            dataPage: "edit"
-          }
-        ]
+            dataPage: "edit",
+          },
+        ],
       },
       {
         id: "mail",
         label: "Mail",
         link: "/application/mail",
         icon: "ph-duotone ph-envelope-open",
-        dataPage: "mail"
+        dataPage: "mail",
       },
       {
         id: "membership",
@@ -283,27 +282,27 @@ const horizontalData = [
             id: "dashboard",
             label: "Dashboard",
             link: "/application/Membership/membership-dashboard",
-            dataPage: "dashboard"
+            dataPage: "dashboard",
           },
           {
             id: "list",
             label: "List",
             link: "/application/Membership/list",
-            dataPage: "list"
+            dataPage: "list",
           },
           {
             id: "pricing",
             label: "Pricing",
             link: "/application/Membership/pricing",
-            dataPage: "pricing"
+            dataPage: "pricing",
           },
           {
             id: "setting",
             label: "Setting",
             link: "/application/Membership/setting",
-            dataPage: "setting"
-          }
-        ]
+            dataPage: "setting",
+          },
+        ],
       },
       {
         id: "online-courses",
@@ -316,93 +315,90 @@ const horizontalData = [
             id: "dashboard",
             label: "Dashboard",
             link: "/application/Courses/course-dashboard",
-            dataPage: "dashboard"
+            dataPage: "dashboard",
           },
           {
             id: "teacher",
             label: "Teacher",
             dataPage: "null",
-            submenu:
-              [
-                {
-                  id: "list",
-                  label: "List",
-                  link: "/application/Courses/Teachers/teachers-list",
-                  dataPage: "list"
-                },
-                {
-                  id: "apply",
-                  label: "Apply",
-                  link: "/application/Courses/Teachers/teacher-apply",
-                  dataPage: "apply"
-                },
-                {
-                  id: "add",
-                  label: "Add",
-                  link: "/application/Courses/Teachers/teacher-add",
-                  dataPage: "add"
-                },
-              ]
+            submenu: [
+              {
+                id: "list",
+                label: "List",
+                link: "/application/Courses/Teachers/teachers-list",
+                dataPage: "list",
+              },
+              {
+                id: "apply",
+                label: "Apply",
+                link: "/application/Courses/Teachers/teacher-apply",
+                dataPage: "apply",
+              },
+              {
+                id: "add",
+                label: "Add",
+                link: "/application/Courses/Teachers/teacher-add",
+                dataPage: "add",
+              },
+            ],
           },
           {
             id: "student",
             label: "Student",
             dataPage: "null",
-            submenu:
-              [
-                {
-                  id: "list",
-                  label: "List",
-                  link: "/application/Courses/Students/student-list",
-                  dataPage: "list"
-                },
-                {
-                  id: "apply",
-                  label: "Apply",
-                  link: "/application/Courses/Students/student-apply",
-                  dataPage: "apply"
-                },
-                {
-                  id: "add",
-                  label: "Add",
-                  link: "/application/Courses/Students/student-add",
-                  dataPage: "add"
-                },
-              ]
+            submenu: [
+              {
+                id: "list",
+                label: "List",
+                link: "/application/Courses/Students/student-list",
+                dataPage: "list",
+              },
+              {
+                id: "apply",
+                label: "Apply",
+                link: "/application/Courses/Students/student-apply",
+                dataPage: "apply",
+              },
+              {
+                id: "add",
+                label: "Add",
+                link: "/application/Courses/Students/student-add",
+                dataPage: "add",
+              },
+            ],
           },
           {
             id: "courses",
             label: "Courses",
             dataPage: "null",
-            submenu:
-              [
-                {
-                  id: "view",
-                  label: "View",
-                  link: "/application/Courses/Courses/course-view",
-                  dataPage: "view"
-                },
-                {
-                  id: "add",
-                  label: "Add",
-                  link: "/application/Courses/Courses/course-add",
-                  dataPage: "add"
-                },
-              ]
+            submenu: [
+              {
+                id: "view",
+                label: "View",
+                link: "/application/Courses/Courses/course-view",
+                dataPage: "view",
+              },
+              {
+                id: "add",
+                label: "Add",
+                link: "/application/Courses/Courses/course-add",
+                dataPage: "add",
+              },
+            ],
           },
           {
             id: "pricing",
             label: "Pricing",
             link: "/application/Courses/course-pricing",
-            dataPage: "pricing"
+            dataPage: "pricing",
           },
           {
             id: "setting",
             label: "Setting",
             link: "/application/Courses/course-site",
-            dataPage: "setting"
-          }
-        ]
+            dataPage: "setting",
+          },
+        ],
       },
       {
         id: "plans",
@@ -421,35 +417,35 @@ const horizontalData = [
             id: "accountprofile",
             label: "Account Profile",
             link: "/application/account-profile",
-            dataPage: "account-profile"
+            dataPage: "account-profile",
           },
           {
             id: "socialmedia",
             label: "Social media",
             link: "/application/social-media",
-            dataPage: "social-media"
+            dataPage: "social-media",
           },
           {
             id: "usercard",
             label: "User Card",
             link: "/application/user-card",
-            dataPage: "user-card"
+            dataPage: "user-card",
           },
           {
             id: "userlist",
             label: "User List",
             link: "/application/user-list",
-            dataPage: "user-list"
+            dataPage: "user-list",
           },
           {
             id: "team",
             label: "Team",
             link: "/application/team",
-            dataPage: "team"
-          }
-        ]
+            dataPage: "team",
+          },
+        ],
       },
-    ]
+    ],
   },
   {
     id: "page",
@@ -475,33 +471,33 @@ const horizontalData = [
                 id: "login",
                 label: "Login",
                 link: "/pages/login-v1",
-                dataPage: "pages-login-v1"
+                dataPage: "pages-login-v1",
               },
               {
                 id: "register",
                 label: "Register",
                 link: "/pages/register-v1",
-                dataPage: "pages-register-v1"
+                dataPage: "pages-register-v1",
               },
               {
                 id: "forgotpw",
                 label: "Forgot Password",
                 link: "/pages/forgot-password-v1",
-                dataPage: "pages-forgot-password-v1"
+                dataPage: "pages-forgot-password-v1",
               },
               {
                 id: "resetpw",
                 label: "Reset Password",
                 link: "/pages/reset-password-v1",
-                dataPage: "pages-reset-password-v1"
+                dataPage: "pages-reset-password-v1",
               },
               {
                 id: "codeverify",
                 label: "Code Verification",
                 link: "/pages/code-verification-v1",
-                dataPage: "code-verification-v1"
-              }
-            ]
+                dataPage: "code-verification-v1",
+              },
+            ],
           },
           {
             id: "auth2",
@@ -513,41 +509,41 @@ const horizontalData = [
                 id: "login2",
                 label: "Login",
                 link: "/pages/login-v2",
-                dataPage: "pages-login-v2"
+                dataPage: "pages-login-v2",
               },
               {
                 id: "register2",
                 label: "Register",
                 link: "/pages/register-v2",
-                dataPage: "pages-register-v2"
+                dataPage: "pages-register-v2",
               },
               {
                 id: "forgotpw2",
                 label: "Forgot Password",
                 link: "/pages/forgot-password-v2",
-                dataPage: "pages-forgot-password-v2"
+                dataPage: "pages-forgot-password-v2",
               },
               {
                 id: "resetpw2",
                 label: "Reset Password",
                 link: "/pages/reset-password-v2",
-                dataPage: "pages-reset-password-v2"
+                dataPage: "pages-reset-password-v2",
               },
               {
                 id: "codeverify2",
                 label: "Code Verification",
                 link: "/pages/code-verification-v2",
-                dataPage: "code-verification-v2"
-              }
-            ]
+                dataPage: "code-verification-v2",
+              },
+            ],
           },
           {
             id: "loginmodal",
             label: "Login Modal",
             link: "/pages/login-modal",
-            dataPage: "ui-loginmodal"
+            dataPage: "ui-loginmodal",
           },
-        ]
+        ],
       },
       {
         id: "maintenance",
@@ -560,48 +556,48 @@ const horizontalData = [
             id: "er404",
             label: "Error 404",
             link: "/pages/error-404",
-            dataPage: "error-404"
+            dataPage: "error-404",
           },
           {
             id: "connectionlost",
             label: "Connection lost",
             link: "/pages/connection-lost",
-            dataPage: "connection-lost"
+            dataPage: "connection-lost",
           },
           {
             id: "underconstruction",
             label: "Under Construction",
             link: "/pages/under-construction",
-            dataPage: "under-construction"
+            dataPage: "under-construction",
           },
           {
             id: "comingsoon",
             label: "Coming soon",
             link: "/pages/coming-soon",
-            dataPage: "coming-soon"
-          }
-        ]
+            dataPage: "coming-soon",
+          },
+        ],
       },
       {
         id: "contactus",
         label: "Contact Us",
         link: "/pages/contact-us",
         icon: "ph-duotone ph-target",
-        dataPage: "contactus"
+        dataPage: "contactus",
       },
       {
         id: "landing",
         label: "Landing",
         link: "/",
         icon: "ph-duotone ph-rocket",
-        dataPage: "landing"
+        dataPage: "landing",
       },
       {
         id: "loading",
         label: "Loading",
         link: "/pages/loading",
         icon: "ph-duotone ph-fan",
-        dataPage: "loading"
+        dataPage: "loading",
       },
       {
         id: "search",
@@ -622,7 +618,7 @@ const horizontalData = [
             link: "/pages/contact-search",
             dataPage: "contact-search",
           },
-        ]
+        ],
       },
       {
         id: "setting",
@@ -631,7 +627,7 @@ const horizontalData = [
         link: "/pages/settings",
         dataPage: "setting",
       },
-    ]
+    ],
   },
   {
     id: "uicomponent",
@@ -645,7 +641,7 @@ const horizontalData = [
         label: "Components",
         icon: "ph-duotone ph-compass-tool",
         link: "/",
-        dataPage: "components"
+        dataPage: "components",
       },
       {
         id: "icons",
@@ -658,41 +654,41 @@ const horizontalData = [
             id: "iconfeather",
             label: "Feather",
             link: "/elements/icon-feather",
-            dataPage: "icon-feather"
+            dataPage: "icon-feather",
           },
           {
             id: "fontawesome",
             label: "Font Awesome 5",
             link: "/elements/icon-fontawesome",
-            dataPage: "icon-fontawesome"
+            dataPage: "icon-fontawesome",
           },
           {
             id: "iconmaterial",
             label: "Material",
             link: "/elements/icon-material",
-            dataPage: "icon-material"
+            dataPage: "icon-material",
           },
           {
             id: "icontabler",
             label: "Tabler",
             link: "/elements/icon-tabler",
-            dataPage: "icon-tabler"
+            dataPage: "icon-tabler",
           },
           {
             id: "icon-phosphor",
             label: "Phosphor",
             link: "/elements/icon-phosphor",
-            dataPage: "icon-phosphor"
+            dataPage: "icon-phosphor",
           },
           {
             id: "icon-custom",
             label: "Custom",
             link: "/elements/icon-custom",
-            dataPage: "icon-custom"
-          }
-        ]
-      }
-    ]
+            dataPage: "icon-custom",
+          },
+        ],
+      },
+    ],
   },
   {
     id: "form",
@@ -711,51 +707,51 @@ const horizontalData = [
             id: "formbasic",
             label: "Form Basic",
             link: "/forms/form_elements",
-            dataPage: "forms-form_elements"
+            dataPage: "forms-form_elements",
           },
           {
             id: "formfloat",
             label: "Form Floating",
             link: "/forms/form_floating",
-            dataPage: "forms-form_floating"
+            dataPage: "forms-form_floating",
           },
           {
             id: "formoption",
             label: "Form Options",
             link: "/forms/form2_basic",
-            dataPage: "forms-form2_basic"
+            dataPage: "forms-form2_basic",
           },
           {
             id: "inputgroup",
             label: "Input Groups",
             link: "/forms/form2_input_group",
-            dataPage: "forms-form2_input_group"
+            dataPage: "forms-form2_input_group",
           },
           {
             id: "checkbox",
             label: "Checkbox",
             link: "/forms/form2_checkbox",
-            dataPage: "forms-form2_checkbox"
+            dataPage: "forms-form2_checkbox",
           },
           {
             id: "radio",
             label: "Radio",
             link: "/forms/form2_radio",
-            dataPage: "forms-form2_radio"
+            dataPage: "forms-form2_radio",
           },
           {
             id: "switch",
             label: "Switch",
             link: "/forms/form2_switch",
-            dataPage: "forms-form2_switch"
+            dataPage: "forms-form2_switch",
           },
           {
             id: "megaoption",
             label: "Mega option",
             link: "/forms/form2_megaoption",
-            dataPage: "forms-form2_megaoption"
-          }
-        ]
+            dataPage: "forms-form2_megaoption",
+          },
+        ],
       },
       {
         id: "formplugin",
@@ -774,15 +770,15 @@ const horizontalData = [
                 id: "datepicker",
                 label: "Datepicker",
                 link: "application/forms/form2_datepicker",
-                dataPage: "forms-form2_datepicker"
+                dataPage: "forms-form2_datepicker",
               },
               {
                 id: "daterange",
                 label: "Date Range Picker",
                 link: "application/forms/form2_daterangepicker",
-                dataPage: "forms-form2_daterangepicker"
+                dataPage: "forms-form2_daterangepicker",
               },
-            ]
+            ],
           },
           {
             id: "select",
@@ -794,41 +790,41 @@ const horizontalData = [
                 id: "choicejs",
                 label: "Choices js",
                 link: "/forms/form2_choices",
-                dataPage: "forms-form2_choices"
-              }
-            ]
+                dataPage: "forms-form2_choices",
+              },
+            ],
           },
           {
             id: "captcha",
             label: "Google reCaptcha",
             link: "/forms/form2_recaptcha",
-            dataPage: "forms-form2_recaptcha"
+            dataPage: "forms-form2_recaptcha",
           },
           {
             id: "inputmask",
             label: "Input Masks",
             link: "/forms/form2_inputmask",
-            dataPage: "forms-form2_inputmask"
+            dataPage: "forms-form2_inputmask",
           },
           {
             id: "clipboard",
             label: "Clipboard",
             link: "/forms/form2_clipboard",
-            dataPage: "forms-form2_clipboard"
+            dataPage: "forms-form2_clipboard",
           },
           {
             id: "nouislider",
             label: "Nouislider",
             link: "/forms/form2_nouislider",
-            dataPage: "forms-form2_nouislider"
+            dataPage: "forms-form2_nouislider",
           },
           {
             id: "typehead",
             label: "Typeahead",
             link: "/forms/form2_typeahead",
-            dataPage: "forms-form2_typeahead"
-          }
-        ]
+            dataPage: "forms-form2_typeahead",
+          },
+        ],
       },
       {
         id: "textedit",
@@ -841,13 +837,13 @@ const horizontalData = [
             id: "tinymce",
             label: "Tinymce",
             link: "/forms/form2_tinymce",
-            dataPage: "forms-form2_tinymce"
+            dataPage: "forms-form2_tinymce",
           },
           {
             id: "quill",
             label: "Quill",
             link: "/forms/form2_quill",
-            dataPage: "forms-form2_quill"
+            dataPage: "forms-form2_quill",
           },
           {
             id: "ckeditor",
@@ -859,7 +855,7 @@ const horizontalData = [
                 id: "classic",
                 label: "classic",
                 link: "/forms/editor-classic",
-                dataPage: "forms-editor-classic"
+                dataPage: "forms-editor-classic",
               },
               // {
               //   id: "document",
@@ -879,15 +875,15 @@ const horizontalData = [
               //   link: "/forms/editor-balloon",
               //   dataPage: "forms-editor-balloon"
               // }
-            ]
+            ],
           },
           {
             id: "markdown",
             label: "Markdown",
             link: "/forms/form2_markdown",
-            dataPage: "forms-form2_markdown"
-          }
-        ]
+            dataPage: "forms-form2_markdown",
+          },
+        ],
       },
       {
         id: "formlayout",
@@ -900,27 +896,27 @@ const horizontalData = [
             id: "layouts",
             label: "Layouts",
             link: "/forms/form2_lay_default",
-            dataPage: "forms-form2_lay_default"
+            dataPage: "forms-form2_lay_default",
           },
           {
             id: "multicolumn",
             label: "Multicolumn",
             link: "/forms/form2_lay_multicolumn",
-            dataPage: "forms-form2_lay_multicolumn"
+            dataPage: "forms-form2_lay_multicolumn",
           },
           {
             id: "actionbar",
             label: "Actionbars",
             link: "/forms/form2_lay_actionbars",
-            dataPage: "forms-form2_lay_actionbars"
+            dataPage: "forms-form2_lay_actionbars",
           },
           {
             id: "stickyaction",
             label: "Sticky Action bars",
             link: "/forms/form2_lay_stickyactionbars",
-            dataPage: "forms-form2_lay_stickyactionbars"
-          }
-        ]
+            dataPage: "forms-form2_lay_stickyactionbars",
+          },
+        ],
       },
       {
         id: "fileupload",
@@ -933,32 +929,32 @@ const horizontalData = [
             id: "dropzone",
             label: "Dropzone",
             link: "/forms/file_upload",
-            dataPage: "forms-file_upload"
+            dataPage: "forms-file_upload",
           },
-        ]
+        ],
       },
       {
         id: "Wizard",
         label: "Form Wizard",
         icon: "ph-duotone ph-password",
         link: "/forms/form2_wizard",
-        dataPage: "forms-form_wizard"
+        dataPage: "forms-form_wizard",
       },
       {
         id: "validation",
         label: "Form Validation",
         icon: "ph-duotone ph-password",
         link: "/forms/form_validation",
-        dataPage: "forms-form_validation"
+        dataPage: "forms-form_validation",
       },
       {
         id: "imagecropper",
         label: "Image cropper",
         icon: "ph-duotone ph-crop",
         link: "/forms/image_crop",
-        dataPage: "forms-image_crop"
-      }
-    ]
+        dataPage: "forms-image_crop",
+      },
+    ],
   },
   {
     id: "table",
@@ -978,27 +974,27 @@ const horizontalData = [
             id: "basictable",
             label: "Basic table",
             link: "/table/tbl_bootstrap",
-            dataPage: "table-tbl_bootstrap"
+            dataPage: "table-tbl_bootstrap",
           },
           {
             id: "sizingtable",
             label: "Sizing table",
             link: "/table/tbl_sizing",
-            dataPage: "table-tbl_sizing"
+            dataPage: "table-tbl_sizing",
           },
           {
             id: "bordertable",
             label: "Border table",
             link: "/table/tbl_border",
-            dataPage: "table-tbl_border"
+            dataPage: "table-tbl_border",
           },
           {
             id: "stylingtable",
             label: "Styling table",
             link: "/table/tbl_styling",
-            dataPage: "table-tbl_styling"
-          }
-        ]
+            dataPage: "table-tbl_styling",
+          },
+        ],
       },
       {
         id: "vanillatable",
@@ -1011,63 +1007,63 @@ const horizontalData = [
             id: "basicinitialization",
             label: "Basic initialization",
             link: "/table/tbl_dt_simple",
-            dataPage: "table-tbl_dt_simple"
+            dataPage: "table-tbl_dt_simple",
           },
           {
             id: "dynamicimport",
             label: "Dynamic Import",
             link: "/table/dynamicImport",
-            dataPage: "dynamic_import"
+            dataPage: "dynamic_import",
           },
           {
             id: "rendercolumn",
             label: "Render Column Cells",
             link: "/table/tbl_dt_render_column_cells",
-            dataPage: "table-tbl_dt_render_column_cells"
+            dataPage: "table-tbl_dt_render_column_cells",
           },
           {
             id: "columnmanipulation",
             label: "Column Manipulation",
             link: "/table/tbl_dt_column-manipulation",
-            dataPage: "table-tbl_dt_column-manipulation"
+            dataPage: "table-tbl_dt_column-manipulation",
           },
           {
             id: "datetime",
             label: "Datetime Sorting",
             link: "/table/tbl_dt_datetime-sorting",
-            dataPage: "table-tbl_dt_datetime-sorting"
+            dataPage: "table-tbl_dt_datetime-sorting",
           },
           {
             id: "methos",
             label: "Methods",
             link: "/table/tbl_dt_methods",
-            dataPage: "table-tbl_dt_methods"
+            dataPage: "table-tbl_dt_methods",
           },
           {
             id: "addrows",
             label: "Add Rows",
             link: "/table/addRows",
-            dataPage: "table-tbl_dt_add-rows"
+            dataPage: "table-tbl_dt_add-rows",
           },
           {
             id: "fetchapi",
             label: "Fetch API",
             link: "/table/tbl_dt_fetch-api",
-            dataPage: "table-tbl_dt_fetch-api"
+            dataPage: "table-tbl_dt_fetch-api",
           },
           {
             id: "filters",
             label: "Filters",
             link: "/table/tbl_dt_filters",
-            dataPage: "table-tbl_dt_filters"
+            dataPage: "table-tbl_dt_filters",
           },
           {
             id: "export",
             label: "Export",
             link: "/table/tbl_dt_export",
-            dataPage: "table-tbl_dt_export"
-          }
-        ]
+            dataPage: "table-tbl_dt_export",
+          },
+        ],
       },
       {
         id: "datatable",
@@ -1080,13 +1076,13 @@ const horizontalData = [
             id: "advanceinitial",
             label: "Advance initialization",
             link: "/table/dt_advance",
-            dataPage: "table-dt_advance"
+            dataPage: "table-dt_advance",
           },
           {
             id: "styling",
             label: "Styling",
             link: "/table/dt_styling",
-            dataPage: "table-dt_styling"
+            dataPage: "table-dt_styling",
           },
           // {
           //   id: "api",
@@ -1098,20 +1094,20 @@ const horizontalData = [
             id: "plugin",
             label: "Plug-in",
             link: "/table/plug_In",
-            dataPage: "table-dt_plugin"
+            dataPage: "table-dt_plugin",
           },
           {
             id: "datasources",
             label: "Data sources",
             link: "/table/data_sources",
-            dataPage: "table-dt_sources"
-          }
-        ]
+            dataPage: "table-dt_sources",
+          },
+        ],
       },
       {
         id: "dtextention",
         label: "DT extention",
-        dataPage: 'dtextention',
+        dataPage: "dtextention",
         link: "#",
         icon: "ph-duotone ph-wall",
         submenu: [
@@ -1119,80 +1115,79 @@ const horizontalData = [
             id: "autofill",
             label: "Autofill",
             link: "/table/DTExtention/autofill",
-            dataPage: "autofill"
+            dataPage: "autofill",
           },
           {
             id: "button",
             label: "Button",
             link: "#",
             dataPage: "button",
-            submenu:
-              [
-                {
-                  id: "basicbutton",
-                  label: "Basic button",
-                  link: "/table/DTExtention/Buttons/basic-button",
-                  dataPage: "basicbutton"
-                },
-                {
-                  id: "dataexport",
-                  label: "Data export",
-                  link: "/table/DTExtention/Buttons/data-export",
-                  dataPage: "dataexport"
-                },
-              ]
+            submenu: [
+              {
+                id: "basicbutton",
+                label: "Basic button",
+                link: "/table/DTExtention/Buttons/basic-button",
+                dataPage: "basicbutton",
+              },
+              {
+                id: "dataexport",
+                label: "Data export",
+                link: "/table/DTExtention/Buttons/data-export",
+                dataPage: "dataexport",
+              },
+            ],
           },
           {
             id: "colreorder",
             label: "Col reorder",
             link: "/table/DTExtention/col_reorder",
-            dataPage: "colreorder"
+            dataPage: "colreorder",
           },
           {
             id: "fixedcolumns",
             label: "Fixed columns",
             link: "/table/DTExtention/fixed_columns",
-            dataPage: "fixedcolumns"
+            dataPage: "fixedcolumns",
           },
           {
             id: "fixedheader",
             label: "Fixed Header",
             link: "/table/DTExtention/fixed_header",
-            dataPage: "fixedheader"
+            dataPage: "fixedheader",
           },
           {
             id: "keytable",
             label: "Key table",
             link: "/table/DTExtention/key_table",
-            dataPage: "keytable"
+            dataPage: "keytable",
           },
           {
             id: "responsive",
             label: "Responsive",
             link: "/table/DTExtention/responsive",
-            dataPage: "responsive"
+            dataPage: "responsive",
           },
           {
             id: "rowreorder",
             label: "Row reorder",
             link: "/table/DTExtention/row_reorder",
-            dataPage: "rowreorder"
+            dataPage: "rowreorder",
           },
           {
             id: "scroller",
             label: "Scroller",
             link: "/table/DTExtention/scroller",
-            dataPage: "scroller"
+            dataPage: "scroller",
           },
           {
             id: "selecttable",
             label: "Select table",
             link: "/table/DTExtention/select_table",
-            dataPage: "selecttable"
+            dataPage: "selecttable",
           },
-        ]
-      }
-    ]
+        ],
+      },
+    ],
   },
   {
     id: "chartsmaps",
@@ -1212,15 +1207,15 @@ const horizontalData = [
             id: "apexchart",
             label: "Apex Chart",
             link: "/chart/chart-apex",
-            dataPage: "chart-apex"
+            dataPage: "chart-apex",
           },
           {
             id: "pietychart",
             label: "Piety Chart",
             link: "/chart/chart-piety",
-            dataPage: "chart-piety"
-          }
-        ]
+            dataPage: "chart-piety",
+          },
+        ],
       },
       {
         id: "maps",
@@ -1233,17 +1228,17 @@ const horizontalData = [
             id: "vectormap",
             label: "Vector Map",
             link: "/chart/map-vector",
-            dataPage: "map-vector"
+            dataPage: "map-vector",
           },
           {
             id: "gmap",
             label: "GMaps",
             link: "/chart/g-maps",
-            dataPage: "g-maps"
-          }
-        ]
-      }
-    ]
+            dataPage: "g-maps",
+          },
+        ],
+      },
+    ],
   },
 
   {
@@ -1264,7 +1259,7 @@ const horizontalData = [
             id: "level2.1",
             label: "Level 2.1",
             dataPage: null,
-            link: "#"
+            link: "#",
           },
           {
             id: "Level 2.2",
@@ -1276,13 +1271,13 @@ const horizontalData = [
                 id: "level3.1",
                 label: "Level 3.1",
                 link: "#",
-                dataPage: "#3.1"
+                dataPage: "#3.1",
               },
               {
                 id: "level3.2",
                 label: "Level 3.2",
                 link: "#",
-                dataPage: "#3.2"
+                dataPage: "#3.2",
               },
               {
                 id: "level3.3",
@@ -1294,17 +1289,17 @@ const horizontalData = [
                     id: "level4.1",
                     label: "Level 4.1",
                     link: "#",
-                    dataPage: "#4.1"
+                    dataPage: "#4.1",
                   },
                   {
                     id: "level4.2",
                     label: "Level 4.2",
                     link: "#",
-                    dataPage: "#4.2"
-                  }
-                ]
-              }
-            ]
+                    dataPage: "#4.2",
+                  },
+                ],
+              },
+            ],
           },
           {
             id: "level2.3",
@@ -1316,13 +1311,13 @@ const horizontalData = [
                 id: "level3.1",
                 label: "Level 3.1",
                 link: "#",
-                dataPage: "#3.1"
+                dataPage: "#3.1",
               },
               {
                 id: "level3.2",
                 label: "Level 3.2",
                 link: "#",
-                dataPage: "#3.2"
+                dataPage: "#3.2",
               },
               {
                 id: "level3.3",
@@ -1334,29 +1329,29 @@ const horizontalData = [
                     id: "level4.1",
                     label: "Level 4.1",
                     link: "#",
-                    dataPage: "#4.1"
+                    dataPage: "#4.1",
                   },
                   {
                     id: "level4.2",
                     label: "Level 4.2",
                     link: "#",
-                    dataPage: "#4.2"
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+                    dataPage: "#4.2",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
       {
         id: "samplepage",
         label: "Sample page",
         icon: "ph-duotone ph-desktop",
         link: "/other/sample-page",
-        dataPage: "sample-page"
-      }
-    ]
-  }
+        dataPage: "sample-page",
+      },
+    ],
+  },
 ];
 
 export { horizontalData };

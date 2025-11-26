@@ -9,11 +9,25 @@ axiosInstanceWithToken.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.authorization = `Bearer ${token}`;
     }
     return config;
   },
   (error) => Promise.reject(new Error(error))
+);
+
+axiosInstanceWithToken.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("authToken");
+
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 const axiosInstanceWithoutToken = axios.create({

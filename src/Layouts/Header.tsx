@@ -1,43 +1,53 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { getUserProfile } from '../api/services/userService';
-import navCardBg from "@assets/images/layout/nav-card-bg.svg";
+import { useRouter } from "next/router";
 import logoDark from "@assets/images/logo-dark.svg";
 import logoLight from "@assets/images/logo-white.svg";
 import SimpleBar from "simplebar-react";
 import { menuItems } from "./MenuData";
 import NestedMenu from "./NestedMenu";
 import { Dropdown } from "react-bootstrap";
+import { useAuthStore } from "../stores/authStore";
 
-const Header = ({ themeMode,sidebarTheme }: any) => {
+const Header = ({ themeMode, sidebarTheme }: any) => {
+  const userInfo = useAuthStore((state) => state.userInfo);
+  const [userName, setUserName] = useState("");
 
-  const [userName, setUserName] = useState('');
+  const router = useRouter();
+  const { clearUserInfo } = useAuthStore((state) => state);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const profile = await getUserProfile();
-        setUserName(profile?.name);
-        console.log('User Profile:', profile);
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    };
-    fetchData();
-  }, [userName]);
+    if (userInfo) {
+      setUserName(userInfo.firstName);
+    }
+  }, [userInfo]);
 
+  const handleLogout = () => {
+    clearUserInfo();
+    router.push("/login");
+  };
 
   return (
     <nav className="pc-sidebar" id="pc-sidebar-hide">
       <div className="navbar-wrapper">
         <div className="m-header">
           <Link href="/" className="b-brand text-primary">
-            {themeMode && sidebarTheme === "dark" ?
-              <Image src={logoLight} alt="logo" className="logo-lg landing-logo"  priority={true}/>
-              :
-              <Image src={logoDark} alt="logo" className="logo-lg landing-logo" priority={true}/>
-            }
+            {themeMode && sidebarTheme === "dark" ? (
+              <Image
+                src={logoLight}
+                alt="logo"
+                className="logo-lg landing-logo"
+                priority={true}
+              />
+            ) : (
+              <Image
+                src={logoDark}
+                alt="logo"
+                className="logo-lg landing-logo"
+                priority={true}
+              />
+            )}
             {/* <span className="badge bg-brand-color-2 rounded-pill ms-2 theme-version">
               v1.2.0
             </span> */}
@@ -49,31 +59,12 @@ const Header = ({ themeMode,sidebarTheme }: any) => {
             {/* Sidebar  */}
             <NestedMenu menuItems={menuItems} />
           </ul>
-          <div className="card nav-action-card bg-brand-color-4">
-            <div
-              className="card-body"
-              style={{ backgroundImage: `url(${navCardBg})` }}
-            >
-              <h5 className="text-dark">Help Center</h5>
-              <p className="text-dark text-opacity-75">
-                Please contact us for more questions.
-              </p>
-              <Link
-                href="https://phoenixcoded.support-hub.io/"
-                className="btn btn-primary"
-                target="_blank"
-              >
-                Go to help Center
-              </Link>
-            </div>
-          </div>
         </SimpleBar>
         {/* </div> */}
         <div className="card pc-user-card">
           <div className="card-body">
             <div className="d-flex align-items-center">
-              <div className="flex-shrink-0">
-              </div>
+              <div className="flex-shrink-0"></div>
               <div className="flex-grow-1 ms-3 me-2">
                 <h6 className="mb-0">{userName}</h6>
                 <small>Administrator</small>
@@ -88,22 +79,30 @@ const Header = ({ themeMode,sidebarTheme }: any) => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                   <ul>
-                    <li><Dropdown.Item className="pc-user-links">
-                      <i className="ph-duotone ph-user"></i>
-                      <span>My Account</span>
-                    </Dropdown.Item></li>
-                    <li><Dropdown.Item className="pc-user-links">
-                      <i className="ph-duotone ph-gear"></i>
-                      <span>Settings</span>
-                    </Dropdown.Item></li>
-                    <li><Dropdown.Item className="pc-user-links">
-                      <i className="ph-duotone ph-lock-key"></i>
-                      <span>Lock Screen</span>
-                    </Dropdown.Item></li>
-                    <li><Dropdown.Item className="pc-user-links">
-                      <i className="ph-duotone ph-power"></i>
-                      <span>Logout</span>
-                    </Dropdown.Item></li>
+                    <li>
+                      <Dropdown.Item className="pc-user-links">
+                        <i className="ph-duotone ph-user"></i>
+                        <span>My Account</span>
+                      </Dropdown.Item>
+                    </li>
+                    <li>
+                      <Dropdown.Item className="pc-user-links">
+                        <i className="ph-duotone ph-gear"></i>
+                        <span>Settings</span>
+                      </Dropdown.Item>
+                    </li>
+                    <li>
+                      <Dropdown.Item className="pc-user-links">
+                        <i className="ph-duotone ph-lock-key"></i>
+                        <span>Lock Screen</span>
+                      </Dropdown.Item>
+                    </li>
+                    <li onClick={handleLogout}>
+                      <Dropdown.Item className="pc-user-links">
+                        <i className="ph-duotone ph-power"></i>
+                        <span>Logout</span>
+                      </Dropdown.Item>
+                    </li>
                   </ul>
                 </Dropdown.Menu>
               </Dropdown>

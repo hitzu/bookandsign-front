@@ -4,8 +4,8 @@ import {
   combineReducers,
   configureStore,
   ThunkAction,
-} from '@reduxjs/toolkit';
-import { createWrapper, HYDRATE } from 'next-redux-wrapper';
+} from "@reduxjs/toolkit";
+import { createWrapper, HYDRATE } from "next-redux-wrapper";
 
 // Front
 import ThemeReducer from "./themeLayouts/reducer";
@@ -22,13 +22,17 @@ import ChatReducer from "./Chat/reducer";
 // email
 import EmailReducer from "./Email/reducer";
 
+// auth
+import AuthReducer from "./Auth/reducer";
+
 // Combine your reducers into a root reducer
 const rootReducer = combineReducers({
   Calender: calenderReducer,
   Ecom: EcomReducer,
   chat: ChatReducer,
   Email: EmailReducer,
-  Theme: ThemeReducer
+  Theme: ThemeReducer,
+  Auth: AuthReducer,
 });
 
 const reducer = (state: any, action: AnyAction) => {
@@ -50,8 +54,8 @@ export const makeStore = () =>
 
 type Store = ReturnType<typeof makeStore>;
 
-export type AppDispatch = Store['dispatch'];
-export type RootState = ReturnType<Store['getState']>;
+export type AppDispatch = Store["dispatch"];
+export type RootState = ReturnType<Store["getState"]>;
 export type AppThunk<ReturnType = void> = ThunkAction<
   ReturnType,
   RootState,
