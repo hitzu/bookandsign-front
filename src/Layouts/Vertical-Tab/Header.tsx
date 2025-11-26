@@ -11,18 +11,26 @@ import { menuItems } from "@layout/MenuData";
 import NestedMenu from "@layout/NestedMenu";
 import { Dropdown } from "react-bootstrap";
 
-const Header = ({ themeMode,sidebarTheme }: any) => {
+const Header = ({ themeMode, sidebarTheme }: any) => {
   return (
     <React.Fragment>
       <nav className="pc-sidebar" id="pc-sidebar-hide">
         <div className="navbar-wrapper">
           <div className="m-header">
             <Link href="/" className="b-brand text-primary">
-              {themeMode && sidebarTheme === "dark" ?
-                <Image src={logoLight} alt="logo" className="logo-lg landing-logo" />
-                :
-                <Image src={logoDark} alt="logo" className="logo-lg landing-logo" />
-              }
+              {themeMode && sidebarTheme === "dark" ? (
+                <Image
+                  src={logoLight}
+                  alt="logo"
+                  className="logo-lg landing-logo"
+                />
+              ) : (
+                <Image
+                  src={logoDark}
+                  alt="logo"
+                  className="logo-lg landing-logo"
+                />
+              )}
               <span className="badge bg-brand-color-2 rounded-pill ms-2 theme-version">
                 v1.0
               </span>
@@ -34,24 +42,6 @@ const Header = ({ themeMode,sidebarTheme }: any) => {
               {/* Sidebar  */}
               <NestedMenu menuItems={menuItems} />
             </ul>
-            <div className="card nav-action-card bg-brand-color-4">
-              <div
-                className="card-body"
-                style={{ backgroundImage: `url(${navCardBg})` }}
-              >
-                <h5 className="text-dark">Help Center</h5>
-                <p className="text-dark text-opacity-75">
-                  Please contact us for more questions.
-                </p>
-                <Link
-                  href="https://phoenixcoded.support-hub.io/"
-                  className="btn btn-primary"
-                  target="_blank"
-                >
-                  Go to help Center
-                </Link>
-              </div>
-            </div>
           </SimpleBar>
           {/* </div> */}
           <div className="card pc-user-card">
@@ -79,22 +69,30 @@ const Header = ({ themeMode,sidebarTheme }: any) => {
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     <ul>
-                      <li><Dropdown.Item className="pc-user-links">
-                        <i className="ph-duotone ph-user"></i>
-                        <span>My Account</span>
-                      </Dropdown.Item></li>
-                      <li><Dropdown.Item className="pc-user-links">
-                        <i className="ph-duotone ph-gear"></i>
-                        <span>Settings</span>
-                      </Dropdown.Item></li>
-                      <li><Dropdown.Item className="pc-user-links">
-                        <i className="ph-duotone ph-lock-key"></i>
-                        <span>Lock Screen</span>
-                      </Dropdown.Item></li>
-                      <li><Dropdown.Item className="pc-user-links">
-                        <i className="ph-duotone ph-power"></i>
-                        <span>Logout</span>
-                      </Dropdown.Item></li>
+                      <li>
+                        <Dropdown.Item className="pc-user-links">
+                          <i className="ph-duotone ph-user"></i>
+                          <span>My Account</span>
+                        </Dropdown.Item>
+                      </li>
+                      <li>
+                        <Dropdown.Item className="pc-user-links">
+                          <i className="ph-duotone ph-gear"></i>
+                          <span>Settings</span>
+                        </Dropdown.Item>
+                      </li>
+                      <li>
+                        <Dropdown.Item className="pc-user-links">
+                          <i className="ph-duotone ph-lock-key"></i>
+                          <span>Lock Screen</span>
+                        </Dropdown.Item>
+                      </li>
+                      <li>
+                        <Dropdown.Item className="pc-user-links">
+                          <i className="ph-duotone ph-power"></i>
+                          <span>Logout</span>
+                        </Dropdown.Item>
+                      </li>
                     </ul>
                   </Dropdown.Menu>
                 </Dropdown>
