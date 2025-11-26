@@ -19,16 +19,13 @@ const Loginv2 = () => {
     try {
       const payload = { email, password };
       const authInfo = await login(payload);
-      localStorage.setItem(
-        "authToken",
-        authInfo.data.accessAndRefreshToken?.accessToken
-      );
-      localStorage.setItem(
-        "refreshToken",
-        authInfo.data.accessAndRefreshToken?.refreshToken
-      );
+      const { accessToken, refreshToken } = authInfo.data.accessAndRefreshToken;
+      if (!accessToken || !refreshToken) {
+        throw new Error("Invalid access token or refresh token");
+      }
+      localStorage.setItem("authToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
 
-      console.log(authInfo.data.userInfo);
       setUserInfo(authInfo.data.userInfo as UserInfo);
       router.replace("/");
     } catch (err: any) {

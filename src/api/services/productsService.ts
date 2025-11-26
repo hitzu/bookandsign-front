@@ -46,8 +46,7 @@ export const createProduct = async (
   payload: CreateProductPayload
 ): Promise<void> => {
   try {
-    const response = await axiosInstanceWithToken.post("/products", payload);
-    return response.data;
+    await axiosInstanceWithToken.post("/products", payload);
   } catch (error) {
     console.error("Error creating product:", error);
     throw error;
@@ -73,11 +72,7 @@ export const updateProductById = async (
   payload: UpdateProductPayload
 ): Promise<void> => {
   try {
-    const response = await axiosInstanceWithToken.patch(
-      `/products/${id}`,
-      payload
-    );
-    return response.data;
+    await axiosInstanceWithToken.patch(`/products/${id}`, payload);
   } catch (error) {
     console.error("Error updating product by id:", error);
     throw error;
@@ -86,8 +81,7 @@ export const updateProductById = async (
 
 export const deleteProductById = async (id: number): Promise<void> => {
   try {
-    const response = await axiosInstanceWithToken.delete(`/products/${id}`);
-    return response.data;
+    await axiosInstanceWithToken.delete(`/products/${id}`);
   } catch (error) {
     console.error("Error deleting product by id:", error);
     throw error;

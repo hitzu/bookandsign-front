@@ -18,7 +18,6 @@ const Header = ({ themeMode, sidebarTheme }: any) => {
   const { clearUserInfo } = useAuthStore((state) => state);
 
   useEffect(() => {
-    console.log(userInfo);
     if (userInfo) {
       setUserName(userInfo.firstName);
     }

@@ -32,6 +32,7 @@ const TopBar = ({
   const { clearUserInfo } = useAuthStore((state) => state);
   // Function to handle theme mode change
   const handleThemeChange = (value: any) => {
+    if (!changeThemeMode) return;
     dispatch(changeThemeMode(value));
   };
 

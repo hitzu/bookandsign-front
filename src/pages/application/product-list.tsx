@@ -55,8 +55,12 @@ const ProductList = () => {
 
   const handleDeleteId = async () => {
     if (deleteId) {
-      await deleteProductById(deleteId);
-      setProducts(products.filter((product) => product.id !== deleteId));
+      try {
+        await deleteProductById(deleteId);
+        setProducts(products.filter((product) => product.id !== deleteId));
+      } catch (error) {
+        console.error("Error deleting product:", error);
+      }
     }
     handleClose();
   };

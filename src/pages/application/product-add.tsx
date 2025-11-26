@@ -85,34 +85,29 @@ const ProductAdd = () => {
     },
   });
 
-  try {
-    useEffect(() => {
-      const fetchBrands = async () => {
-        try {
-          const response = (await getBrands()) as GetBrandsResponse[];
-          setBrands(response);
-        } catch (error) {
-          console.error("Error fetching brands:", error);
-        }
-      };
-      fetchBrands();
-    }, []);
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const response = (await getBrands()) as GetBrandsResponse[];
+        setBrands(response);
+      } catch (error) {
+        console.error("Error fetching brands:", error);
+      }
+    };
+    fetchBrands();
+  }, []);
 
-    useEffect(() => {
-      const fetchProductStatuses = async () => {
-        try {
-          const response = (await getProductsStatuses()) as string[];
-          setProductStatuses(response);
-        } catch (error) {
-          console.error("Error fetching product statuses:", error);
-        }
-      };
-      fetchProductStatuses();
-    }, []);
-  } catch (error) {
-    console.error("Error fetching brands:", error);
-    throw error;
-  }
+  useEffect(() => {
+    const fetchProductStatuses = async () => {
+      try {
+        const response = (await getProductsStatuses()) as string[];
+        setProductStatuses(response);
+      } catch (error) {
+        console.error("Error fetching product statuses:", error);
+      }
+    };
+    fetchProductStatuses();
+  }, []);
 
   return (
     <React.Fragment>

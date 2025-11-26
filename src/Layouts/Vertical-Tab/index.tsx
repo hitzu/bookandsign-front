@@ -20,6 +20,7 @@ import NestedMenu from "../NestedMenu";
 import { Card, CardBody, Dropdown } from "react-bootstrap";
 import { menuItems } from "../MenuData";
 import Image from "next/image";
+import { SIDEBAR_THEME, THEME_MODE } from "@common/layoutConfig";
 
 const VerticalTab = ({
   children,
@@ -48,7 +49,8 @@ const VerticalTab = ({
         <div className="navbar-wrapper">
           <div className="m-header">
             <Link href="/" className="b-brand text-primary">
-              {themeMode || sidebarTheme === "dark" ? (
+              {themeMode === THEME_MODE.DARK ||
+              sidebarTheme === SIDEBAR_THEME.DARK ? (
                 <Image
                   src={logoLight}
                   alt="logo"
