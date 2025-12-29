@@ -7,6 +7,7 @@ export interface GetProductsResponse {
   discountPercentage: number | null;
   status: string;
   brandId: number;
+  quantity: number;
   brand: {
     id: number;
     key: string;

@@ -1,5 +1,6 @@
 import Layout from "@layout/index";
 import React, { ReactElement, useState, useEffect } from "react";
+import Select, { MultiValue } from "react-select";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import {
   Card,
@@ -11,30 +12,36 @@ import {
   Button,
 } from "react-bootstrap";
 import { useFormik } from "formik";
-import { GetBrandsResponse, CreateProductPayload } from "../../interfaces";
+import { GetBrandsResponse, CreatePackagePayload } from "../../interfaces";
 import { getBrands } from "../../api/services/brandService";
-import {
-  getProductsStatuses,
-  createProduct,
-} from "../../api/services/productsService";
 import * as yup from "yup";
 import { translateProductStatus } from "../../Common/translations";
+import {
+  createPackage,
+  getPackagesStatuses,
+  uploadProductsBulk,
+} from "../../api/services/packageService";
+import { getProducts } from "../../api/services/productsService";
 
-interface ProductFormValues {
+interface PackageFormValues {
   name: string;
   description: string;
-  price: string;
+  basePrice: string;
+  discount: string;
   status: string;
   brandId: number | "";
 }
 
 const validationSchema = yup.object().shape({
-  name: yup.string().required("El nombre del producto es requerido"),
-  description: yup.string().required("La descripción es requerida"),
-  price: yup
+  name: yup.string().required("El nombre del paquete es requerido"),
+  basePrice: yup
+    .string()
+    .required("El precio base es requerido")
+    .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un precio base válido"),
+  discount: yup
     .string()
     .nullable()
-    .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un precio válido"),
+    .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un descuento válido"),
   status: yup.string().required("El status es requerido"),
   brandId: yup
     .number()
@@ -50,12 +57,20 @@ const ProductAdd = () => {
   const [toastVariant, setToastVariant] = useState<"success" | "danger">(
     "success"
   );
+  const [productOptions, setProductOptions] = useState<
+    { value: number; label: string }[]
+  >([]);
+  const [selectedProducts, setSelectedProducts] = useState<
+    MultiValue<{ value: number; label: string }>
+  >([]);
+  const [brandId, setBrandId] = useState<number | null>(null);
 
-  const formik = useFormik<ProductFormValues>({
+  const formik = useFormik<PackageFormValues>({
     initialValues: {
       name: "",
       description: "",
-      price: "",
+      basePrice: "",
+      discount: "",
       status: "active",
       brandId: "",
     },
@@ -64,21 +79,30 @@ const ProductAdd = () => {
       const payload = {
         name: values.name,
         description: values.description,
-        price: parseFloat(values.price),
+        basePrice: parseFloat(values.basePrice),
+        discount: values.discount ? parseFloat(values.discount) : null,
         status: values.status,
         brandId: values.brandId as number,
       };
       try {
-        await createProduct(payload as CreateProductPayload);
+        const packageCreated = await createPackage(
+          payload as CreatePackagePayload
+        );
+        await uploadProductsBulk(
+          packageCreated.id,
+          selectedProducts.map((product) => product.value)
+        );
         setToastMessage("Producto creado exitosamente");
         setToastVariant("success");
         setShowToast(true);
         setTimeout(() => {
           formik.resetForm();
+          setSelectedProducts([]);
+          setBrandId(null);
         }, 500);
       } catch (error: any) {
         console.error("Error creating product:", error);
-        setToastMessage("Error al crear el producto");
+        setToastMessage("Error al crear el paquete");
         setToastVariant("danger");
         setShowToast(true);
       }
@@ -100,7 +124,7 @@ const ProductAdd = () => {
   useEffect(() => {
     const fetchProductStatuses = async () => {
       try {
-        const response = (await getProductsStatuses()) as string[];
+        const response = (await getPackagesStatuses()) as string[];
         setProductStatuses(response);
       } catch (error) {
         console.error("Error fetching product statuses:", error);
@@ -109,9 +133,24 @@ const ProductAdd = () => {
     fetchProductStatuses();
   }, []);
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getProducts({
+        ...(brandId && { brandId }),
+      });
+
+      const productOptions = data.map((product) => ({
+        value: product.id,
+        label: product.name,
+      }));
+      setProductOptions(productOptions);
+    };
+    fetchProducts();
+  }, [brandId]);
+
   return (
     <React.Fragment>
-      <BreadcrumbItem mainTitle="Productos" subTitle="Agregar producto" />
+      <BreadcrumbItem mainTitle="Paquetes" subTitle="Agregar paquete" />
 
       <div
         style={{
@@ -141,7 +180,7 @@ const ProductAdd = () => {
         <Col sm={12}>
           <Card>
             <Card.Header>
-              <h5>Descripción del producto</h5>
+              <h5>Descripción del paquete</h5>
             </Card.Header>
             <Card.Body>
               <Form onSubmit={formik.handleSubmit}>
@@ -150,12 +189,13 @@ const ProductAdd = () => {
                   <Form.Select
                     name="brandId"
                     value={formik.values.brandId}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       formik.setFieldValue(
                         "brandId",
                         e.target.value ? parseInt(e.target.value) : ""
-                      )
-                    }
+                      );
+                      setBrandId(parseInt(e.target.value));
+                    }}
                     onBlur={formik.handleBlur("brandId")}
                     isInvalid={
                       formik.touched.brandId && !!formik.errors.brandId
@@ -174,7 +214,7 @@ const ProductAdd = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Nombre del producto</Form.Label>
+                  <Form.Label>Nombre del paquete</Form.Label>
                   <Form.Control
                     type="text"
                     placeholder="Nombre del producto"
@@ -190,10 +230,10 @@ const ProductAdd = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Descripción del producto</Form.Label>
+                  <Form.Label>Descripción del paquete</Form.Label>
                   <Form.Control
                     as="textarea"
-                    placeholder="Descripción del producto"
+                    placeholder="Descripción del paquete"
                     name="description"
                     value={formik.values.description}
                     onChange={formik.handleChange}
@@ -208,20 +248,80 @@ const ProductAdd = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
+                  <Form.Label>Productos del paquete</Form.Label>
+                  <Select
+                    isMulti
+                    options={productOptions}
+                    value={selectedProducts}
+                    onChange={(newValues) => setSelectedProducts(newValues)}
+                    placeholder="Seleccione productos"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
                   <Form.Label>Precio</Form.Label>
                   <InputGroup className="mb-3">
                     <InputGroup.Text>$</InputGroup.Text>
                     <Form.Control
                       type="text"
-                      placeholder="Price"
-                      name="price"
-                      value={formik.values.price}
+                      placeholder="Precio base"
+                      name="basePrice"
+                      value={formik.values.basePrice}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      isInvalid={formik.touched.price && !!formik.errors.price}
+                      isInvalid={
+                        formik.touched.basePrice && !!formik.errors.basePrice
+                      }
                     />
                     <Form.Control.Feedback type="invalid">
-                      {formik.errors.price}
+                      {formik.errors.basePrice}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Descuento</Form.Label>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text>%</InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Descuento"
+                      name="discount"
+                      value={formik.values.discount}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      isInvalid={
+                        formik.touched.discount && !!formik.errors.discount
+                      }
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {formik.errors.basePrice}
+                    </Form.Control.Feedback>
+                  </InputGroup>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Precio con descuento</Form.Label>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text>%</InputGroup.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Precio con descuento"
+                      name="priceWithDiscount"
+                      value={
+                        (parseFloat(formik.values.basePrice) || 0) -
+                        ((parseFloat(formik.values.basePrice) || 0) *
+                          (parseFloat(formik.values.discount) || 0)) /
+                          100
+                      }
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      isInvalid={
+                        formik.touched.discount && !!formik.errors.discount
+                      }
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {formik.errors.basePrice}
                     </Form.Control.Feedback>
                   </InputGroup>
                 </Form.Group>
@@ -252,7 +352,7 @@ const ProductAdd = () => {
                   variant="primary"
                   className="btn-page w-100"
                 >
-                  Crear producto
+                  Crear paquete
                 </Button>
               </Form>
             </Card.Body>

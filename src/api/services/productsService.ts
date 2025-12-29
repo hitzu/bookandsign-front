@@ -25,7 +25,7 @@ export const getProducts = async ({
     const response = await axiosInstanceWithToken.get(url);
     return response.data;
   } catch (error) {
-    console.error("Error fetching user prospects:", error);
+    console.error("Error fetching products:", error);
     throw error;
   }
 };
