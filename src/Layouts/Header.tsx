@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import logoDark from "@assets/images/logo-dark.svg";
-import logoLight from "@assets/images/logo-white.svg";
+import logoDark from "@assets/images/logo-dark.png";
+import logoLight from "@assets/images/logo-white.png";
 import SimpleBar from "simplebar-react";
 import { menuItems } from "./MenuData";
 import NestedMenu from "./NestedMenu";
@@ -31,26 +31,16 @@ const Header = ({ themeMode, sidebarTheme }: any) => {
   return (
     <nav className="pc-sidebar" id="pc-sidebar-hide">
       <div className="navbar-wrapper">
-        <div className="m-header">
+        <div className="m-header d-flex justify-content-center">
           <Link href="/" className="b-brand text-primary">
-            {themeMode && sidebarTheme === "dark" ? (
-              <Image
-                src={logoLight}
-                alt="logo"
-                className="logo-lg landing-logo"
-                priority={true}
-              />
-            ) : (
-              <Image
-                src={logoDark}
-                alt="logo"
-                className="logo-lg landing-logo"
-                priority={true}
-              />
-            )}
-            {/* <span className="badge bg-brand-color-2 rounded-pill ms-2 theme-version">
-              v1.2.0
-            </span> */}
+            <Image
+              src={logoLight}
+              alt="logo"
+              className="logo-lg landing-logo"
+              priority={true}
+              width={50}
+              height={50}
+            />
           </Link>
         </div>
         {/* <div className="navbar-content"> */}

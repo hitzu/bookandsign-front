@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import logoDark from '@assets/images/logo-dark.svg'
-import Link from 'next/link';
-import Data from './Data';
-import Image from 'next/image';
-import { Row, Col, Card, CardBody } from 'react-bootstrap';
+import { useState } from "react";
+import logoDark from "@assets/images/logo-dark.png";
+import Link from "next/link";
+import Data from "./Data";
+import Image from "next/image";
+import { Row, Col, Card, CardBody } from "react-bootstrap";
 
 const DetailInvoicePage = () => {
   const [printStylesApplied, setPrintStylesApplied] = useState(false);
@@ -165,14 +165,26 @@ const DetailInvoicePage = () => {
                   <div className="row align-items-center g-3">
                     <div className="col-sm-6">
                       <div className="d-flex align-items-center mb-2">
-                        <Image src={logoDark} className="img-fluid" alt="images" />
-                        <span className="badge bg-light-secondary rounded-pill ms-2">Paid</span>
+                        <Image
+                          src={logoDark}
+                          className="img-fluid"
+                          alt="images"
+                        />
+                        <span className="badge bg-light-secondary rounded-pill ms-2">
+                          Paid
+                        </span>
                       </div>
                       <p className="mb-0">INV - 000457</p>
                     </div>
                     <div className="col-sm-6 text-sm-end">
-                      <h6>Date <span className="text-muted f-w-400">03/8/2023</span></h6>
-                      <h6>Due Date <span className="text-muted f-w-400">10/8/2023</span></h6>
+                      <h6>
+                        Date{" "}
+                        <span className="text-muted f-w-400">03/8/2023</span>
+                      </h6>
+                      <h6>
+                        Due Date{" "}
+                        <span className="text-muted f-w-400">10/8/2023</span>
+                      </h6>
                     </div>
                   </div>
                 </div>
@@ -208,20 +220,18 @@ const DetailInvoicePage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {
-                          Data.map((item: any, index: number) => {
-                            return (
-                              <tr key={index}>
-                                <td>{item.id}</td>
-                                <td>{item.name}</td>
-                                <td>{item.description}</td>
-                                <td className="text-end">{item.qty}</td>
-                                <td className="text-end">{item.price}</td>
-                                <td className="text-end">{item.total_amount}</td>
-                              </tr>
-                            )
-                          })
-                        }
+                        {Data.map((item: any, index: number) => {
+                          return (
+                            <tr key={index}>
+                              <td>{item.id}</td>
+                              <td>{item.name}</td>
+                              <td>{item.description}</td>
+                              <td className="text-end">{item.qty}</td>
+                              <td className="text-end">{item.price}</td>
+                              <td className="text-end">{item.total_amount}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -232,25 +242,58 @@ const DetailInvoicePage = () => {
                 <div className="col-12">
                   <div className="invoice-total ms-auto">
                     <Row className="row">
-                      <div className="col-6"> <p className="text-muted mb-1 text-start">Sub Total :</p></div>
-                      <div className="col-6"> <p className="mb-1 text-end">$20.00</p></div>
-                      <div className="col-6"> <p className="text-muted mb-1 text-start">Discount :</p></div>
-                      <div className="col-6"> <p className="mb-1 text-end text-success">$10.00</p></div>
-                      <div className="col-6"> <p className="text-muted mb-1 text-start">Taxes :</p></div>
-                      <div className="col-6"> <p className="mb-1 text-end">$5.000</p></div>
-                      <div className="col-6"> <p className="f-w-600 mb-1 text-start">Grand Total :</p></div>
-                      <div className="col-6"> <p className="f-w-600 mb-1 text-end">$25.00</p></div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="text-muted mb-1 text-start">
+                          Sub Total :
+                        </p>
+                      </div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="mb-1 text-end">$20.00</p>
+                      </div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="text-muted mb-1 text-start">Discount :</p>
+                      </div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="mb-1 text-end text-success">$10.00</p>
+                      </div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="text-muted mb-1 text-start">Taxes :</p>
+                      </div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="mb-1 text-end">$5.000</p>
+                      </div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="f-w-600 mb-1 text-start">Grand Total :</p>
+                      </div>
+                      <div className="col-6">
+                        {" "}
+                        <p className="f-w-600 mb-1 text-end">$25.00</p>
+                      </div>
                     </Row>
                   </div>
                 </div>
                 <div className="col-12">
                   <label className="form-label">Note</label>
-                  <p className="mb-0"
-                  >It was a pleasure working with you and your team. We hope you will keep us in mind for future freelance
-                    projects. Thank You!</p>
+                  <p className="mb-0">
+                    It was a pleasure working with you and your team. We hope
+                    you will keep us in mind for future freelance projects.
+                    Thank You!
+                  </p>
                 </div>
                 <div className="col-12 text-end d-print-none">
-                  <button className="btn btn-outline-secondary btn-print-invoice" onClick={handlePrint}>Download</button>
+                  <button
+                    className="btn btn-outline-secondary btn-print-invoice"
+                    onClick={handlePrint}
+                  >
+                    Download
+                  </button>
                 </div>
               </Row>
             </CardBody>

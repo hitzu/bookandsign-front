@@ -34,7 +34,7 @@ const menuItems = [
       {
         id: "product-edit",
         label: "Editar producto",
-        link: "/application/product-edit/index",
+        link: "/application/product-edit",
         dataPage: "product-edit",
       },
       {
@@ -42,6 +42,34 @@ const menuItems = [
         label: "Agregar producto",
         link: "/application/product-add",
         dataPage: "product-add",
+      },
+    ],
+  },
+  {
+    type: "HASHMENU",
+    id: 2,
+    label: "Paquetes",
+    icon: "ph-duotone ph-package",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "package-list",
+        label: "Listado de paquetes",
+        link: "/application/package-list",
+        dataPage: "package-list",
+      },
+      {
+        id: "package-edit",
+        label: "Editar paquete",
+        link: "/application/package-edit",
+        dataPage: "package-edit",
+      },
+      {
+        id: "package-add",
+        label: "Agregar paquete",
+        link: "/application/package-add",
+        dataPage: "package-add",
       },
     ],
   },

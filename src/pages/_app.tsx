@@ -21,13 +21,13 @@ const MyApp: any = ({ Component, pageProps, ...rest }: AppPropsWithLayout) => {
   return (
     <>
       <Head>
-        <link rel='icon' href='/favicon.svg' />
+        <link rel="icon" href="/favicon.svg" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
         {/* <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></link> */}
-        <title>LightAble | Next js & Admin Dashboard </title>
+        <title> Book And Sign </title>
       </Head>
       <Provider store={store}>
         {getLayout(<Component {...pageProps} />)}

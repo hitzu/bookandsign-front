@@ -11,3 +11,12 @@ export const translateProductStatus = (status: string): string => {
   };
   return translations[status] || status;
 };
+
+export const translatePackageStatus = (status: string): string => {
+  const translations: Record<string, string> = {
+    draft: "Borrador",
+    active: "Activo",
+    inactive: "Inactivo",
+  };
+  return translations[status] || status;
+};
