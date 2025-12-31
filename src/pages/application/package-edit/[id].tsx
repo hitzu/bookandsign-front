@@ -54,7 +54,7 @@ const validationSchema = yup.object().shape({
     .min(1, "Seleccione una marca válida"),
 });
 
-const ProductEdit = () => {
+const PackageEdit = () => {
   const router = useRouter();
   const { id } = router.query;
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
@@ -153,7 +153,7 @@ const ProductEdit = () => {
             }))
           );
         } catch (error) {
-          console.error("Error fetching product:", error);
+          console.error("Error fetching package:", error);
           setToastMessage("Error al cargar el producto");
           setToastVariant("danger");
           setShowToast(true);
@@ -520,8 +520,8 @@ const ProductEdit = () => {
   );
 };
 
-ProductEdit.getLayout = (page: ReactElement) => {
+PackageEdit.getLayout = (page: ReactElement) => {
   return <Layout>{page}</Layout>;
 };
 
-export default ProductEdit;
+export default PackageEdit;

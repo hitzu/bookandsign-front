@@ -13,7 +13,7 @@ const Footer = () => {
                 href="https://light-able-react-dark.vercel.app/dashboard"
                 target="_blank"
               >
-                Lusso Tech team &#9829; by Lusso Tech team
+                &#9829; by Lusso Tech team
               </a>
             </p>
           </div>

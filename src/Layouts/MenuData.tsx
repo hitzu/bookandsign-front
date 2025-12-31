@@ -73,6 +73,34 @@ const menuItems = [
       },
     ],
   },
+  {
+    type: "HASHMENU",
+    id: 3,
+    label: "Terminos y condiciones",
+    icon: "ph-duotone ph-file-text",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "terms-and-conditions-list",
+        label: "Listado de terminos y condiciones",
+        link: "/application/terms-and-conditions-list",
+        dataPage: "terms-and-conditions-list",
+      },
+      {
+        id: "terms-and-conditions-edit",
+        label: "Editar termino y condicion",
+        link: "/application/terms-and-conditions-edit",
+        dataPage: "terms-and-conditions-edit",
+      },
+      {
+        id: "terms-and-conditions-add",
+        label: "Agregar termino y condicion",
+        link: "/application/terms-and-conditions-add",
+        dataPage: "terms-and-conditions-add",
+      },
+    ],
+  },
 ];
 
 // const menuItems = [

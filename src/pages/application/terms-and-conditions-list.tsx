@@ -6,57 +6,42 @@ import React, {
   useState,
 } from "react";
 import Layout from "@layout/index";
-import { GetPackagesResponse, GetBrandsResponse } from "../../interfaces";
-import { getBrands } from "../../api/services/brandService";
+import { GetTermsResponse, GetPackageTermsResponse } from "../../interfaces";
 import TableContainer from "@common/TableContainer";
 import Link from "next/link";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import { Card, Col, Row } from "react-bootstrap";
 import DeleteModal from "@common/DeleteModal";
-import {
-  deletePackageById,
-  getPackages,
-} from "../../api/services/packageService";
+import { deleteTermById, getTerms } from "../../api/services/termsService";
 
-const PackageList = () => {
-  const [packages, setPackages] = useState<GetPackagesResponse[]>([]);
+const TermsAndConditionsList = () => {
+  const [terms, setTerms] = useState<GetTermsResponse[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
-  const [brandId, setBrandId] = useState<number>(0);
+  const [termScopeSelected, setTermScopeSelected] = useState<string>("global");
   const [deleteId, setDeleteId] = useState<number>(0);
 
-  useEffect(() => {
-    const fetchBrands = async () => {
-      try {
-        const response = (await getBrands()) as GetBrandsResponse[];
-        setBrands(response);
-      } catch (error) {
-        console.error("Error fetching brands:", error);
-      }
-    };
-    fetchBrands();
-  }, []);
+  const termScopes = [
+    { value: "global", label: "Globales" },
+    { value: "package", label: "Paquetes" },
+  ];
 
   useEffect(() => {
-    const fetchPackages = async () => {
-      const params = {
-        ...(brandId && { brandId }),
-      };
-      const response = (await getPackages(params)) as GetPackagesResponse[];
-      setPackages(response);
+    const fetchTerms = async () => {
+      const response = (await getTerms({
+        termScope: termScopeSelected,
+      })) as GetTermsResponse[];
+      setTerms(response);
     };
-    fetchPackages();
-  }, [brandId]);
+    fetchTerms();
+  }, [termScopeSelected]);
 
   const handleDeleteId = async () => {
     if (deleteId) {
       try {
-        await deletePackageById(deleteId);
-        setPackages(
-          packages.filter((currentPackage) => currentPackage.id !== deleteId)
-        );
+        await deleteTermById(deleteId);
+        setTerms(terms.filter((currentTerm) => currentTerm.id !== deleteId));
       } catch (error) {
-        console.error("Error deleting product:", error);
+        console.error("Error deleting term:", error);
       }
     }
     handleClose();
@@ -76,44 +61,36 @@ const PackageList = () => {
     () => [
       {
         header: "Nombre",
-        accessorKey: "name",
+        accessorKey: "title",
         enableColumnFilter: false,
       },
       {
-        header: "Marca",
+        header: "Contenido",
+        accessorKey: "content",
         enableColumnFilter: false,
-        accessorKey: "brand",
         cell: (cellProps: any) => {
-          return <div>{cellProps.row.original.brand.name}</div>;
+          const content = cellProps.row.original.content || "";
+          return (
+            <div>
+              {content.length > 75 ? `${content.substring(0, 75)}...` : content}
+            </div>
+          );
         },
       },
       {
-        header: "Precio",
-        enableColumnFilter: false,
-        accessorKey: "basePrice",
-        cell: (cellProps: any) => {
-          return <div>${cellProps.row.original.basePrice}</div>;
-        },
-      },
-      {
-        header: "Descuento",
-        enableColumnFilter: false,
-        accessorKey: "discount",
-        cell: (cellProps: any) => {
-          return <div>{cellProps.row.original.discount}%</div>;
-        },
-      },
-      {
-        header: "Precio con descuento",
+        header: "Paquetes",
+        accessorKey: "packageTerms",
         enableColumnFilter: false,
         cell: (cellProps: any) => {
           return (
             <div>
-              $
-              {cellProps.row.original.basePrice -
-                (cellProps.row.original.basePrice *
-                  cellProps.row.original.discount) /
-                  100}
+              <ul>
+                {cellProps.row.original.packageTerms?.map(
+                  (packageTerm: GetPackageTermsResponse) => (
+                    <li key={packageTerm.id}>{packageTerm.package.name}</li>
+                  )
+                )}
+              </ul>
             </div>
           );
         },
@@ -131,7 +108,7 @@ const PackageList = () => {
                   title="Edit"
                 >
                   <Link
-                    href={`/application/package-edit/${cellProps.row.original.id}`}
+                    href={`/application/terms-and-conditions-edit/${cellProps.row.original.id}`}
                     className="avtar avtar-xs btn-link-success btn-pc-default"
                   >
                     <i className="ti ti-edit-circle f-18"></i>
@@ -167,7 +144,10 @@ const PackageList = () => {
         handleDeleteId={handleDeleteId}
       />
 
-      <BreadcrumbItem mainTitle="Paquetes" subTitle="Lista de paquetes" />
+      <BreadcrumbItem
+        mainTitle="Terminos y condiciones"
+        subTitle="Lista de terminos y condiciones"
+      />
       <Row>
         <Col sm={12}>
           <Card className="table-card">
@@ -175,29 +155,28 @@ const PackageList = () => {
               <div className="d-flex justify-content-between align-items-center p-sm-4 pb-sm-2">
                 <select
                   className="form-select w-75"
-                  value={brandId || ""}
+                  value={termScopeSelected}
                   onChange={(e) => {
-                    const newBrandId = parseInt(e.target.value);
-                    setBrandId(newBrandId);
+                    setTermScopeSelected(e.target.value);
                   }}
                 >
-                  <option value="">Todas las marcas</option>
-                  {brands.map((brand: GetBrandsResponse) => (
-                    <option key={brand.id} value={brand.id}>
-                      {brand.name}
+                  {termScopes.map((termScope) => (
+                    <option key={termScope.value} value={termScope.value}>
+                      {termScope.label}
                     </option>
                   ))}
                 </select>
                 <Link
-                  href="/application/package-add"
+                  href="/application/terms-and-conditions-add"
                   className="btn btn-primary"
                 >
-                  <i className="ti ti-plus f-18"></i> Agregar paquete
+                  <i className="ti ti-plus f-18"></i> Agregar termino y
+                  condicion
                 </Link>
               </div>
               <TableContainer
                 columns={columns || []}
-                data={packages || []}
+                data={terms || []}
                 isGlobalFilter={true}
                 isBordered={false}
                 customPageSize={50}
@@ -213,8 +192,8 @@ const PackageList = () => {
   );
 };
 
-PackageList.getLayout = (page: ReactElement) => {
+TermsAndConditionsList.getLayout = (page: ReactElement) => {
   return <Layout>{page}</Layout>;
 };
 
-export default PackageList;
+export default TermsAndConditionsList;

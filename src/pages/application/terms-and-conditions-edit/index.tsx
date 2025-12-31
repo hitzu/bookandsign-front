@@ -3,21 +3,26 @@ import { useRouter } from "next/router";
 import React, { ReactElement, useState } from "react";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import { Card, Col, Form, Row } from "react-bootstrap";
-import { GetPackagesResponse } from "../../../interfaces";
-import { getPackages } from "../../../api/services/packageService";
-import { translateProductStatus } from "../../../Common/translations";
+import { GetTermsResponse } from "../../../interfaces";
+import { getTerms } from "src/api/services/termsService";
 
-const PackageEditIndex = () => {
+const TermsAndConditionsEditIndex = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<GetPackagesResponse[]>([]);
+  const [searchResults, setSearchResults] = useState<GetTermsResponse[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [scope, setScope] = useState<"global" | "package">("global");
+
+  const termScopes = [
+    { value: "global", label: "Globales" },
+    { value: "package", label: "Paquetes" },
+  ];
 
   const handleSearch = async (term: string) => {
     setSearchTerm(term);
     if (term.length >= 2) {
       try {
-        const results = await getPackages({ term });
+        const results = await getTerms({ termScope: scope, query: term });
         setSearchResults(results);
         setShowSearchResults(true);
       } catch (error) {
@@ -31,28 +36,50 @@ const PackageEditIndex = () => {
     }
   };
 
-  const handleSelectProduct = (product: GetPackagesResponse) => {
+  const handleSelectTerm = (term: GetTermsResponse) => {
     setSearchTerm("");
     setShowSearchResults(false);
-    router.push(`/application/package-edit/${product.id}`);
+    router.push(`/application/terms-and-conditions-edit/${term.id}`);
   };
 
   return (
     <React.Fragment>
-      <BreadcrumbItem mainTitle="Paquetes" subTitle="Editar paquete" />
+      <BreadcrumbItem
+        mainTitle="Terminos y condiciones"
+        subTitle="Editar termino y condicion"
+      />
 
       <Row>
         <Col sm={12}>
           <Card>
             <Card.Header>
-              <h5>Buscar paquete para editar</h5>
+              <h5>Buscar termino y condicion</h5>
             </Card.Header>
             <Card.Body>
+              <Form.Group className="mb-3">
+                <Form.Label>Scope</Form.Label>
+                <Form.Select
+                  name="scope"
+                  value={scope}
+                  onChange={(e) => {
+                    setScope(e.target.value as "global" | "package");
+                  }}
+                >
+                  {termScopes.map((scope) => (
+                    <option key={scope.value} value={scope.value}>
+                      {scope.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
               <Form.Group>
-                <Form.Label>Buscar paquete por nombre</Form.Label>
+                <Form.Label>
+                  Buscar termino y condicion por titulo o contenido
+                </Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Escriba el nombre del paquete..."
+                  placeholder="Escriba el titulo o contenido del termino y condicion..."
                   value={searchTerm}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
@@ -70,10 +97,10 @@ const PackageEditIndex = () => {
                       marginTop: "4px",
                     }}
                   >
-                    {searchResults.map((product) => (
+                    {searchResults.map((term) => (
                       <div
-                        key={product.id}
-                        onClick={() => handleSelectProduct(product)}
+                        key={term.id}
+                        onClick={() => handleSelectTerm(term)}
                         style={{
                           padding: "8px 12px",
                           cursor: "pointer",
@@ -86,12 +113,9 @@ const PackageEditIndex = () => {
                           e.currentTarget.style.backgroundColor = "white";
                         }}
                       >
-                        <strong>{product.name}</strong>
+                        <strong>{term.title}</strong>
                         <br />
-                        <small className="text-muted">
-                          {product.brand.name} - Status:{" "}
-                          {translateProductStatus(product.status)}
-                        </small>
+                        <small className="text-muted">{term.content}</small>
                       </div>
                     ))}
                   </div>
@@ -111,7 +135,7 @@ const PackageEditIndex = () => {
                       }}
                     >
                       <small className="text-muted">
-                        No se encontraron paquetes con ese nombre
+                        No se encontraron terminos y condiciones con ese nombre
                       </small>
                     </div>
                   )}
@@ -124,8 +148,8 @@ const PackageEditIndex = () => {
   );
 };
 
-PackageEditIndex.getLayout = (page: ReactElement) => {
+TermsAndConditionsEditIndex.getLayout = (page: ReactElement) => {
   return <Layout>{page}</Layout>;
 };
 
-export default PackageEditIndex;
+export default TermsAndConditionsEditIndex;
