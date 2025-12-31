@@ -9,6 +9,7 @@ export interface GetPackagesResponse {
   basePrice: number;
   discount: number | null;
   status: string;
+  brandId: number;
   brand: GetBrandsResponse;
   packageProducts: GetPackageProductsResponse[];
 }

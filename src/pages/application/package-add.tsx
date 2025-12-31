@@ -49,7 +49,7 @@ const validationSchema = yup.object().shape({
     .min(1, "Seleccione una marca válida"),
 });
 
-const ProductAdd = () => {
+const PackageAdd = () => {
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
   const [productStatuses, setProductStatuses] = useState<string[]>([]);
   const [showToast, setShowToast] = useState(false);
@@ -101,7 +101,7 @@ const ProductAdd = () => {
           setBrandId(null);
         }, 500);
       } catch (error: any) {
-        console.error("Error creating product:", error);
+        console.error("Error creating package:", error);
         setToastMessage("Error al crear el paquete");
         setToastVariant("danger");
         setShowToast(true);
@@ -363,8 +363,8 @@ const ProductAdd = () => {
   );
 };
 
-ProductAdd.getLayout = (page: ReactElement) => {
+PackageAdd.getLayout = (page: ReactElement) => {
   return <Layout>{page}</Layout>;
 };
 
-export default ProductAdd;
+export default PackageAdd;

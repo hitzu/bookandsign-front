@@ -26,7 +26,7 @@ export const getPackages = async ({
     const response = await axiosInstanceWithToken.get(url);
     return response.data;
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching packages:", error);
     throw error;
   }
 };
