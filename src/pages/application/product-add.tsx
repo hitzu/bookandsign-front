@@ -208,7 +208,9 @@ const ProductAdd = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Precio</Form.Label>
+                  <Form.Label>
+                    Precio (Por ahora no se usa dejar vacio)
+                  </Form.Label>
                   <InputGroup className="mb-3">
                     <InputGroup.Text>$</InputGroup.Text>
                     <Form.Control

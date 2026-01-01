@@ -22,6 +22,7 @@ import {
   uploadProductsBulk,
 } from "../../api/services/packageService";
 import { getProducts } from "../../api/services/productsService";
+import { multiSelectStyles } from "@common/reactSelectStyles";
 
 interface PackageFormValues {
   name: string;
@@ -255,6 +256,7 @@ const PackageAdd = () => {
                     value={selectedProducts}
                     onChange={(newValues) => setSelectedProducts(newValues)}
                     placeholder="Seleccione productos"
+                    styles={multiSelectStyles}
                   />
                 </Form.Group>
 

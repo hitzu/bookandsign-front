@@ -19,6 +19,7 @@ import {
 } from "../../../api/services/termsService";
 import * as yup from "yup";
 import { getPackages } from "../../../api/services/packageService";
+import { multiSelectStyles } from "@common/reactSelectStyles";
 
 interface TermsAndConditionsFormValues {
   scope: "global" | "package";
@@ -417,6 +418,7 @@ const TermsAndConditionsEdit = () => {
                           handleUploadTermsPackages(newValues)
                         }
                         placeholder="Seleccione paquetes"
+                        styles={multiSelectStyles}
                       />
                     </Form.Group>
                   </React.Fragment>

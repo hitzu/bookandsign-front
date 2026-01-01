@@ -26,6 +26,7 @@ import {
   uploadProductsBulk,
 } from "../../../api/services/packageService";
 import { getProducts } from "src/api/services/productsService";
+import { multiSelectStyles } from "@common/reactSelectStyles";
 
 interface ProductFormValues {
   name: string;
@@ -332,6 +333,7 @@ const PackageEdit = () => {
                 value={selectedProducts}
                 onChange={(newValues) => handleUploadProducts(newValues)}
                 placeholder="Seleccione productos"
+                styles={multiSelectStyles}
               />
             </Card.Body>
           </Card>

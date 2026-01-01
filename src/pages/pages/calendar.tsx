@@ -87,7 +87,14 @@ const CalendarPage = () => {
             </Col>
 
             {/* Month Selector */}
-            <Col xs={12} sm={12} md={12} lg={8} xl={5} justify-content-center>
+            <Col
+              xs={12}
+              sm={12}
+              md={12}
+              lg={8}
+              xl={5}
+              className="justify-content-center"
+            >
               <div className={styles.monthSelectorWrapper}>
                 <Select
                   value={months

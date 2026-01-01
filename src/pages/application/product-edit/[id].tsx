@@ -128,7 +128,7 @@ const ProductEdit = () => {
           formik.setValues({
             name: product.name,
             description: product.description,
-            price: product.price.toString(),
+            price: product.price?.toString() || "",
             status: product.status,
             brandId: product.brandId,
           });
@@ -324,7 +324,9 @@ const ProductEdit = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Precio</Form.Label>
+                  <Form.Label>
+                    Precio (Por ahora no se usa dejar vacio)
+                  </Form.Label>
                   <InputGroup className="mb-3">
                     <InputGroup.Text>$</InputGroup.Text>
                     <Form.Control
