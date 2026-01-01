@@ -101,6 +101,22 @@ const menuItems = [
       },
     ],
   },
+  {
+    type: "HASHMENU",
+    id: 4,
+    label: "Agenda",
+    icon: "ph-duotone ph-calendar-blank",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "slots",
+        label: "Calendario",
+        link: "/pages/calendar",
+        dataPage: "slots",
+      },
+    ],
+  },
 ];
 
 // const menuItems = [
