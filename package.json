@@ -56,6 +56,7 @@
     "react-apexcharts": "^1.4.1",
     "react-bootstrap": "^2.10.0",
     "react-bootstrap-table2-paginator": "^2.1.2",
+    "react-calendar": "^6.0.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-cropper": "^2.3.3",
     "react-data-table-component": "^7.6.2",
