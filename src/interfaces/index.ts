@@ -6,3 +6,5 @@ export * from "./brands";
 export * from "./products";
 export * from "./packages";
 export * from "./terms";
+export * from "./slots";
+export * from "./notes";
