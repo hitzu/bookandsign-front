@@ -1,0 +1,44 @@
+import { GetSlotResponse } from "../../interfaces";
+
+import { axiosInstanceWithToken } from "../config/axiosConfig";
+
+export const getSlots = async (date: string): Promise<GetSlotResponse[]> => {
+  try {
+    const queryParams = new URLSearchParams();
+
+    queryParams.append("date", date);
+
+    const url = `/slots?${queryParams.toString()}`;
+    const response = await axiosInstanceWithToken.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching slots:", error);
+    throw error;
+  }
+};
+
+export const holdSlot = async (payload: {
+  eventDate: string;
+  period: string;
+  leadName: string;
+  leadEmail: string | null;
+  leadPhone: string | null;
+}) => {
+  try {
+    const response = await axiosInstanceWithToken.post(`/slots/hold`, payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error holding slot:", error);
+    throw error;
+  }
+};
+
+export const cancelHoldSlot = async (slotId: number) => {
+  try {
+    const response = await axiosInstanceWithToken.delete(`/slots/${slotId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error canceling hold slot:", error);
+    throw error;
+  }
+};

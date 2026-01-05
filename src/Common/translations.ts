@@ -20,3 +20,12 @@ export const translatePackageStatus = (status: string): string => {
   };
   return translations[status] || status;
 };
+
+export const translateSlotStatus = (status: string): string => {
+  const translations: Record<string, string> = {
+    available: "Disponible",
+    held: "Apartado",
+    occupied: "Ocupado",
+  };
+  return translations[status] || status;
+};
