@@ -51,6 +51,24 @@ const CalendarPage = () => {
     });
   };
 
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const q = router.query.date;
+    const dateStr = Array.isArray(q) ? q[0] : q;
+    if (!dateStr) return;
+
+    // expects /pages/calendar?date=YYYY-MM-DD
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+    if (!m) return;
+
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])); // local date
+    setDate(d);
+    setSelectedYear(d.getFullYear());
+    setSelectedMonth(d.getMonth());
+    handleDateSelect(d); // this makes selectedDate non-null => opens slot selection UI
+  }, [router.isReady, router.query.date]);
+
   const handleLogoClick = () => {
     router.push("/");
   };
@@ -310,10 +328,10 @@ const CalendarPage = () => {
                     const status = periodSlot?.slot?.status ?? "available";
                     return (
                       <SlotsChips
-                        key={timeSlot.value}
+                        key={`${selectedDate?.ymd}-${timeSlot.value}-${status}`}
                         timeSlot={timeSlot}
                         status={status}
-                        slotId={periodSlot?.slot?.id}
+                        slot={periodSlot}
                         handleClick={handleSlotClick}
                         handleCancelHold={handleCancelHold}
                       />

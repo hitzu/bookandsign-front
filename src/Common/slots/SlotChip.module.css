@@ -72,7 +72,7 @@
 .is_available {
   --status: #22c55e;
 } /* verde */
-.is_occupied {
+.is_booked {
   --status: #ef4444;
 } /* rojo */
 .is_held {
@@ -135,4 +135,16 @@
 
 .isNotClickable {
   cursor: default;
+}
+
+.contractInfo {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
