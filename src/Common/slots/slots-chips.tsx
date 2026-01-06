@@ -6,6 +6,7 @@ const SlotsChips = ({
   status,
   slotId,
   handleClick,
+  handleCancelHold,
 }: {
   timeSlot: any;
   status: string;
@@ -15,9 +16,10 @@ const SlotsChips = ({
     period: string;
     slotId?: number;
   }) => void;
+  handleCancelHold: (slotId: number) => void;
 }) => {
   const payload = { status, period: timeSlot.value, slotId };
-  const isCardClickable = status === "available";
+  const isCardClickable = status === "available" || status === "held";
   return (
     <div
       key={timeSlot.value}
@@ -59,9 +61,9 @@ const SlotsChips = ({
         {status === "held" && (
           <button
             className={styles.slotActionGhost}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClick(payload); // aquí Calendar ejecuta cancelHoldSlot
+            onClick={() => {
+              if (!slotId) return;
+              handleCancelHold(slotId);
             }}
             type="button"
           >

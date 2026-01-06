@@ -113,6 +113,9 @@ const PackageEdit = () => {
     const fetchBrands = async () => {
       try {
         const response = (await getBrands()) as GetBrandsResponse[];
+        if (response.length > 0) {
+          setBrandId(response[0].id);
+        }
         setBrands(response);
       } catch (error) {
         console.error("Error fetching brands:", error);
