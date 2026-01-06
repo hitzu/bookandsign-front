@@ -1,5 +1,6 @@
 export interface Slot {
   id: number;
+  eventDate: string;
   status: string;
   leadName: string;
   leadEmail: string | null;

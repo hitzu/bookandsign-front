@@ -10,6 +10,7 @@ import { Row, Col, Button } from "react-bootstrap";
 import { useRouter } from "next/router";
 import SlotsChips from "@common/slots/slots-chips";
 import { GetSlotResponse } from "../../interfaces";
+import { formatLongSpanishDate } from "@common/dates";
 import {
   getSlots,
   holdSlot,
@@ -39,16 +40,6 @@ const CalendarPage = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const formatLongSpanishDate = (d: Date) =>
-    new Intl.DateTimeFormat("es-ES", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    })
-      .format(d)
-      .replace(",", "");
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate({
@@ -147,13 +138,16 @@ const CalendarPage = () => {
       return;
     } else if (status === "held") {
       if (!slotId) return;
-      try {
-        await cancelHoldSlot(slotId);
-        await refreshSlots();
-      } catch (e) {
-        console.error("Error canceling slot:", e);
-        setSubmitError("No se pudo cancelar el slot. Intenta de nuevo.");
-      }
+      router.push(`/pages/contract-creation/${slotId}`);
+    }
+  };
+
+  const handleCancelHold = async (slotId: number) => {
+    try {
+      await cancelHoldSlot(slotId);
+      await refreshSlots();
+    } catch (e) {
+      console.error("Error canceling slot:", e);
     }
   };
 
@@ -321,6 +315,7 @@ const CalendarPage = () => {
                         status={status}
                         slotId={periodSlot?.slot?.id}
                         handleClick={handleSlotClick}
+                        handleCancelHold={handleCancelHold}
                       />
                     );
                   })}

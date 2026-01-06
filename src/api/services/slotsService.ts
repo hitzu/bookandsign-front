@@ -1,4 +1,4 @@
-import { GetSlotResponse } from "../../interfaces";
+import { GetSlotResponse, Slot } from "../../interfaces";
 
 import { axiosInstanceWithToken } from "../config/axiosConfig";
 
@@ -39,6 +39,36 @@ export const cancelHoldSlot = async (slotId: number) => {
     return response.data;
   } catch (error) {
     console.error("Error canceling hold slot:", error);
+    throw error;
+  }
+};
+
+export const getSlotById = async (slotId: number): Promise<Slot> => {
+  try {
+    const response = await axiosInstanceWithToken.get(`/slots/${slotId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching slot by id:", error);
+    throw error;
+  }
+};
+
+export const updateLeadInfo = async (
+  slotId: number,
+  payload: {
+    leadName?: string;
+    leadEmail?: string;
+    leadPhone?: string;
+  }
+) => {
+  try {
+    const response = await axiosInstanceWithToken.patch(
+      `/slots/${slotId}/lead-info`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating lead info:", error);
     throw error;
   }
 };
