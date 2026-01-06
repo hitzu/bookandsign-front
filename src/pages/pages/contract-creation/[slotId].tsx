@@ -9,12 +9,14 @@ import { getBrands } from "../../../api/services/brandService";
 import { getPackages } from "../../../api/services/packageService";
 import type { GetBrandsResponse } from "../../../interfaces/brands";
 import type { GetPackagesResponse } from "../../../interfaces/packages";
-import { Slot } from "../../../interfaces";
+import { GenerateContractPayload, Slot } from "../../../interfaces";
 import {
   getSlotById,
   updateLeadInfo,
 } from "../../../api/services/slotsService";
 import { formatLongSpanishDate } from "@common/dates";
+import { generateContract } from "../../../api/services/contractService";
+import { createNote } from "../../../api/services/notesService";
 
 type ClientDraft = {
   leadName: string;
@@ -31,6 +33,7 @@ const ContractCreationPage = () => {
   const router = useRouter();
   const { slotId } = router.query;
   const [slot, setSlot] = useState<Slot | null>(null);
+  const [date, setDate] = useState<string | null>(null);
   const [isEditingClient, setIsEditingClient] = useState(false);
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState<number | "">("");
@@ -100,6 +103,8 @@ const ContractCreationPage = () => {
           leadPhone: slot.leadPhone ?? "",
         });
 
+        setDate(slot.eventDate);
+
         setIsEditingClient(false);
 
         setSlot(slot);
@@ -117,8 +122,11 @@ const ContractCreationPage = () => {
     }).format(n);
 
   // NOTE: maqueta assumption: discount is an AMOUNT (not %)
-  const unitPriceForPackage = (p: GetPackagesResponse) =>
-    Math.max(0, (p.basePrice ?? 0) - (p.discount ?? 0));
+  const unitPriceForPackage = (p: GetPackagesResponse) => {
+    const base = p.basePrice ?? 0;
+    const discountPct = Math.min(100, Math.max(0, p.discount ?? 0));
+    return Math.max(0, base - (base * discountPct) / 100);
+  };
 
   const total = items.reduce(
     (sum, it) => sum + unitPriceForPackage(it.pkg) * it.quantity,
@@ -203,6 +211,31 @@ const ContractCreationPage = () => {
       setIsEditingClient(false);
     } catch (error) {
       console.error("Error saving client:", error);
+    }
+  };
+
+  const handleGenerateContract = async () => {
+    try {
+      const payload: GenerateContractPayload = {
+        slotId: Number(slotId),
+        packages: items.map((item) => ({
+          packageId: item.pkg.id,
+          quantity: item.quantity,
+          source: "package",
+        })),
+      };
+      const contract = await generateContract(payload);
+
+      if (contract) {
+        await createNote({
+          targetId: contract.id,
+          content: notes,
+          scope: "contract",
+          kind: "internal",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating contract:", error);
     }
   };
 
@@ -625,10 +658,18 @@ const ContractCreationPage = () => {
           <Row className="mb-4 justify-content-center">
             <Col xs={12}>
               <div className={styles.pageActions}>
-                <button type="button" className={styles.btnCancel}>
+                <button
+                  onClick={() => router.push(`/pages/calendar?date=${date}`)}
+                  type="button"
+                  className={styles.btnCancel}
+                >
                   Cancelar
                 </button>
-                <button type="button" className={styles.btnPrimary}>
+                <button
+                  type="button"
+                  className={styles.btnPrimary}
+                  onClick={handleGenerateContract}
+                >
                   Generar Contrato
                 </button>
               </div>

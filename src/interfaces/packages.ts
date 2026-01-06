@@ -1,6 +1,17 @@
 import { GetBrandsResponse } from "./brands";
 import { GetProductsResponse } from "./products";
 
+export interface Package {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  basePrice: number;
+  discount: number | null;
+  status: string;
+  brandId: number;
+}
+
 export interface GetPackagesResponse {
   id: number;
   code: string;

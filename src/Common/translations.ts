@@ -25,7 +25,7 @@ export const translateSlotStatus = (status: string): string => {
   const translations: Record<string, string> = {
     available: "Disponible",
     held: "Apartado",
-    occupied: "Ocupado",
+    booked: "Ocupado",
   };
   return translations[status] || status;
 };
