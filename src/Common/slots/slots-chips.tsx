@@ -1,8 +1,13 @@
 import { translateSlotStatus } from "@common/translations";
 import styles from "./SlotChip.module.css";
-import { GetContractByIdResponse, GetSlotResponse } from "../../interfaces";
+import {
+  GetContractByIdResponse,
+  GetSlotResponse,
+  Note,
+} from "../../interfaces";
 import { getContractById } from "src/api/services/contractService";
 import { useEffect, useState } from "react";
+import { getNotes } from "../../api/services/notesService";
 
 const SlotsChips = ({
   timeSlot,
@@ -27,6 +32,17 @@ const SlotsChips = ({
   const [contract, setContract] = useState<GetContractByIdResponse | null>(
     null
   );
+  const [notes, setNotes] = useState<Note[]>([]);
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      if (!slotId) return;
+      const notes = await getNotes(slotId, "slot");
+      setNotes(notes);
+    };
+    fetchNotes();
+  }, [slotId]);
+
   useEffect(() => {
     const fetchContract = async () => {
       try {
@@ -82,17 +98,26 @@ const SlotsChips = ({
           </button>
         )}
         {status === "held" && (
-          <button
-            className={styles.slotActionGhost}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (!slotId) return;
-              handleCancelHold(slotId);
-            }}
-            type="button"
-          >
-            Cancelar apartado
-          </button>
+          <div>
+            <div className={styles.contractInfo}>
+              <p>Cliente: {slot?.slot?.leadName}</p>
+              {notes.length > 0 && (
+                <p>Notas: {notes.map((note) => note.content).join(", ")}</p>
+              )}
+            </div>
+
+            <button
+              className={styles.slotActionGhost}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!slotId) return;
+                handleCancelHold(slotId);
+              }}
+              type="button"
+            >
+              Cancelar apartado
+            </button>
+          </div>
         )}
 
         {contract && (
