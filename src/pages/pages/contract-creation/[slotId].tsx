@@ -39,6 +39,8 @@ type PackageLineItem = {
   quantity: number;
 };
 
+type CurrencyCode = "MXN" | "USD";
+
 const ContractCreationPage = () => {
   const router = useRouter();
   const { slotId } = router.query;
@@ -143,6 +145,56 @@ const ContractCreationPage = () => {
       currency: "MXN",
     }).format(n);
 
+  const formatCurrencyParts = (
+    amount: number,
+    currency: CurrencyCode = "MXN"
+  ) => {
+    const roundedCents = Math.round(
+      (Number.isFinite(amount) ? amount : 0) * 100
+    );
+    const hasCents = Math.abs(roundedCents % 100) !== 0;
+    const nf = new Intl.NumberFormat(currency === "USD" ? "en-US" : "es-MX", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: hasCents ? 2 : 0,
+      maximumFractionDigits: hasCents ? 2 : 0,
+    });
+
+    const parts = nf.formatToParts(amount);
+    const symbol = parts.find((p) => p.type === "currency")?.value ?? "";
+    const number = parts
+      .filter((p) => p.type !== "currency" && p.type !== "literal")
+      .map((p) => p.value)
+      .join("");
+    const rest = parts
+      .filter((p) => p.type !== "currency")
+      .map((p) => p.value)
+      .join("")
+      .trim();
+
+    // `rest` is locale-aware (includes separators). `number` is the digit-y part.
+    return { symbol, number: number || rest, formatted: rest };
+  };
+
+  const parseAmountInput = (raw: string) => {
+    const s = (raw ?? "").trim();
+    if (!s)
+      return {
+        value: null as number | null,
+        isNegative: false,
+        isValidNumber: true,
+      };
+    const normalized = s.replace(/,/g, "");
+    const hasMinus = normalized.includes("-");
+    const cleaned = normalized.replace(/[^\d.\-]/g, "");
+    const n = Number(cleaned);
+    return {
+      value: Number.isFinite(n) ? n : null,
+      isNegative: hasMinus && (Number.isFinite(n) ? n < 0 : true),
+      isValidNumber: cleaned === "-" ? true : Number.isFinite(n),
+    };
+  };
+
   const unitPriceForPackage = (p: GetPackagesResponse) => {
     const base = p.basePrice ?? 0;
     const discountPct = Math.min(100, Math.max(0, p.discount ?? 0));
@@ -163,6 +215,38 @@ const ContractCreationPage = () => {
     0,
     Number((deposit || "0").replace(/[^\d.]/g, "")) || 0
   );
+
+  const depositParsed = useMemo(() => parseAmountInput(deposit), [deposit]);
+  const depositInlineError =
+    depositParsed.value !== null &&
+    (depositParsed.value < 0 || depositParsed.value > totalWithDiscount)
+      ? `Ingresa un anticipo entre ${formatMoney(0)} y ${formatMoney(
+          totalWithDiscount
+        )}.`
+      : null;
+
+  const discountAmount = useMemo(() => {
+    const n = (total ?? 0) - (totalWithDiscount ?? 0);
+    return n > 0 ? n : 0;
+  }, [total, totalWithDiscount]);
+
+  const discountDisplay = useMemo(() => {
+    if (totalWithDiscount === total) return null;
+    if (!Number.isFinite(discountAmount) || discountAmount <= 0) return null;
+
+    const discounts = items
+      .map((it) => it.pkg.discount)
+      .filter((d) => typeof d === "number");
+    const uniq = new Set(
+      discounts.map((d) => Math.round((d ?? 0) * 100) / 100)
+    );
+    const common = uniq.size === 1 ? Array.from(uniq)[0] : null;
+
+    if (common && common > 0) {
+      return { type: "percent" as const, value: common };
+    }
+    return { type: "amount" as const, value: discountAmount };
+  }, [discountAmount, items, total, totalWithDiscount]);
 
   const handleAddSelectedPackage = () => {
     if (isLocked) return;
@@ -617,127 +701,196 @@ const ContractCreationPage = () => {
                 {/* Financial summary */}
                 <Row className="g-3">
                   <Col xs={12} lg={8}>
-                    <div
-                      style={{
-                        border: "2px solid rgba(255,255,255,0.18)",
-                        borderRadius: 14,
-                        padding: 16,
-                        background: "rgba(0,0,0,0.18)",
-                      }}
-                    >
-                      <div
-                        style={{
-                          color: "white",
-                          fontWeight: 900,
-                          marginBottom: 12,
-                        }}
-                      >
-                        Resumen Financiero:
+                    <div className={styles.financialCard}>
+                      <div className={styles.financialTitle}>
+                        Resumen financiero
                       </div>
 
-                      <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                        <div
-                          style={{
-                            color: "rgba(255,255,255,0.9)",
-                            fontWeight: 800,
-                          }}
-                        >
-                          Precio base:
+                      <div className={styles.financialSection}>
+                        <div className={styles.financialRow}>
+                          <div className={styles.financialLabel}>
+                            Precio base
+                          </div>
+                          <div className={styles.financialValueMuted}>
+                            <span className={styles.moneySymbol}>
+                              {formatCurrencyParts(total, "MXN").symbol}
+                            </span>
+                            <span className={styles.moneyNumber}>
+                              {formatCurrencyParts(total, "MXN").number}
+                            </span>
+                          </div>
                         </div>
-                        <div
-                          style={{
-                            color: "#34d399",
-                            fontWeight: 900,
-                            fontSize: 28,
-                            lineHeight: 1,
-                          }}
-                        >
-                          {formatMoney(total)}
+
+                        {discountDisplay && (
+                          <div className={styles.financialRow}>
+                            <div className={styles.financialLabel}>
+                              Descuento Expo Bodas y Quince
+                            </div>
+                            <div className={styles.discountWrap}>
+                              {discountDisplay.type === "percent" ? (
+                                <>
+                                  <span
+                                    className={styles.discountBadge}
+                                    title={`Equivale a –$ ${
+                                      formatCurrencyParts(discountAmount, "MXN")
+                                        .number
+                                    }`}
+                                  >
+                                    –{discountDisplay.value}%
+                                  </span>
+                                  <span className={styles.discountSubtext}>
+                                    –
+                                    {
+                                      formatCurrencyParts(discountAmount, "MXN")
+                                        .symbol
+                                    }{" "}
+                                    {
+                                      formatCurrencyParts(discountAmount, "MXN")
+                                        .number
+                                    }
+                                  </span>
+                                </>
+                              ) : (
+                                <span className={styles.discountBadge}>
+                                  –
+                                  {
+                                    formatCurrencyParts(
+                                      discountDisplay.value,
+                                      "MXN"
+                                    ).symbol
+                                  }{" "}
+                                  {
+                                    formatCurrencyParts(
+                                      discountDisplay.value,
+                                      "MXN"
+                                    ).number
+                                  }
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className={styles.financialRow}>
+                          <div className={styles.financialLabel}>
+                            Precio final
+                          </div>
+                          <div className={styles.financialValueFinal}>
+                            <span className={styles.moneySymbol}>
+                              {
+                                formatCurrencyParts(totalWithDiscount, "MXN")
+                                  .symbol
+                              }
+                            </span>
+                            <span className={styles.moneyNumberBig}>
+                              {
+                                formatCurrencyParts(totalWithDiscount, "MXN")
+                                  .number
+                              }
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      {items.length > 0 && (
-                        <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                          <div
-                            style={{
-                              color: "rgba(255,255,255,0.9)",
-                              fontWeight: 800,
-                            }}
+                      <div className={styles.financialDivider} />
+
+                      <div className={styles.financialSection}>
+                        <div className={styles.financialRow}>
+                          <label
+                            className={styles.financialLabel}
+                            htmlFor="deposit-amount"
                           >
-                            Descuento por expo Bodas y Quince:
+                            Anticipo
+                          </label>
+
+                          <div className={styles.depositField}>
+                            <span
+                              className={styles.depositPrefix}
+                              aria-hidden="true"
+                            >
+                              {formatCurrencyParts(0, "MXN").symbol}
+                            </span>
+                            <input
+                              id="deposit-amount"
+                              className={`${styles.depositInput} ${
+                                depositInlineError
+                                  ? styles.depositInputError
+                                  : ""
+                              }`}
+                              value={deposit}
+                              disabled={isLocked}
+                              onChange={(e) => setDeposit(e.target.value)}
+                              inputMode="decimal"
+                              placeholder="0.00"
+                              aria-invalid={!!depositInlineError}
+                              aria-describedby="deposit-help deposit-error"
+                            />
                           </div>
+                        </div>
+
+                        <div id="deposit-help" className={styles.depositHelp}>
+                          Mín. {formatCurrencyParts(500, "MXN").symbol}500
+                        </div>
+
+                        {depositInlineError && (
                           <div
-                            style={{
-                              color: "#34d399",
-                              fontWeight: 900,
-                              fontSize: 28,
-                              lineHeight: 1,
-                            }}
+                            id="deposit-error"
+                            className={styles.depositError}
+                            role="alert"
                           >
-                            -10%
+                            {depositInlineError}
+                          </div>
+                        )}
+
+                        <div className={styles.financialRow}>
+                          <div className={styles.financialLabel}>Restante</div>
+                          <div
+                            className={
+                              Math.max(0, totalWithDiscount - depositNumber) ===
+                              0
+                                ? styles.remainingPaid
+                                : styles.remainingDue
+                            }
+                          >
+                            <span className={styles.moneySymbol}>
+                              {
+                                formatCurrencyParts(
+                                  Math.max(
+                                    0,
+                                    totalWithDiscount - depositNumber
+                                  ),
+                                  "MXN"
+                                ).symbol
+                              }
+                            </span>
+                            <span className={styles.moneyNumberRemaining}>
+                              {
+                                formatCurrencyParts(
+                                  Math.max(
+                                    0,
+                                    totalWithDiscount - depositNumber
+                                  ),
+                                  "MXN"
+                                ).number
+                              }
+                            </span>
+                            {Math.max(0, totalWithDiscount - depositNumber) ===
+                              0 && (
+                              <span className={styles.paidBadge}>
+                                Liquidado
+                              </span>
+                            )}
                           </div>
                         </div>
-                      )}
 
-                      <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                        <div
-                          style={{
-                            color: "rgba(255,255,255,0.9)",
-                            fontWeight: 800,
-                          }}
-                        >
-                          Precio final:
-                        </div>
-                        <div
-                          style={{
-                            color: "#34d399",
-                            fontWeight: 900,
-                            fontSize: 28,
-                            lineHeight: 1,
-                          }}
-                        >
-                          {formatMoney(totalWithDiscount)}
-                        </div>
-                      </div>
-
-                      <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap mt-3">
-                        <div
-                          style={{
-                            color: "rgba(255,255,255,0.9)",
-                            fontWeight: 800,
-                          }}
-                        >
-                          Anticipo:
-                        </div>
-
-                        <div className="d-flex align-items-center gap-2">
-                          <div style={{ color: "white", fontWeight: 900 }}>
-                            $
-                          </div>
-                          <input
-                            className={styles.formInput}
-                            style={{ width: 140, padding: "0.6rem 0.75rem" }}
-                            value={deposit}
-                            disabled={isLocked}
-                            onChange={(e) => setDeposit(e.target.value)}
-                            inputMode="decimal"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap mt-3">
-                        <div
-                          style={{
-                            color: "rgba(255,255,255,0.9)",
-                            fontWeight: 800,
-                          }}
-                        >
-                          Restante:
-                        </div>
-                        <div style={{ color: "white", fontWeight: 900 }}>
-                          {formatMoney(
-                            Math.max(0, totalWithDiscount - depositNumber)
-                          )}
+                        <div className={styles.srOnly} aria-live="polite">
+                          Restante{" "}
+                          {
+                            formatCurrencyParts(
+                              Math.max(0, totalWithDiscount - depositNumber),
+                              "MXN"
+                            ).formatted
+                          }
                         </div>
                       </div>
                     </div>
@@ -773,10 +926,6 @@ const ContractCreationPage = () => {
                 <div className={styles.pageActions}>
                   <button
                     onClick={() => {
-                      console.log("Cancelar click", {
-                        date,
-                        slotId: router.query.slotId,
-                      });
                       router.push({
                         pathname: "/pages/calendar",
                         query: date ? { date } : {},
@@ -817,10 +966,6 @@ const ContractCreationPage = () => {
               <div className="d-flex justify-content-center">
                 <button
                   onClick={() => {
-                    console.log("Cancelar click", {
-                      date,
-                      slotId: router.query.slotId,
-                    });
                     router.push({
                       pathname: "/pages/calendar",
                       query: date ? { date } : {},
@@ -836,9 +981,13 @@ const ContractCreationPage = () => {
                   className={styles.btnPrimary}
                   disabled={!contractLink}
                   onClick={async () => {
-                    await navigator.clipboard.writeText(contractLink);
-                    setHasCopiedLink(true);
-                    setTimeout(() => setHasCopiedLink(false), 1500);
+                    try {
+                      await navigator.clipboard.writeText(contractLink);
+                      setHasCopiedLink(true);
+                      setTimeout(() => setHasCopiedLink(false), 1500);
+                    } catch (error) {
+                      console.error("Error copying link:", error);
+                    }
                   }}
                 >
                   {hasCopiedLink ? "Link copiado" : "Copiar link"}
