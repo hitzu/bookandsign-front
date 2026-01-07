@@ -72,3 +72,24 @@ export const updateLeadInfo = async (
     throw error;
   }
 };
+
+export const bookSlot = async ({
+  slotId,
+  contractId,
+}: {
+  slotId: number;
+  contractId: number;
+}) => {
+  try {
+    const response = await axiosInstanceWithToken.patch(
+      `/slots/${slotId}/book`,
+      {
+        contractId: contractId,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error booking slot:", error);
+    throw error;
+  }
+};

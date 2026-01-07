@@ -569,3 +569,36 @@
     width: 100%;
   }
 }
+
+.contractShareTitle {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  line-height: 1.05;
+  margin: 1rem 0 1.25rem;
+  text-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+}
+
+.contractShareQrBox {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 18px;
+  width: min(560px, 100%);
+  margin: 0 auto 1.25rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* opcional: reduce un poco el padding en móviles */
+@media (max-width: 480px) {
+  .contractShareQrBox {
+    padding: 14px;
+    border-radius: 18px;
+  }
+}

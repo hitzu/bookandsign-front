@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import NonLayout from "@layout/NonLayout";
 import styles from "../../../assets/css/contract-creation.module.css";
 import logoWhite from "@assets/images/logo-white.png";
@@ -9,14 +9,24 @@ import { getBrands } from "../../../api/services/brandService";
 import { getPackages } from "../../../api/services/packageService";
 import type { GetBrandsResponse } from "../../../interfaces/brands";
 import type { GetPackagesResponse } from "../../../interfaces/packages";
-import { GenerateContractPayload, Slot } from "../../../interfaces";
 import {
+  Contract,
+  GenerateContractPayload,
+  GetProductsResponse,
+  Slot,
+} from "../../../interfaces";
+import {
+  bookSlot,
   getSlotById,
   updateLeadInfo,
 } from "../../../api/services/slotsService";
 import { formatLongSpanishDate } from "@common/dates";
-import { generateContract } from "../../../api/services/contractService";
+import {
+  generateContract,
+  getContractById,
+} from "../../../api/services/contractService";
 import { createNote } from "../../../api/services/notesService";
+import QRCode from "react-qr-code";
 
 type ClientDraft = {
   leadName: string;
@@ -34,6 +44,7 @@ const ContractCreationPage = () => {
   const { slotId } = router.query;
   const [slot, setSlot] = useState<Slot | null>(null);
   const [date, setDate] = useState<string | null>(null);
+  const [contract, setContract] = useState<Contract | null>(null);
   const [isEditingClient, setIsEditingClient] = useState(false);
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState<number | "">("");
@@ -52,6 +63,10 @@ const ContractCreationPage = () => {
     leadEmail: null,
     leadPhone: null,
   });
+
+  const [hasCopiedLink, setHasCopiedLink] = useState(false);
+
+  const isLocked = !!contract;
 
   useEffect(() => {
     const loadBrands = async () => {
@@ -97,6 +112,13 @@ const ContractCreationPage = () => {
       try {
         const slot = await getSlotById(Number(slotId));
 
+        if (slot.contractId) {
+          const contract = await getContractById(Number(slot.contractId));
+          setContract(contract.contract);
+        } else {
+          setContract(null);
+        }
+
         setClientDraft({
           leadName: slot.leadName ?? "",
           leadEmail: slot.leadEmail ?? "",
@@ -121,7 +143,6 @@ const ContractCreationPage = () => {
       currency: "MXN",
     }).format(n);
 
-  // NOTE: maqueta assumption: discount is an AMOUNT (not %)
   const unitPriceForPackage = (p: GetPackagesResponse) => {
     const base = p.basePrice ?? 0;
     const discountPct = Math.min(100, Math.max(0, p.discount ?? 0));
@@ -129,6 +150,11 @@ const ContractCreationPage = () => {
   };
 
   const total = items.reduce(
+    (sum, it) => sum + it.pkg.basePrice * it.quantity,
+    0
+  );
+
+  const totalWithDiscount = items.reduce(
     (sum, it) => sum + unitPriceForPackage(it.pkg) * it.quantity,
     0
   );
@@ -139,6 +165,7 @@ const ContractCreationPage = () => {
   );
 
   const handleAddSelectedPackage = () => {
+    if (isLocked) return;
     if (!selectedPackageId) return;
     const pkg = packages.find((p) => p.id === Number(selectedPackageId));
     if (!pkg) return;
@@ -160,6 +187,7 @@ const ContractCreationPage = () => {
   };
 
   const incItem = (packageId: number) => {
+    if (isLocked) return;
     setItems((prev) =>
       prev.map((it) =>
         it.pkg.id === packageId ? { ...it, quantity: it.quantity + 1 } : it
@@ -168,6 +196,7 @@ const ContractCreationPage = () => {
   };
 
   const decItem = (packageId: number) => {
+    if (isLocked) return;
     setItems((prev) =>
       prev
         .map((it) =>
@@ -180,10 +209,14 @@ const ContractCreationPage = () => {
   };
 
   const removeItem = (packageId: number) => {
+    if (isLocked) return;
     setItems((prev) => prev.filter((it) => it.pkg.id !== packageId));
   };
 
-  const handleStartEditClient = () => setIsEditingClient(true);
+  const handleStartEditClient = () => {
+    if (isLocked) return;
+    setIsEditingClient(true);
+  };
 
   const handleCancelEditClient = () => {
     setClientDraft({
@@ -195,6 +228,7 @@ const ContractCreationPage = () => {
   };
 
   const handleSaveClient = async () => {
+    if (isLocked) return;
     try {
       await updateLeadInfo(Number(slotId), {
         ...(clientDraft.leadName?.trim()
@@ -234,10 +268,30 @@ const ContractCreationPage = () => {
           kind: "internal",
         });
       }
+      setContract(contract);
+
+      await bookSlot({ slotId: Number(slotId), contractId: contract.id });
     } catch (error) {
       console.error("Error generating contract:", error);
     }
   };
+
+  const promotionalProducts = useMemo(() => {
+    const byId = new Map<number, Omit<GetProductsResponse, "brand">>();
+
+    for (const it of items) {
+      for (const pp of it.pkg.packageProducts ?? []) {
+        if (pp.product?.isPromotional) byId.set(pp.product.id, pp.product);
+      }
+    }
+
+    return Array.from(byId.values());
+  }, [items]);
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const contractLink = contract?.token
+    ? `${origin}/pages/c/${contract.token}`
+    : "";
 
   return (
     <div className={styles.contractCreationContainer}>
@@ -270,7 +324,7 @@ const ContractCreationPage = () => {
                     Datos del cliente
                   </div>
 
-                  {!isEditingClient && (
+                  {!isEditingClient && !isLocked && (
                     <button
                       type="button"
                       className={styles.btnPrimary}
@@ -291,7 +345,7 @@ const ContractCreationPage = () => {
                       <input
                         className={styles.formInput}
                         value={clientDraft.leadName}
-                        disabled={!isEditingClient}
+                        disabled={!isEditingClient || isLocked}
                         onChange={(e) =>
                           setClientDraft((p) => ({
                             ...p,
@@ -311,7 +365,7 @@ const ContractCreationPage = () => {
                         className={styles.formInput}
                         type="email"
                         value={clientDraft.leadEmail ?? ""}
-                        disabled={!isEditingClient}
+                        disabled={!isEditingClient || isLocked}
                         onChange={(e) =>
                           setClientDraft((p) => ({
                             ...p,
@@ -331,7 +385,7 @@ const ContractCreationPage = () => {
                         className={styles.formInput}
                         type="tel"
                         value={clientDraft.leadPhone ?? ""}
-                        disabled={!isEditingClient}
+                        disabled={!isEditingClient || isLocked}
                         onChange={(e) =>
                           setClientDraft((p) => ({
                             ...p,
@@ -346,21 +400,21 @@ const ContractCreationPage = () => {
                   </Col>
                 </Row>
 
-                {isEditingClient && (
+                {isEditingClient && !isLocked && (
                   <div className={styles.formActions}>
-                    <button
-                      type="button"
-                      className={styles.btnPrimary}
-                      onClick={handleSaveClient}
-                    >
-                      Guardar
-                    </button>
                     <button
                       type="button"
                       className={styles.btnCancel}
                       onClick={handleCancelEditClient}
                     >
                       Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.btnPrimary}
+                      onClick={handleSaveClient}
+                    >
+                      Guardar
                     </button>
                   </div>
                 )}
@@ -390,6 +444,7 @@ const ContractCreationPage = () => {
                       <select
                         className={styles.formInput}
                         value={selectedBrandId}
+                        disabled={isLocked}
                         onChange={(e) =>
                           setSelectedBrandId(
                             e.target.value ? Number(e.target.value) : ""
@@ -414,6 +469,7 @@ const ContractCreationPage = () => {
                       <select
                         className={styles.formInput}
                         value={selectedPackageId}
+                        disabled={isLocked}
                         onChange={(e) =>
                           setSelectedPackageId(
                             e.target.value ? Number(e.target.value) : ""
@@ -423,7 +479,7 @@ const ContractCreationPage = () => {
                         <option value="">Selecciona un paquete</option>
                         {packages.map((p) => (
                           <option key={p.id} value={p.id}>
-                            {p.name} — {formatMoney(unitPriceForPackage(p))}
+                            {p.name} — {formatMoney(p.basePrice)}
                           </option>
                         ))}
                       </select>
@@ -444,7 +500,7 @@ const ContractCreationPage = () => {
                         onChange={(e) =>
                           setQtyToAdd(Math.max(1, Number(e.target.value) || 1))
                         }
-                        disabled={!selectedPackageId}
+                        disabled={!selectedPackageId || isLocked}
                       />
                     </div>
                   </Col>
@@ -454,7 +510,7 @@ const ContractCreationPage = () => {
                       type="button"
                       className={styles.btnPrimary}
                       onClick={handleAddSelectedPackage}
-                      disabled={!selectedPackageId}
+                      disabled={!selectedPackageId || isLocked}
                       style={{ width: "100%" }}
                     >
                       Agregar
@@ -490,52 +546,60 @@ const ContractCreationPage = () => {
                               {it.pkg.name}
                             </div>
                             <div style={{ color: "#34d399", fontWeight: 800 }}>
-                              {formatMoney(unitPriceForPackage(it.pkg))} c/u
+                              {formatMoney(it.pkg.basePrice)} c/u
                             </div>
                           </div>
 
                           <div className="d-flex align-items-center gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-outline-light rounded-circle"
-                              style={{ width: 40, height: 40 }}
-                              onClick={() => decItem(it.pkg.id)}
-                              aria-label="Disminuir"
-                            >
-                              -
-                            </button>
+                            {!isLocked ? (
+                              <>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-light rounded-circle"
+                                  style={{ width: 40, height: 40 }}
+                                  onClick={() => decItem(it.pkg.id)}
+                                  aria-label="Disminuir"
+                                >
+                                  -
+                                </button>
 
-                            <div
-                              style={{
-                                minWidth: 34,
-                                textAlign: "center",
-                                color: "white",
-                                fontWeight: 900,
-                                fontSize: 18,
-                              }}
-                            >
-                              {it.quantity}
-                            </div>
+                                <div
+                                  style={{
+                                    minWidth: 34,
+                                    textAlign: "center",
+                                    color: "white",
+                                    fontWeight: 900,
+                                    fontSize: 18,
+                                  }}
+                                >
+                                  {it.quantity}
+                                </div>
 
-                            <button
-                              type="button"
-                              className="btn btn-outline-light rounded-circle"
-                              style={{ width: 40, height: 40 }}
-                              onClick={() => incItem(it.pkg.id)}
-                              aria-label="Aumentar"
-                            >
-                              +
-                            </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-outline-light rounded-circle"
+                                  style={{ width: 40, height: 40 }}
+                                  onClick={() => incItem(it.pkg.id)}
+                                  aria-label="Aumentar"
+                                >
+                                  +
+                                </button>
 
-                            <button
-                              type="button"
-                              className="btn btn-danger rounded-circle"
-                              style={{ width: 40, height: 40 }}
-                              onClick={() => removeItem(it.pkg.id)}
-                              aria-label="Eliminar"
-                            >
-                              ×
-                            </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-danger rounded-circle"
+                                  style={{ width: 40, height: 40 }}
+                                  onClick={() => removeItem(it.pkg.id)}
+                                  aria-label="Eliminar"
+                                >
+                                  ×
+                                </button>
+                              </>
+                            ) : (
+                              <div style={{ color: "white", fontWeight: 900 }}>
+                                Cantidad: {it.quantity}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -578,7 +642,7 @@ const ContractCreationPage = () => {
                             fontWeight: 800,
                           }}
                         >
-                          Precio Total:
+                          Precio base:
                         </div>
                         <div
                           style={{
@@ -589,6 +653,50 @@ const ContractCreationPage = () => {
                           }}
                         >
                           {formatMoney(total)}
+                        </div>
+                      </div>
+
+                      {items.length > 0 && (
+                        <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                          <div
+                            style={{
+                              color: "rgba(255,255,255,0.9)",
+                              fontWeight: 800,
+                            }}
+                          >
+                            Descuento por expo Bodas y Quince:
+                          </div>
+                          <div
+                            style={{
+                              color: "#34d399",
+                              fontWeight: 900,
+                              fontSize: 28,
+                              lineHeight: 1,
+                            }}
+                          >
+                            -10%
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+                        <div
+                          style={{
+                            color: "rgba(255,255,255,0.9)",
+                            fontWeight: 800,
+                          }}
+                        >
+                          Precio final:
+                        </div>
+                        <div
+                          style={{
+                            color: "#34d399",
+                            fontWeight: 900,
+                            fontSize: 28,
+                            lineHeight: 1,
+                          }}
+                        >
+                          {formatMoney(totalWithDiscount)}
                         </div>
                       </div>
 
@@ -610,6 +718,7 @@ const ContractCreationPage = () => {
                             className={styles.formInput}
                             style={{ width: 140, padding: "0.6rem 0.75rem" }}
                             value={deposit}
+                            disabled={isLocked}
                             onChange={(e) => setDeposit(e.target.value)}
                             inputMode="decimal"
                           />
@@ -626,7 +735,9 @@ const ContractCreationPage = () => {
                           Restante:
                         </div>
                         <div style={{ color: "white", fontWeight: 900 }}>
-                          {formatMoney(Math.max(0, total - depositNumber))}
+                          {formatMoney(
+                            Math.max(0, totalWithDiscount - depositNumber)
+                          )}
                         </div>
                       </div>
                     </div>
@@ -645,6 +756,7 @@ const ContractCreationPage = () => {
                         className={styles.formTextarea}
                         rows={6}
                         value={notes}
+                        disabled={isLocked}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Notas adicionales"
                       />
@@ -655,26 +767,85 @@ const ContractCreationPage = () => {
             </Col>
           </Row>
 
-          <Row className="mb-4 justify-content-center">
-            <Col xs={12}>
-              <div className={styles.pageActions}>
+          {!contract && (
+            <Row className="mb-4 justify-content-center">
+              <Col xs={12}>
+                <div className={styles.pageActions}>
+                  <button
+                    onClick={() => {
+                      console.log("Cancelar click", {
+                        date,
+                        slotId: router.query.slotId,
+                      });
+                      router.push({
+                        pathname: "/pages/calendar",
+                        query: date ? { date } : {},
+                      });
+                    }}
+                    type="button"
+                    className={styles.btnCancel}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btnPrimary}
+                    onClick={handleGenerateContract}
+                  >
+                    Generar Contrato
+                  </button>
+                </div>
+              </Col>
+            </Row>
+          )}
+          {contract && (
+            <>
+              <div className={styles.contractShareTitle}>
+                "Contrato generado"
+              </div>
+
+              <div className={styles.contractShareQrBox}>
+                {contract.token ? (
+                  <QRCode value={contractLink} size={320} />
+                ) : (
+                  <div style={{ color: "#111" }}>
+                    No hay link para generar QR
+                  </div>
+                )}
+              </div>
+
+              <div className="d-flex justify-content-center">
                 <button
-                  onClick={() => router.push(`/pages/calendar?date=${date}`)}
+                  onClick={() => {
+                    console.log("Cancelar click", {
+                      date,
+                      slotId: router.query.slotId,
+                    });
+                    router.push({
+                      pathname: "/pages/calendar",
+                      query: date ? { date } : {},
+                    });
+                  }}
                   type="button"
                   className={styles.btnCancel}
                 >
-                  Cancelar
+                  Volver al calendario
                 </button>
                 <button
                   type="button"
                   className={styles.btnPrimary}
-                  onClick={handleGenerateContract}
+                  disabled={!contractLink}
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(contractLink);
+                    setHasCopiedLink(true);
+                    setTimeout(() => setHasCopiedLink(false), 1500);
+                  }}
                 >
-                  Generar Contrato
+                  {hasCopiedLink ? "Link copiado" : "Copiar link"}
                 </button>
               </div>
-            </Col>
-          </Row>
+            </>
+          )}
         </Col>
       </Row>
     </div>

@@ -84,7 +84,8 @@ const SlotsChips = ({
         {status === "held" && (
           <button
             className={styles.slotActionGhost}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!slotId) return;
               handleCancelHold(slotId);
             }}

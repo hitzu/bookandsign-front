@@ -5,6 +5,7 @@ export interface Contract {
   id: number;
   status: string;
   totalAmount: number;
+  token: string;
 }
 
 export interface ContractItem {

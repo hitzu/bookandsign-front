@@ -362,18 +362,6 @@ const CalendarPage = () => {
 
                     <div className={styles.formGroup}>
                       <label className={styles.formLabel}>
-                        Email (opcional)
-                      </label>
-                      <input
-                        className={styles.formInput}
-                        value={leadEmail}
-                        onChange={(e) => setLeadEmail(e.target.value)}
-                        placeholder="ana@email.com"
-                      />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                      <label className={styles.formLabel}>
                         Teléfono (opcional)
                       </label>
                       <input
@@ -381,6 +369,18 @@ const CalendarPage = () => {
                         value={leadPhone}
                         onChange={(e) => setLeadPhone(e.target.value)}
                         placeholder="222110149"
+                      />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>
+                        Email (opcional)
+                      </label>
+                      <input
+                        className={styles.formInput}
+                        value={leadEmail}
+                        onChange={(e) => setLeadEmail(e.target.value)}
+                        placeholder="ana@email.com"
                       />
                     </div>
 

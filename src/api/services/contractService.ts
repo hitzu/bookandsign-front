@@ -1,4 +1,5 @@
 import {
+  Contract,
   GenerateContractPayload,
   GetContractByIdResponse,
 } from "../../interfaces";
@@ -20,9 +21,9 @@ export const getContractById = async (
 
 export const generateContract = async (
   payload: GenerateContractPayload
-): Promise<GetContractByIdResponse> => {
+): Promise<Contract> => {
   try {
-    const response = await axiosInstanceWithToken.post<GetContractByIdResponse>(
+    const response = await axiosInstanceWithToken.post<Contract>(
       `/contracts`,
       payload
     );
