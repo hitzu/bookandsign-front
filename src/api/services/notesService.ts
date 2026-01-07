@@ -11,3 +11,18 @@ export const createNote = async (payload: CreateNotePayload): Promise<Note> => {
     throw error;
   }
 };
+
+export const getNotes = async (
+  slotId: number,
+  scope: string
+): Promise<Note[]> => {
+  try {
+    const response = await axiosInstanceWithToken.get<Note[]>(
+      `/notes/${scope}/${slotId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notes:", error);
+    throw error;
+  }
+};

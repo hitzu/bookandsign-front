@@ -92,9 +92,8 @@ const CalendarPage = () => {
   ];
   const timeSlots = useMemo(
     () => [
-      { value: "morning", label: "Mañana" },
-      { value: "afternoon", label: "Tarde" },
-      { value: "evening", label: "Noche" },
+      { value: "am_block", label: "Matutino (antes de las 4 PM)" },
+      { value: "pm_block", label: "Vespertino (después de las 4 PM)" },
     ],
     []
   );

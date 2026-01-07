@@ -371,7 +371,7 @@
   flex-direction: column;
   gap: 1.25rem;
   min-height: 30vh;
-  justify-content: space-between;
+  justify-content: space-around;
 }
 
 .backRow {
