@@ -8,6 +8,8 @@ export interface GetProductsResponse {
   status: string;
   brandId: number;
   quantity: number;
+  isPromotional: boolean;
+  promotionalText: string | null;
   brand: {
     id: number;
     key: string;
