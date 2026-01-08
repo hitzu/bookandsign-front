@@ -4,7 +4,24 @@ import {
   GetContractByIdResponse,
 } from "../../interfaces";
 
-import { axiosInstanceWithToken } from "../config/axiosConfig";
+import {
+  axiosInstanceWithToken,
+  axiosInstanceWithoutToken,
+} from "../config/axiosConfig";
+
+export const getContractByToken = async (
+  token: string
+): Promise<GetContractByIdResponse> => {
+  try {
+    const response = await axiosInstanceWithoutToken.get(
+      `/contracts/get-by-token/${token}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contract by token:", error);
+    throw error;
+  }
+};
 
 export const getContractById = async (
   id: number

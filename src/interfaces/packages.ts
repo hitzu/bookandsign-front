@@ -1,5 +1,6 @@
 import { GetBrandsResponse } from "./brands";
 import { GetProductsResponse } from "./products";
+import { Terms } from "./terms";
 
 export interface Package {
   id: number;
@@ -10,6 +11,7 @@ export interface Package {
   discount: number | null;
   status: string;
   brandId: number;
+  terms?: Terms[];
 }
 
 export interface GetPackagesResponse {
