@@ -27,6 +27,7 @@ import {
 } from "../../../api/services/contractService";
 import { createNote } from "../../../api/services/notesService";
 import QRCode from "react-qr-code";
+import { createPayment } from "../../../api/services/paymentService";
 
 type ClientDraft = {
   leadName: string;
@@ -40,6 +41,40 @@ type PackageLineItem = {
 };
 
 type CurrencyCode = "MXN" | "USD";
+
+const SKU_MONTHS_ES = [
+  "Ene",
+  "Feb",
+  "Mar",
+  "Abr",
+  "May",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dic",
+] as const;
+
+const normalizeSkuText = (value?: string | null) => {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove accents/diacritics
+    .replace(/\s+/g, "") // remove spaces
+    .replace(/[^0-9a-zA-Z]/g, ""); // keep only alphanumerics
+};
+
+// Converts "2026-01-16" -> "16Jan26"
+const formatSkuDate = (isoDate?: string | null) => {
+  if (!isoDate) return "";
+  const [yyyy, mm, dd] = isoDate.split("-");
+  const monthIdx = Number(mm) - 1;
+  const month = SKU_MONTHS_ES[monthIdx] ?? "";
+  const year2 = (yyyy ?? "").slice(-2);
+  if (!dd || !month || !year2) return "";
+  return `${dd}${month}${year2}`;
+};
 
 const ContractCreationPage = () => {
   const router = useRouter();
@@ -58,6 +93,7 @@ const ContractCreationPage = () => {
   const [items, setItems] = useState<PackageLineItem[]>([]);
 
   const [deposit, setDeposit] = useState<string>("0");
+  const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [notes, setNotes] = useState<string>("");
 
   const [clientDraft, setClientDraft] = useState<ClientDraft>({
@@ -334,8 +370,14 @@ const ContractCreationPage = () => {
 
   const handleGenerateContract = async () => {
     try {
+      const sku = `${normalizeSkuText(
+        items?.[0]?.pkg?.name
+      ).toLowerCase()}${formatSkuDate(slot?.eventDate)}${normalizeSkuText(
+        slot?.leadName
+      )}`;
       const payload: GenerateContractPayload = {
         slotId: Number(slotId),
+        sku,
         packages: items.map((item) => ({
           packageId: item.pkg.id,
           quantity: item.quantity,
@@ -345,12 +387,21 @@ const ContractCreationPage = () => {
       const contract = await generateContract(payload);
 
       if (contract) {
-        await createNote({
-          targetId: contract.id,
-          content: notes,
-          scope: "contract",
-          kind: "internal",
-        });
+        await Promise.all([
+          createPayment({
+            contractId: contract.id,
+            amount: depositNumber,
+            method: paymentMethod,
+            note: "Depósito inicial",
+            receivedAt: new Date().toISOString(),
+          }),
+          createNote({
+            targetId: contract.id,
+            content: notes,
+            scope: "contract",
+            kind: "internal",
+          }),
+        ]);
       }
       setContract(contract);
 
@@ -570,26 +621,7 @@ const ContractCreationPage = () => {
                     </div>
                   </Col>
 
-                  <Col xs={12} sm={6} md={2}>
-                    <div
-                      className={styles.formGroup}
-                      style={{ marginBottom: 0 }}
-                    >
-                      <label className={styles.formLabel}>Cantidad</label>
-                      <input
-                        className={styles.formInput}
-                        type="number"
-                        min={1}
-                        value={qtyToAdd}
-                        onChange={(e) =>
-                          setQtyToAdd(Math.max(1, Number(e.target.value) || 1))
-                        }
-                        disabled={!selectedPackageId || isLocked}
-                      />
-                    </div>
-                  </Col>
-
-                  <Col xs={12} sm={6} md={2}>
+                  <Col xs={12} sm={6} md={4}>
                     <button
                       type="button"
                       className={styles.btnPrimary}
@@ -828,6 +860,27 @@ const ContractCreationPage = () => {
                           </div>
                         </div>
 
+                        <div className={styles.financialRow}>
+                          <label
+                            className={styles.financialLabel}
+                            htmlFor="deposit-amount"
+                          >
+                            Forma de pago
+                          </label>
+
+                          <div className={styles.depositField}>
+                            <select
+                              className={styles.formInput}
+                              value={paymentMethod}
+                              onChange={(e) => setPaymentMethod(e.target.value)}
+                            >
+                              <option value="cash">Efectivo</option>
+                              <option value="card">Tarjeta</option>
+                              <option value="transfer">Transferencia</option>
+                            </select>
+                          </div>
+                        </div>
+
                         <div id="deposit-help" className={styles.depositHelp}>
                           Mín. {formatCurrencyParts(500, "MXN").symbol}500
                         </div>
@@ -940,6 +993,7 @@ const ContractCreationPage = () => {
                     type="button"
                     className={styles.btnPrimary}
                     onClick={handleGenerateContract}
+                    disabled={!items.length || depositNumber === 0}
                   >
                     Generar Contrato
                   </button>
@@ -974,7 +1028,7 @@ const ContractCreationPage = () => {
                   type="button"
                   className={styles.btnCancel}
                 >
-                  Volver al calendario
+                  Volver
                 </button>
                 <button
                   type="button"

@@ -1,4 +1,5 @@
 import { Package } from "./packages";
+import { Payment } from "./payments";
 import { Slot } from "./slots";
 
 export interface Contract {
@@ -21,7 +22,7 @@ export interface GetContractByIdResponse {
   contract: Contract;
   slots: Slot[];
   items: ContractItem[];
-  payments: any[];
+  payments: Payment[];
   paidAmount: number;
 }
 
@@ -33,5 +34,6 @@ export interface GenerateContractItem {
 
 export interface GenerateContractPayload {
   slotId: number;
+  sku: string;
   packages: GenerateContractItem[];
 }

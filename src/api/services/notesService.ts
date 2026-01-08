@@ -1,4 +1,4 @@
-import { CreateNotePayload, Note } from "../../interfaces/notes";
+import { CreateNotePayload, Note } from "../../interfaces";
 
 import { axiosInstanceWithToken } from "../config/axiosConfig";
 
