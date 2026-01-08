@@ -1,5 +1,13 @@
 import { GetPackagesResponse } from "./packages";
 
+export interface Terms {
+  id: number;
+  code: string;
+  title: string;
+  content: string;
+  scope: "global" | "package";
+}
+
 export interface GetTermsResponse {
   id: number;
   code: string;
