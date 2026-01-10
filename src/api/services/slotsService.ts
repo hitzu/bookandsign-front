@@ -1,6 +1,13 @@
-import { GetSlotResponse, Slot } from "../../interfaces";
+import {
+  CalendarSlotsByMonthResponse,
+  GetSlotResponse,
+  Slot,
+} from "../../interfaces";
 
-import { axiosInstanceWithToken } from "../config/axiosConfig";
+import {
+  axiosInstanceWithoutToken,
+  axiosInstanceWithToken,
+} from "../config/axiosConfig";
 
 export const getSlots = async (date: string): Promise<GetSlotResponse[]> => {
   try {
@@ -90,6 +97,21 @@ export const bookSlot = async ({
     return response.data;
   } catch (error) {
     console.error("Error booking slot:", error);
+    throw error;
+  }
+};
+
+export const getSlotsByMonthAndYear = async (
+  month: number,
+  year: number
+): Promise<CalendarSlotsByMonthResponse[]> => {
+  try {
+    const response = await axiosInstanceWithoutToken.get(
+      `/slots/calendar?year=${year}&month=${month}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching slots by month and year:", error);
     throw error;
   }
 };

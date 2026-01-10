@@ -13,3 +13,13 @@ export interface GetSlotResponse {
   available: boolean;
   slot: Slot | null;
 }
+
+export type SlotAvailabilityStatus = "available" | "reserved";
+export type CalendarDaySlots = {
+  morning: SlotAvailabilityStatus;
+  afternoon: SlotAvailabilityStatus;
+};
+export interface CalendarSlotsByMonthResponse {
+  date: string;
+  slots: CalendarDaySlots;
+}
