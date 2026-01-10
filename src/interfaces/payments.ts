@@ -3,7 +3,7 @@ export interface Payment {
   contractId: number;
   amount: number;
   method: string;
-  status: string;
+  status?: string;
   receivedAt: string;
   note: string | null;
   reference: string | null;

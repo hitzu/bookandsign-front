@@ -47,6 +47,20 @@ const ContractPublicPage = () => {
 
   const normalizeWhatsAppPhone = (raw: string) => raw.replace(/[^\d]/g, "");
 
+  const formatShortSpanishDate = (raw: string | null | undefined) => {
+    if (!raw) return "—";
+
+    // Accept both ISO strings and yyyy-mm-dd
+    const d = raw.includes("T") ? new Date(raw) : new Date(`${raw}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return "—";
+
+    return new Intl.DateTimeFormat("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(d);
+  };
+
   const unitPriceForPkg = (base: number, discountPct: number | null) => {
     const baseSafe = Number.isFinite(base) ? base : 0;
     const pct = Math.min(100, Math.max(0, discountPct ?? 0));
@@ -91,6 +105,99 @@ const ContractPublicPage = () => {
       : totals.totalWithDiscount;
   const remaining = Math.max(0, totalFinal - paidAmount);
 
+  const paymentsSorted = useMemo(() => {
+    const payments = (data?.payments ?? []).slice();
+    payments.sort((a, b) => {
+      const aRaw = a?.receivedAt ?? "";
+      const bRaw = b?.receivedAt ?? "";
+      const aD = aRaw.includes("T")
+        ? new Date(aRaw)
+        : new Date(`${aRaw}T00:00:00`);
+      const bD = bRaw.includes("T")
+        ? new Date(bRaw)
+        : new Date(`${bRaw}T00:00:00`);
+      const aT = Number.isNaN(aD.getTime()) ? 0 : aD.getTime();
+      const bT = Number.isNaN(bD.getTime()) ? 0 : bD.getTime();
+      return aT - bT; // oldest -> newest
+    });
+    return payments;
+  }, [data?.payments]);
+
+  const paidAmountFromPayments = useMemo(() => {
+    if (paymentsSorted.length === 0) return paidAmount;
+    return paymentsSorted.reduce((sum, p) => sum + (p?.amount ?? 0), 0);
+  }, [paidAmount, paymentsSorted]);
+
+  const remainingFromPayments = Math.max(
+    0,
+    totalFinal - paidAmountFromPayments
+  );
+
+  const [expandedItemIds, setExpandedItemIds] = useState<Set<number>>(
+    () => new Set()
+  );
+
+  const toggleItemExpanded = (itemId: number) => {
+    setExpandedItemIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  };
+
+  const parsePackageDescription = (raw: string) => {
+    const text = raw.trim();
+
+    const includesMatch = text.match(/Incluye:\s*([\s\S]*?)(?:\.|$)/i);
+    const durationMatch = text.match(/Duración:\s*([^\.]+)(?:\.|$)/i);
+    const staffMatch = text.match(/Personal:\s*([^\.]+)(?:\.|$)/i);
+
+    const includesRaw = (includesMatch?.[1] ?? "").trim();
+    const duration = (durationMatch?.[1] ?? "").trim();
+    const staff = (staffMatch?.[1] ?? "").trim();
+
+    const includesItems = includesRaw
+      ? includesRaw
+          .split(",")
+          .flatMap((part) => {
+            const t = part.trim();
+            if (!t) return [];
+            if (t.includes(" y ")) {
+              return t
+                .split(" y ")
+                .map((x) => x.trim())
+                .filter(Boolean);
+            }
+            return [t];
+          })
+          .map((s) => s.replace(/\.$/, "").trim())
+          .filter(Boolean)
+      : [];
+
+    // Fallback: split into sentences if we didn't detect the structured format
+    const fallbackLines =
+      includesItems.length === 0 && !duration && !staff
+        ? text
+            .split(".")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+
+    // Unify detail lines into a single list (same format for everything)
+    const detailItems = (() => {
+      if (fallbackLines.length) return fallbackLines;
+
+      const out: string[] = [];
+      out.push(...includesItems);
+      if (duration) out.push(`Duración: ${duration}`);
+      if (staff) out.push(`Personal: ${staff}`);
+      return out;
+    })();
+
+    return { detailItems };
+  };
+
   const whatsappHref = useMemo(() => {
     const phoneRaw = (
       process.env.NEXT_PUBLIC_WHATSAPP_PHONE ?? "5212215775211"
@@ -98,7 +205,7 @@ const ContractPublicPage = () => {
     const phone = normalizeWhatsAppPhone(phoneRaw);
     const contractId = data?.contract?.id;
     const date = slot?.eventDate ? ` el ${slot.eventDate}` : "";
-    const text = `Hola ✨ Tengo una duda sobre mi reserva Brillipoint${
+    const text = `Hola, Tengo una duda sobre mi reserva Brillipoint${
       contractId ? ` (Contrato #${contractId})` : ""
     }${date}.`;
     const encoded = encodeURIComponent(text);
@@ -271,6 +378,11 @@ const ContractPublicPage = () => {
                     const unit = unitPriceForPkg(base, pkg?.discount ?? null);
                     const line = unit * qty;
                     const savings = Math.max(0, base * qty - line);
+                    const hasDetails = Boolean(pkg?.description?.trim());
+                    const isExpanded = expandedItemIds.has(it.id);
+                    const parsed = hasDetails
+                      ? parsePackageDescription(pkg!.description!)
+                      : null;
 
                     return (
                       <li key={it.id} className={styles.listItem}>
@@ -282,10 +394,16 @@ const ContractPublicPage = () => {
                                 <span className={styles.itemQty}>×{qty}</span>
                               ) : null}
                             </div>
-                            {pkg?.description ? (
-                              <div className={styles.itemDesc}>
-                                {pkg.description}
-                              </div>
+
+                            {hasDetails ? (
+                              <button
+                                type="button"
+                                className={styles.detailToggle}
+                                onClick={() => toggleItemExpanded(it.id)}
+                                aria-expanded={isExpanded}
+                              >
+                                {isExpanded ? "ocultar detalle" : "ver detalle"}
+                              </button>
                             ) : null}
 
                             {savings > 0 ? (
@@ -307,6 +425,18 @@ const ContractPublicPage = () => {
                             ) : null}
                           </div>
                         </div>
+
+                        {hasDetails && isExpanded ? (
+                          <div className={styles.detailsBlock}>
+                            {parsed?.detailItems?.length ? (
+                              <ul className={styles.detailsList}>
+                                {parsed.detailItems.map((s) => (
+                                  <li key={s}>{s}</li>
+                                ))}
+                              </ul>
+                            ) : null}
+                          </div>
+                        ) : null}
                       </li>
                     );
                   })}
@@ -317,7 +447,7 @@ const ContractPublicPage = () => {
 
           {/* RESUMEN FINANCIERO */}
           <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Resumen financiero</h2>
+            <h2 className={styles.sectionTitle}>Tu pago y saldo</h2>
             <div
               className={styles.sectionBody}
               style={{ display: "grid", gap: "0.75rem" }}
@@ -347,17 +477,40 @@ const ContractPublicPage = () => {
 
               <div className={styles.divider} />
 
+              <div className={styles.subSectionTitle}>Histórico de pagos</div>
+
+              {paymentsSorted.length === 0 ? (
+                <div className={styles.emptySubText}>
+                  Aún no hay pagos registrados.
+                </div>
+              ) : (
+                <div style={{ display: "grid", gap: "0.35rem" }}>
+                  {paymentsSorted.map((p, idx) => (
+                    <div key={p.id ?? idx} className={styles.financeRow}>
+                      <span>
+                        Pago {idx + 1}: {formatShortSpanishDate(p.receivedAt)}
+                      </span>
+                      <span className={styles.financeValue}>
+                        {formatMoney(p.amount ?? 0)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className={styles.divider} />
+
               <div className={styles.financeRow}>
-                <span>Anticipo pagado</span>
+                <span>Pagado</span>
                 <span className={styles.financeValue}>
-                  {formatMoney(paidAmount)}
+                  {formatMoney(paidAmountFromPayments)}
                 </span>
               </div>
 
               <div className={styles.financeRow}>
                 <span>Restante por pagar</span>
                 <span className={styles.financeValue}>
-                  {formatMoney(remaining)}
+                  {formatMoney(remainingFromPayments)}
                 </span>
               </div>
             </div>
@@ -377,7 +530,7 @@ const ContractPublicPage = () => {
               <>
                 <p className={styles.termsIntro}>
                   Estos son los términos y condiciones de los servicios
-                  contratados. Léelos con calma.
+                  contratados.
                 </p>
 
                 <ul className={styles.termsList}>
