@@ -1,4 +1,5 @@
 import "@assets/scss/custom.scss";
+import "flatpickr/dist/flatpickr.min.css";
 import React, { ReactElement, ReactNode } from "react";
 import Head from "next/head";
 import { Provider } from "react-redux";

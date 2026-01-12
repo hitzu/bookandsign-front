@@ -31,6 +31,20 @@ export const getTerms = async ({
   }
 };
 
+export const getPackageTerms = async (
+  packageId: number
+): Promise<GetTermsResponse[]> => {
+  try {
+    const response = await axiosInstanceWithToken.get(
+      `/terms/packages/${packageId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching package terms:", error);
+    throw error;
+  }
+};
+
 export const deleteTermById = async (id: number): Promise<void> => {
   try {
     await axiosInstanceWithToken.delete(`/terms/${id}`);

@@ -104,16 +104,28 @@ const menuItems = [
   {
     type: "HASHMENU",
     id: 4,
-    label: "Agenda",
+    label: "Contratos",
     icon: "ph-duotone ph-calendar-blank",
     dataPage: null,
     link: "#",
     submenu: [
       {
         id: "slots",
-        label: "Calendario",
-        link: "/pages/calendar",
+        label: "Listado de Contratos",
+        link: "/application/contracts-list",
         dataPage: "slots",
+      },
+      {
+        id: "contracts-add",
+        label: "Agregar Contrato",
+        link: "/pages/contracts-add",
+        dataPage: "contracts-add",
+      },
+      {
+        id: "contracts-edit",
+        label: "Editar Contrato",
+        link: "/application/contracts-edit",
+        dataPage: "contracts-edit",
       },
     ],
   },

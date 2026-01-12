@@ -1,33 +1,38 @@
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import NonLayout from "@layout/NonLayout";
-import styles from "../../../assets/css/contract-creation.module.css";
+import styles from "../../assets/css/contract-creation.module.css";
 import logoWhite from "@assets/images/logo-white.png";
 import Image from "next/image";
-import { Row, Col } from "react-bootstrap";
-import { useRouter } from "next/router";
-import { getBrands } from "../../../api/services/brandService";
-import { getPackages } from "../../../api/services/packageService";
-import type { GetBrandsResponse } from "../../../interfaces/brands";
-import type { GetPackagesResponse } from "../../../interfaces/packages";
+import { Row, Col, Form, Toast } from "react-bootstrap";
+import { getBrands } from "../../api/services/brandService";
+import { getPackages } from "../../api/services/packageService";
 import {
   Contract,
   GenerateContractPayload,
-  GetProductsResponse,
   Slot,
-} from "../../../interfaces";
-import {
-  bookSlot,
-  getSlotById,
-  updateLeadInfo,
-} from "../../../api/services/slotsService";
-import { formatLongSpanishDate } from "@common/dates";
-import {
-  generateContract,
-  getContractById,
-} from "../../../api/services/contractService";
-import { createNote } from "../../../api/services/notesService";
+  Promotion,
+  UserInfo,
+  GetPackagesResponse,
+  GetBrandsResponse,
+  Payment,
+  Note,
+} from "../../interfaces";
+import { bookSlot, getSlots, holdSlot } from "../../api/services/slotsService";
+import { generateContract } from "../../api/services/contractService";
+import { createNote } from "../../api/services/notesService";
 import QRCode from "react-qr-code";
-import { createPayment } from "../../../api/services/paymentService";
+import { createPayment } from "../../api/services/paymentService";
+
+import type { GetSlotResponse } from "../../interfaces/slots";
+import { Spanish } from "flatpickr/dist/l10n/es.js";
+import dynamic from "next/dynamic";
+import { getUsers } from "../../api/services/usersService";
+import { getPromotionsByBrandId } from "../../api/services/promotionsService";
+
+const Flatpickr = dynamic(
+  () => import("react-flatpickr").then((mod: any) => mod.default as any),
+  { ssr: false }
+) as any;
 
 type ClientDraft = {
   leadName: string;
@@ -38,6 +43,7 @@ type ClientDraft = {
 type PackageLineItem = {
   pkg: GetPackagesResponse;
   quantity: number;
+  promotion: Promotion | null;
 };
 
 type CurrencyCode = "MXN" | "USD";
@@ -76,13 +82,19 @@ const formatSkuDate = (isoDate?: string | null) => {
   return `${dd}${month}${year2}`;
 };
 
-const ContractCreationPage = () => {
-  const router = useRouter();
-  const { slotId } = router.query;
+const ContractsAddPage = () => {
   const [slot, setSlot] = useState<Slot | null>(null);
-  const [date, setDate] = useState<string | null>(null);
+  const [date, setDate] = useState<string>(() =>
+    new Date().toISOString().slice(0, 10)
+  );
+  const [promotion, setPromotion] = useState<Promotion[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<
+    "am_block" | "pm_block" | null
+  >(null);
+  const [slotAvailability, setSlotAvailability] = useState<GetSlotResponse[]>(
+    []
+  );
   const [contract, setContract] = useState<Contract | null>(null);
-  const [isEditingClient, setIsEditingClient] = useState(false);
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
   const [selectedBrandId, setSelectedBrandId] = useState<number | "">("");
 
@@ -96,6 +108,12 @@ const ContractCreationPage = () => {
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [notes, setNotes] = useState<string>("");
 
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState<"success" | "danger">(
+    "success"
+  );
+
   const [clientDraft, setClientDraft] = useState<ClientDraft>({
     leadName: "",
     leadEmail: null,
@@ -103,6 +121,8 @@ const ContractCreationPage = () => {
   });
 
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
+  const [users, setUsers] = useState<UserInfo[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<number | "">("");
 
   const isLocked = !!contract;
 
@@ -145,35 +165,69 @@ const ContractCreationPage = () => {
   }, [selectedBrandId]);
 
   useEffect(() => {
-    if (!slotId) return;
+    const loadPromotions = async () => {
+      try {
+        const data = await getPromotionsByBrandId({
+          brandId: Number(selectedBrandId),
+        });
+        setPromotion(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("Error loading promotions:", e);
+        setPromotion([]);
+      }
+    };
+    loadPromotions();
+  }, [selectedBrandId]);
+
+  useEffect(() => {
     const fetchSlot = async () => {
       try {
-        const slot = await getSlotById(Number(slotId));
-
-        if (slot.contractId) {
-          const contract = await getContractById(Number(slot.contractId));
-          setContract(contract.contract);
-        } else {
-          setContract(null);
-        }
-
-        setClientDraft({
-          leadName: slot.leadName ?? "",
-          leadEmail: slot.leadEmail ?? "",
-          leadPhone: slot.leadPhone ?? "",
-        });
-
-        setDate(slot.eventDate);
-
-        setIsEditingClient(false);
-
-        setSlot(slot);
+        if (!date) return;
+        const data = await getSlots(date);
+        setSlotAvailability(Array.isArray(data) ? data : []);
       } catch (e) {
         console.error("Error fetching slot:", e);
+        setSlotAvailability([]);
       }
     };
     fetchSlot();
-  }, [slotId]);
+  }, [date]);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await getUsers();
+        setUsers(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error("Error loading users:", e);
+        setUsers([]);
+      }
+    };
+    loadUsers();
+  }, []);
+
+  const availabilityByPeriod = useMemo(() => {
+    const normalizePeriod = (p?: string | null) => {
+      const s = (p ?? "").toLowerCase().trim();
+      // Backend periods: "am_block" | "pm_block"
+      if (s === "am_block") return "matutine";
+      if (s === "pm_block") return "vespertine";
+      return null;
+    };
+
+    const out: Record<"matutine" | "vespertine", boolean | null> = {
+      matutine: null,
+      vespertine: null,
+    };
+
+    for (const it of slotAvailability ?? []) {
+      const key = normalizePeriod(it?.period);
+      if (!key) continue;
+      out[key] = Boolean(it?.available);
+    }
+
+    return out;
+  }, [slotAvailability]);
 
   const formatMoney = (n: number) =>
     new Intl.NumberFormat("es-MX", {
@@ -212,77 +266,23 @@ const ContractCreationPage = () => {
     return { symbol, number: number || rest, formatted: rest };
   };
 
-  const parseAmountInput = (raw: string) => {
-    const s = (raw ?? "").trim();
-    if (!s)
-      return {
-        value: null as number | null,
-        isNegative: false,
-        isValidNumber: true,
-      };
-    const normalized = s.replace(/,/g, "");
-    const hasMinus = normalized.includes("-");
-    const cleaned = normalized.replace(/[^\d.\-]/g, "");
-    const n = Number(cleaned);
-    return {
-      value: Number.isFinite(n) ? n : null,
-      isNegative: hasMinus && (Number.isFinite(n) ? n < 0 : true),
-      isValidNumber: cleaned === "-" ? true : Number.isFinite(n),
-    };
-  };
-
-  const unitPriceForPackage = (p: GetPackagesResponse) => {
-    const base = p.basePrice ?? 0;
-    const discountPct = Math.min(100, Math.max(0, p.discount ?? 0));
-    return Math.max(0, base - (base * discountPct) / 100);
-  };
-
-  const total = items.reduce(
-    (sum, it) => sum + it.pkg.basePrice * it.quantity,
-    0
-  );
-
-  const totalWithDiscount = items.reduce(
-    (sum, it) => sum + unitPriceForPackage(it.pkg) * it.quantity,
-    0
-  );
-
   const depositNumber = Math.max(
     0,
     Number((deposit || "0").replace(/[^\d.]/g, "")) || 0
   );
 
-  const depositParsed = useMemo(() => parseAmountInput(deposit), [deposit]);
-  const depositInlineError =
-    depositParsed.value !== null &&
-    (depositParsed.value < 0 || depositParsed.value > totalWithDiscount)
-      ? `Ingresa un anticipo entre ${formatMoney(0)} y ${formatMoney(
-          totalWithDiscount
-        )}.`
-      : null;
+  const subtotal = useMemo(() => {
+    return items.reduce((sum, it) => sum + it.pkg.basePrice * it.quantity, 0);
+  }, [items]);
 
-  const discountAmount = useMemo(() => {
-    const n = (total ?? 0) - (totalWithDiscount ?? 0);
-    return n > 0 ? n : 0;
-  }, [total, totalWithDiscount]);
-
-  const discountDisplay = useMemo(() => {
-    if (totalWithDiscount === total) return null;
-    if (!Number.isFinite(discountAmount) || discountAmount <= 0) return null;
-
-    const discounts = items
-      .map((it) => it.pkg.discount)
-      .filter((d) => typeof d === "number");
-    const uniq = new Set(
-      discounts.map((d) => Math.round((d ?? 0) * 100) / 100)
+  const discountTotal = useMemo(() => {
+    return items.reduce(
+      (sum, it) =>
+        sum +
+        (it.pkg.basePrice * it.quantity * (it.promotion?.value ?? 0)) / 100,
+      0
     );
-    const common = uniq.size === 1 ? Array.from(uniq)[0] : null;
-
-    if (common && common > 0) {
-      return { type: "percent" as const, value: common };
-    }
-    return { type: "amount" as const, value: discountAmount };
-  }, [discountAmount, items, total, totalWithDiscount]);
+  }, [items]);
 
   const handleAddSelectedPackage = () => {
     if (isLocked) return;
@@ -299,7 +299,13 @@ const ContractCreationPage = () => {
         copy[idx] = { ...copy[idx], quantity: copy[idx].quantity + addQty };
         return copy;
       }
-      return [...prev, { pkg, quantity: addQty }];
+      const promotionForThisPackage = promotion.find(
+        (p) => p.brandId === pkg.brandId
+      );
+      return [
+        ...prev,
+        { pkg, quantity: addQty, promotion: promotionForThisPackage ?? null },
+      ];
     });
 
     setQtyToAdd(1);
@@ -333,61 +339,73 @@ const ContractCreationPage = () => {
     setItems((prev) => prev.filter((it) => it.pkg.id !== packageId));
   };
 
-  const handleStartEditClient = () => {
-    if (isLocked) return;
-    setIsEditingClient(true);
-  };
-
-  const handleCancelEditClient = () => {
-    setClientDraft({
-      leadName: slot?.leadName ?? "",
-      leadEmail: slot?.leadEmail ?? "",
-      leadPhone: slot?.leadPhone ?? "",
-    });
-    setIsEditingClient(false);
-  };
-
-  const handleSaveClient = async () => {
-    if (isLocked) return;
+  const createContract = async () => {
     try {
-      await updateLeadInfo(Number(slotId), {
-        ...(clientDraft.leadName?.trim()
-          ? { leadName: clientDraft.leadName.trim() }
-          : {}),
-        ...(clientDraft.leadEmail?.trim()
-          ? { leadEmail: clientDraft.leadEmail.trim() }
-          : {}),
-        ...(clientDraft.leadPhone?.trim()
-          ? { leadPhone: clientDraft.leadPhone.trim() }
-          : {}),
+      if (!selectedPeriod) {
+        setToastMessage("No se ha seleccionado el periodo");
+        setToastVariant("danger");
+        setShowToast(true);
+        return;
+      }
+      if (!selectedUserId) {
+        setToastMessage("No se ha seleccionado el vendedor");
+        setToastVariant("danger");
+        setShowToast(true);
+        return;
+      }
+      if (!clientDraft.leadName?.trim()) {
+        setToastMessage("No se ha seleccionado el nombre del cliente");
+        setToastVariant("danger");
+        setShowToast(true);
+        return;
+      }
+
+      if (depositNumber < 500) {
+        setToastMessage("El anticipo mínimo es de 500 pesos");
+        setToastVariant("danger");
+        setShowToast(true);
+        return;
+      }
+
+      // 1) Hold slot (POST /slots/hold) using selected date + period
+      const held = await holdSlot({
+        eventDate: date,
+        period: selectedPeriod,
       });
+      setSlot(held);
 
-      setIsEditingClient(false);
-    } catch (error) {
-      console.error("Error saving client:", error);
-    }
-  };
-
-  const handleGenerateContract = async () => {
-    try {
       const sku = `${normalizeSkuText(
         items?.[0]?.pkg?.name
-      ).toLowerCase()}${formatSkuDate(slot?.eventDate)}${normalizeSkuText(
-        slot?.leadName
+      ).toLowerCase()}${formatSkuDate(held?.eventDate)}${normalizeSkuText(
+        clientDraft.leadName
       )}`;
+
       const payload: GenerateContractPayload = {
-        slotId: Number(slotId),
+        userId: Number(selectedUserId),
+        slotId: held.id,
         sku,
+        clientName: clientDraft.leadName.trim(),
+        clientPhone: clientDraft.leadPhone,
+        clientEmail: clientDraft.leadEmail,
+        subtotal: subtotal,
+        discountTotal: discountTotal,
+        total: subtotal - discountTotal,
         packages: items.map((item) => ({
           packageId: item.pkg.id,
           quantity: item.quantity,
-          source: "package",
+          basePriceSnapshot:
+            item.pkg.basePrice * item.quantity -
+            (item.pkg.basePrice *
+              item.quantity *
+              (item.promotion?.value ?? 0)) /
+              100,
         })),
       };
+
       const contract = await generateContract(payload);
 
       if (contract) {
-        await Promise.all([
+        const promises: Promise<Payment | Note>[] = [
           createPayment({
             contractId: contract.id,
             amount: depositNumber,
@@ -395,59 +413,212 @@ const ContractCreationPage = () => {
             note: "Depósito inicial",
             receivedAt: new Date().toISOString(),
           }),
-          createNote({
-            targetId: contract.id,
-            content: notes,
-            scope: "contract",
-            kind: "internal",
-          }),
-        ]);
+        ];
+
+        if (notes) {
+          promises.push(
+            createNote({
+              targetId: contract.id,
+              content: notes,
+              scope: "contract",
+              kind: "public",
+            })
+          );
+        }
+        await Promise.all(promises);
       }
       setContract(contract);
 
-      await bookSlot({ slotId: Number(slotId), contractId: contract.id });
+      await bookSlot({ slotId: held.id, contractId: contract.id });
     } catch (error) {
       console.error("Error generating contract:", error);
     }
   };
-
-  const promotionalProducts = useMemo(() => {
-    const byId = new Map<number, Omit<GetProductsResponse, "brand">>();
-
-    for (const it of items) {
-      for (const pp of it.pkg.packageProducts ?? []) {
-        if (pp.product?.isPromotional) byId.set(pp.product.id, pp.product);
-      }
-    }
-
-    return Array.from(byId.values());
-  }, [items]);
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const contractLink = contract?.token
     ? `${origin}/pages/c/${contract.token}`
     : "";
 
+  function clearFormData(): void {
+    setContract(null);
+    setSlot(null);
+    setItems([]);
+    setDeposit("0");
+    setPaymentMethod("cash");
+    setNotes("");
+    setClientDraft({ leadName: "", leadEmail: null, leadPhone: null });
+    setSelectedPackageId("");
+    setQtyToAdd(1);
+    setSelectedPeriod(null);
+    setDate(new Date().toISOString().slice(0, 10));
+    setSelectedUserId("");
+  }
+
   return (
     <div className={styles.contractCreationContainer}>
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          zIndex: 9999,
+        }}
+      >
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={4000}
+          autohide
+          bg={toastVariant}
+        >
+          <Toast.Header>
+            <strong className="me-auto">
+              {toastVariant === "success" ? "Éxito" : "Error"}
+            </strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+        </Toast>
+      </div>
+
       <Row className="justify-content-center">
         <Col>
           <Row className="mb-4">
             <Col className="text-center">
               <div className={styles.logoContainer}>
                 <Image src={logoWhite} alt="logo" width={100} height={100} />
-
-                <h1 className={styles.contractTitle}>
-                  Contrato de Reserva para la fecha{" "}
-                  {formatLongSpanishDate(
-                    new Date(slot?.eventDate || new Date())
-                  )}
-                </h1>
               </div>
             </Col>
           </Row>
 
-          {/* CLIENT DATA (read-only by default, editable on "Modificar") */}
+          {/* Fecha de la reserva */}
+          <Row className="mb-4 justify-content-center">
+            <Col xs={12}>
+              <div className={styles.reservationCard}>
+                <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                  <div
+                    className={styles.reservationTitle}
+                    style={{ marginBottom: 0 }}
+                  >
+                    Fecha de la reserva
+                  </div>
+                </div>
+
+                <Row className="mt-3">
+                  <Col xs={4}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>
+                        Selecciona la fecha
+                        <span className={styles.required}>*</span>
+                      </label>
+                      <Flatpickr
+                        value={date}
+                        options={{
+                          locale: Spanish,
+                          dateFormat: "Y-m-d", // <- what the API expects
+                          altInput: true,
+                          altFormat: "d/m/Y",
+                          disableMobile: true,
+                          minDate: "today",
+                          // avoid clipping/z-index issues inside cards/containers
+                          appendTo:
+                            typeof window !== "undefined"
+                              ? document.body
+                              : undefined,
+                        }}
+                        onChange={(_: any, dateStr: string) => {
+                          // `dateStr` is in `dateFormat` -> "YYYY-MM-DD"
+                          setDate(dateStr);
+                          setSelectedPeriod(null);
+                        }}
+                        render={(props: any, ref: any) => (
+                          <input
+                            {...props}
+                            ref={ref}
+                            className={styles.formInput}
+                            disabled={isLocked}
+                            placeholder="Selecciona la fecha"
+                          />
+                        )}
+                      />
+                    </div>
+                  </Col>
+
+                  <Col xs={4}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>Slots</label>
+                      <div className="d-flex flex-wrap gap-3">
+                        <Form.Check
+                          type="radio"
+                          id="slot-matutine"
+                          name="slot-period"
+                          label={
+                            availabilityByPeriod.matutine === false
+                              ? "Matutino (no disponible)"
+                              : "Matutino (Antes de las 4:00 PM)"
+                          }
+                          value="am_block"
+                          checked={selectedPeriod === "am_block"}
+                          disabled={
+                            isLocked || availabilityByPeriod.matutine === false
+                          }
+                          onChange={() => setSelectedPeriod("am_block")}
+                        />
+                        <Form.Check
+                          type="radio"
+                          id="slot-vespertine"
+                          name="slot-period"
+                          label={
+                            availabilityByPeriod.vespertine === false
+                              ? "Vespertino (no disponible)"
+                              : "Vespertino (Despues de las 4:00 PM)"
+                          }
+                          value="pm_block"
+                          checked={selectedPeriod === "pm_block"}
+                          disabled={
+                            isLocked ||
+                            availabilityByPeriod.vespertine === false
+                          }
+                          onChange={() => setSelectedPeriod("pm_block")}
+                        />
+                      </div>
+                    </div>
+                  </Col>
+
+                  <Col xs={4}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>
+                        Vendedor generador del contrato
+                        <span className={styles.required}>*</span>
+                      </label>
+                      <select
+                        className={styles.formInput}
+                        value={selectedUserId}
+                        disabled={isLocked}
+                        onChange={(e) =>
+                          setSelectedUserId(
+                            e.target.value ? Number(e.target.value) : ""
+                          )
+                        }
+                      >
+                        <option value="">Selecciona un vendedor</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.name ??
+                              [user.firstName, user.lastName]
+                                .filter(Boolean)
+                                .join(" ")}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </Col>
+                </Row>
+              </div>
+            </Col>
+          </Row>
+
+          {/* CLIENT DATA */}
           <Row className="mb-4 justify-content-center">
             <Col xs={12}>
               <div className={styles.reservationCard}>
@@ -458,20 +629,10 @@ const ContractCreationPage = () => {
                   >
                     Datos del cliente
                   </div>
-
-                  {!isEditingClient && !isLocked && (
-                    <button
-                      type="button"
-                      className={styles.btnPrimary}
-                      onClick={handleStartEditClient}
-                    >
-                      Modificar
-                    </button>
-                  )}
                 </div>
 
                 <Row className="mt-3">
-                  <Col xs={12} md={6}>
+                  <Col xs={4}>
                     <div className={styles.formGroup}>
                       <label className={styles.formLabel}>
                         Nombre del cliente
@@ -480,7 +641,7 @@ const ContractCreationPage = () => {
                       <input
                         className={styles.formInput}
                         value={clientDraft.leadName}
-                        disabled={!isEditingClient || isLocked}
+                        disabled={isLocked}
                         onChange={(e) =>
                           setClientDraft((p) => ({
                             ...p,
@@ -493,14 +654,14 @@ const ContractCreationPage = () => {
                     </div>
                   </Col>
 
-                  <Col xs={12} md={6}>
+                  <Col xs={4}>
                     <div className={styles.formGroup}>
                       <label className={styles.formLabel}>Email</label>
                       <input
                         className={styles.formInput}
                         type="email"
                         value={clientDraft.leadEmail ?? ""}
-                        disabled={!isEditingClient || isLocked}
+                        disabled={isLocked}
                         onChange={(e) =>
                           setClientDraft((p) => ({
                             ...p,
@@ -513,14 +674,14 @@ const ContractCreationPage = () => {
                     </div>
                   </Col>
 
-                  <Col xs={12} md={6}>
+                  <Col xs={4}>
                     <div className={styles.formGroup}>
                       <label className={styles.formLabel}>Teléfono</label>
                       <input
                         className={styles.formInput}
                         type="tel"
                         value={clientDraft.leadPhone ?? ""}
-                        disabled={!isEditingClient || isLocked}
+                        disabled={isLocked}
                         onChange={(e) =>
                           setClientDraft((p) => ({
                             ...p,
@@ -534,25 +695,6 @@ const ContractCreationPage = () => {
                     </div>
                   </Col>
                 </Row>
-
-                {isEditingClient && !isLocked && (
-                  <div className={styles.formActions}>
-                    <button
-                      type="button"
-                      className={styles.btnCancel}
-                      onClick={handleCancelEditClient}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.btnPrimary}
-                      onClick={handleSaveClient}
-                    >
-                      Guardar
-                    </button>
-                  </div>
-                )}
               </div>
             </Col>
           </Row>
@@ -732,73 +874,37 @@ const ContractCreationPage = () => {
 
                 {/* Financial summary */}
                 <Row className="g-3">
-                  <Col xs={12} lg={8}>
+                  <Col xs={12}>
                     <div className={styles.financialCard}>
-                      <div className={styles.financialTitle}>
-                        Resumen financiero
-                      </div>
-
                       <div className={styles.financialSection}>
                         <div className={styles.financialRow}>
-                          <div className={styles.financialLabel}>
-                            Precio base
-                          </div>
+                          <div className={styles.financialLabel}>Subtotal</div>
                           <div className={styles.financialValueMuted}>
                             <span className={styles.moneySymbol}>
-                              {formatCurrencyParts(total, "MXN").symbol}
+                              {formatCurrencyParts(subtotal, "MXN").symbol}
                             </span>
                             <span className={styles.moneyNumber}>
-                              {formatCurrencyParts(total, "MXN").number}
+                              {formatCurrencyParts(subtotal, "MXN").number}
                             </span>
                           </div>
                         </div>
 
-                        {discountDisplay && (
+                        {promotion.length > 0 && items.length > 0 && (
                           <div className={styles.financialRow}>
                             <div className={styles.financialLabel}>
                               Descuento Expo Bodas y Quince
                             </div>
                             <div className={styles.discountWrap}>
-                              {discountDisplay.type === "percent" ? (
-                                <>
-                                  <span
-                                    className={styles.discountBadge}
-                                    title={`Equivale a –$ ${
-                                      formatCurrencyParts(discountAmount, "MXN")
-                                        .number
-                                    }`}
-                                  >
-                                    –{discountDisplay.value}%
-                                  </span>
-                                  <span className={styles.discountSubtext}>
-                                    –
-                                    {
-                                      formatCurrencyParts(discountAmount, "MXN")
-                                        .symbol
-                                    }{" "}
-                                    {
-                                      formatCurrencyParts(discountAmount, "MXN")
-                                        .number
-                                    }
-                                  </span>
-                                </>
-                              ) : (
-                                <span className={styles.discountBadge}>
-                                  –
-                                  {
-                                    formatCurrencyParts(
-                                      discountDisplay.value,
-                                      "MXN"
-                                    ).symbol
-                                  }{" "}
-                                  {
-                                    formatCurrencyParts(
-                                      discountDisplay.value,
-                                      "MXN"
-                                    ).number
-                                  }
-                                </span>
-                              )}
+                              <span className={styles.discountSubtext}>
+                                {
+                                  formatCurrencyParts(discountTotal, "MXN")
+                                    .symbol
+                                }{" "}
+                                {
+                                  formatCurrencyParts(discountTotal, "MXN")
+                                    .number
+                                }
+                              </span>
                             </div>
                           </div>
                         )}
@@ -810,14 +916,18 @@ const ContractCreationPage = () => {
                           <div className={styles.financialValueFinal}>
                             <span className={styles.moneySymbol}>
                               {
-                                formatCurrencyParts(totalWithDiscount, "MXN")
-                                  .symbol
+                                formatCurrencyParts(
+                                  subtotal - discountTotal,
+                                  "MXN"
+                                ).symbol
                               }
                             </span>
                             <span className={styles.moneyNumberBig}>
                               {
-                                formatCurrencyParts(totalWithDiscount, "MXN")
-                                  .number
+                                formatCurrencyParts(
+                                  subtotal - discountTotal,
+                                  "MXN"
+                                ).number
                               }
                             </span>
                           </div>
@@ -832,7 +942,9 @@ const ContractCreationPage = () => {
                             className={styles.financialLabel}
                             htmlFor="deposit-amount"
                           >
-                            Anticipo
+                            Anticipo Mín.{" "}
+                            {formatCurrencyParts(500, "MXN").symbol}
+                            {formatCurrencyParts(500, "MXN").number}
                           </label>
 
                           <div className={styles.depositField}>
@@ -845,16 +957,14 @@ const ContractCreationPage = () => {
                             <input
                               id="deposit-amount"
                               className={`${styles.depositInput} ${
-                                depositInlineError
-                                  ? styles.depositInputError
-                                  : ""
+                                false ? styles.depositInputError : ""
                               }`}
                               value={deposit}
                               disabled={isLocked}
                               onChange={(e) => setDeposit(e.target.value)}
                               inputMode="decimal"
                               placeholder="0.00"
-                              aria-invalid={!!depositInlineError}
+                              aria-invalid={false}
                               aria-describedby="deposit-help deposit-error"
                             />
                           </div>
@@ -881,37 +991,23 @@ const ContractCreationPage = () => {
                           </div>
                         </div>
 
-                        <div id="deposit-help" className={styles.depositHelp}>
-                          Mín. {formatCurrencyParts(500, "MXN").symbol}500
-                        </div>
-
-                        {depositInlineError && (
+                        {false && (
                           <div
                             id="deposit-error"
                             className={styles.depositError}
                             role="alert"
                           >
-                            {depositInlineError}
+                            {false}
                           </div>
                         )}
 
                         <div className={styles.financialRow}>
                           <div className={styles.financialLabel}>Restante</div>
-                          <div
-                            className={
-                              Math.max(0, totalWithDiscount - depositNumber) ===
-                              0
-                                ? styles.remainingPaid
-                                : styles.remainingDue
-                            }
-                          >
+                          <div className={styles.remainingDue}>
                             <span className={styles.moneySymbol}>
                               {
                                 formatCurrencyParts(
-                                  Math.max(
-                                    0,
-                                    totalWithDiscount - depositNumber
-                                  ),
+                                  subtotal - discountTotal - depositNumber,
                                   "MXN"
                                 ).symbol
                               }
@@ -919,45 +1015,38 @@ const ContractCreationPage = () => {
                             <span className={styles.moneyNumberRemaining}>
                               {
                                 formatCurrencyParts(
-                                  Math.max(
-                                    0,
-                                    totalWithDiscount - depositNumber
-                                  ),
+                                  subtotal - discountTotal - depositNumber,
                                   "MXN"
                                 ).number
                               }
                             </span>
-                            {Math.max(0, totalWithDiscount - depositNumber) ===
-                              0 && (
-                              <span className={styles.paidBadge}>
-                                Liquidado
-                              </span>
-                            )}
                           </div>
-                        </div>
-
-                        <div className={styles.srOnly} aria-live="polite">
-                          Restante{" "}
-                          {
-                            formatCurrencyParts(
-                              Math.max(0, totalWithDiscount - depositNumber),
-                              "MXN"
-                            ).formatted
-                          }
                         </div>
                       </div>
                     </div>
                   </Col>
+                </Row>
+              </div>
+            </Col>
+          </Row>
 
-                  {/* Notes */}
-                  <Col xs={12} lg={4}>
-                    <div
-                      className={styles.formGroup}
-                      style={{ marginBottom: 0 }}
-                    >
-                      <label className={styles.formLabel}>
-                        Promociones/Aclaraciones (opcional):
-                      </label>
+          {/* Notes */}
+          <Row className="mb-4 justify-content-center">
+            <Col xs={12}>
+              <div className={styles.reservationCard}>
+                <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+                  <div
+                    className={styles.reservationTitle}
+                    style={{ marginBottom: 0 }}
+                  >
+                    Promociones/Aclaraciones (opcional):
+                  </div>
+                </div>
+
+                <Row className="mt-3">
+                  <Col xs={12}>
+                    <div className={styles.financialCard}>
+                      <label className={styles.formLabel}></label>
                       <textarea
                         className={styles.formTextarea}
                         rows={6}
@@ -978,24 +1067,19 @@ const ContractCreationPage = () => {
               <Col xs={12}>
                 <div className={styles.pageActions}>
                   <button
-                    onClick={() => {
-                      router.push({
-                        pathname: "/pages/calendar",
-                        query: date ? { date } : {},
-                      });
-                    }}
                     type="button"
                     className={styles.btnCancel}
+                    onClick={clearFormData}
                   >
                     Cancelar
                   </button>
                   <button
                     type="button"
                     className={styles.btnPrimary}
-                    onClick={handleGenerateContract}
-                    disabled={!items.length || depositNumber === 0}
+                    onClick={createContract}
+                    disabled={!items.length}
                   >
-                    Generar Contrato
+                    Cerrar Contrato
                   </button>
                 </div>
               </Col>
@@ -1019,12 +1103,7 @@ const ContractCreationPage = () => {
 
               <div className="d-flex justify-content-center">
                 <button
-                  onClick={() => {
-                    router.push({
-                      pathname: "/pages/calendar",
-                      query: date ? { date } : {},
-                    });
-                  }}
+                  onClick={clearFormData}
                   type="button"
                   className={styles.btnCancel}
                 >
@@ -1055,8 +1134,8 @@ const ContractCreationPage = () => {
   );
 };
 
-ContractCreationPage.getLayout = (page: ReactElement) => {
+ContractsAddPage.getLayout = (page: ReactElement) => {
   return <NonLayout>{page}</NonLayout>;
 };
 
-export default ContractCreationPage;
+export default ContractsAddPage;

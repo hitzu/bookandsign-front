@@ -1,24 +1,19 @@
 import { GetBrandsResponse } from "./brands";
 import { GetProductsResponse } from "./products";
-import { Terms } from "./terms";
+import { GetPackageTermsResponse, Terms } from "./terms";
 
 export interface Package {
   id: number;
-  code: string;
   name: string;
-  description: string;
-  basePrice: number;
-  discount: number | null;
-  status: string;
   brandId: number;
+  packages: GetPackagesResponse[];
+  packageProducts: GetPackageProductsResponse[];
   terms?: Terms[];
 }
 
 export interface GetPackagesResponse {
   id: number;
-  code: string;
   name: string;
-  description: string;
   basePrice: number;
   discount: number | null;
   status: string;

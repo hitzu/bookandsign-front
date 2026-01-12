@@ -5,6 +5,13 @@
   background-position: center;
   background-repeat: no-repeat;
   padding: 1.5rem 1rem 6.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.center-information-content {
+  display: flex;
+  justify-content: center;
 }
 
 .contentMax {

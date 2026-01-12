@@ -14,15 +14,18 @@ export const createNote = async (payload: CreateNotePayload): Promise<Note> => {
 
 export const getNotes = async (
   slotId: number,
-  scope: string
+  scope: string,
+  kind: string
 ): Promise<Note[]> => {
   try {
+    const queryParams = new URLSearchParams();
+    queryParams.append("kind", kind);
     const response = await axiosInstanceWithToken.get<Note[]>(
-      `/notes/${scope}/${slotId}`
+      `/notes/${scope}/${slotId}?${queryParams.toString()}`
     );
     return response.data;
   } catch (error) {
     console.error("Error fetching notes:", error);
-    throw error;
+    return [];
   }
 };
