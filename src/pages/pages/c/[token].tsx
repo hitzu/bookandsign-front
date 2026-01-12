@@ -6,7 +6,11 @@ import { Container, Row, Col } from "react-bootstrap";
 import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/contract-public.module.css";
 import { getContractByToken } from "../../../api/services/contractService";
-import { getPackageTerms, getTerms } from "../../../api/services/termsService";
+import {
+  getPackageTerms,
+  getPublicTerms,
+  getTerms,
+} from "../../../api/services/termsService";
 import {
   ContractSlot,
   GetContractByIdResponse,
@@ -15,7 +19,7 @@ import {
 } from "../../../interfaces";
 import { translateContractSlotPurpose } from "@common/translations";
 import { formatLongSpanishDate } from "@common/dates";
-import { getNotes } from "src/api/services/notesService";
+import { getPublicNotes } from "../../../api/services/notesService";
 
 const ContractPublicPage = () => {
   const router = useRouter();
@@ -29,6 +33,10 @@ const ContractPublicPage = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const halfwayDate = (start: Date, end: Date): Date => {
+    return new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
+  };
+
   useEffect(() => {
     const loadContract = async () => {
       if (!token) return;
@@ -37,7 +45,39 @@ const ContractPublicPage = () => {
         setError(null);
         const res = await getContractByToken(token);
         setData(res);
-        setSlots(res.contractSlots);
+        console.log("res", res.contractSlots[0].slot.eventDate);
+        const eventDate = new Date(res.contractSlots[0].slot.eventDate);
+        const slotsToShow: ContractSlot[] = [
+          {
+            id: 0,
+            purpose: "creation_date",
+            slotId: 0,
+            contractId: 0,
+            slot: {
+              contractId: 0,
+              id: 0,
+              eventDate: res.contract.createdAt,
+              status: "reserved",
+            },
+          },
+          {
+            id: 0,
+            purpose: "halfway_date",
+            slotId: 0,
+            contractId: 0,
+            slot: {
+              contractId: 0,
+              id: 0,
+              eventDate: halfwayDate(
+                eventDate,
+                new Date(res.contract.createdAt)
+              ).toISOString(),
+              status: "reserved",
+            },
+          },
+          ...res.contractSlots,
+        ];
+        setSlots(slotsToShow);
       } catch (_e: unknown) {
         setError("No se pudo cargar tu reserva. Intenta de nuevo más tarde.");
       } finally {
@@ -53,23 +93,22 @@ const ContractPublicPage = () => {
       if (!data?.contract?.id) return;
       const loadTermsAndNotes = async () => {
         try {
-          const terms = await getTerms({ termScope: "global" });
+          const terms = await getPublicTerms({ scope: "global" });
           if (
             data?.packages &&
             data?.packages.length > 0 &&
             data?.packages[0].package.id
           ) {
             const promises = data?.packages.map((currentPackage) =>
-              getPackageTerms(currentPackage.package.id)
+              getPublicTerms({
+                targetId: currentPackage.package.id,
+                scope: "package",
+              })
             );
             const packageTerms = await Promise.all(promises);
             setTerms([...terms, ...packageTerms.flat()]);
 
-            const notes = await getNotes(
-              data?.contract?.id,
-              "contract",
-              "public"
-            );
+            const notes = await getPublicNotes(data?.contract?.id, "contract");
             setNotes([...notes]);
           } else {
             setTerms(terms);
@@ -95,20 +134,6 @@ const ContractPublicPage = () => {
 
   const normalizeWhatsAppPhone = (raw: string) => raw.replace(/[^\d]/g, "");
 
-  const formatShortSpanishDate = (raw: string | null | undefined) => {
-    if (!raw) return "—";
-
-    // Accept both ISO strings and yyyy-mm-dd
-    const d = raw.includes("T") ? new Date(raw) : new Date(`${raw}T00:00:00`);
-    if (Number.isNaN(d.getTime())) return "—";
-
-    return new Intl.DateTimeFormat("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    }).format(d);
-  };
-
   const items = data?.packages ?? [];
   const packageTerms = useMemo((): Terms[] => {
     const dedup = new Map<number, Terms>();
@@ -120,19 +145,6 @@ const ContractPublicPage = () => {
       }
     }
     return Array.from(dedup.values());
-  }, [items]);
-
-  const productsByPackage = useMemo(() => {
-    return items.map((it) => {
-      const packageId = it.packageId ?? it.package?.id;
-
-      const products =
-        it.package?.packageProducts
-          ?.map((pp) => pp.product?.name)
-          .filter(Boolean) ?? [];
-
-      return { packageId, products };
-    });
   }, [items]);
 
   const paidAmount = data?.paidAmount ?? 0;
@@ -386,11 +398,23 @@ const ContractPublicPage = () => {
                                 <span className={styles.itemQty}>×{qty}</span>
                               ) : null}
                             </div>
+                            <div className={styles.itemName}>
+                              {it.promotion?.name ?? "—"}
+                            </div>
                           </div>
 
                           <div style={{ flexShrink: 0, textAlign: "right" }}>
                             <div className={styles.itemPrice}>
-                              {formatMoney(it.basePriceSnapshot)}
+                              {formatMoney(it.package.basePrice * qty)}
+                            </div>
+                            <div className={styles.itemPrice}>
+                              -{" "}
+                              {formatMoney(
+                                (it.package.basePrice *
+                                  qty *
+                                  (it.promotion?.value ?? 0)) /
+                                  100
+                              )}
                             </div>
                           </div>
                         </div>
@@ -444,7 +468,7 @@ const ContractPublicPage = () => {
               <div className={styles.totalRow}>
                 <div className={styles.totalLabel}>Total final</div>
                 <div className={styles.totalValue}>
-                  {formatMoney(data.contract.total)}
+                  {formatMoney(data.contract.total)}{" "}
                 </div>
               </div>
 
@@ -461,7 +485,8 @@ const ContractPublicPage = () => {
                   {paymentsSorted.map((p, idx) => (
                     <div key={p.id ?? idx} className={styles.financeRow}>
                       <span>
-                        Pago {idx + 1}: {formatShortSpanishDate(p.receivedAt)}
+                        Pago {idx + 1}:{" "}
+                        {formatLongSpanishDate(new Date(p.receivedAt))}
                       </span>
                       <span className={styles.financeValue}>
                         {formatMoney(p.amount ?? 0)}
@@ -482,8 +507,15 @@ const ContractPublicPage = () => {
 
               <div className={styles.financeRow}>
                 <span>Restante por pagar</span>
-                <span className={styles.financeValue}>
+                <span
+                  className={
+                    styles.financeValue +
+                    " " +
+                    styles.financeValuePaymentPending
+                  }
+                >
                   {formatMoney(data.contract.total - paidAmountFromPayments)}
+                  <span className={styles.moveValueText}> + traslado</span>
                 </span>
               </div>
             </div>

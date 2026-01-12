@@ -6,6 +6,7 @@ export interface Package {
   id: number;
   name: string;
   brandId: number;
+  basePrice: number;
   packages: GetPackagesResponse[];
   packageProducts: GetPackageProductsResponse[];
   terms?: Terms[];
@@ -32,7 +33,6 @@ export interface GetPackageProductsResponse {
 
 export interface CreatePackagePayload {
   name: string;
-  description: string;
   basePrice: number;
   discount: number | null;
   status: string;

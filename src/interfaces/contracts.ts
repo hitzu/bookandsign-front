@@ -1,9 +1,11 @@
 import { Package } from "./packages";
 import { Payment } from "./payments";
+import { Promotion } from "./promotions";
 import { Slot } from "./slots";
 
 export interface Contract {
   id: number;
+  createdAt: string;
   status: string;
   clientName: string;
   clientPhone: string | null;
@@ -20,10 +22,12 @@ export interface ContractPackages {
   id: number;
   contractId: number;
   packageId: number;
+  promotionId: number | null;
   quantity: number;
   basePriceSnapshot: number;
   source: string;
   package: Package;
+  promotion: Promotion | null;
 }
 
 export interface ContractSlot {

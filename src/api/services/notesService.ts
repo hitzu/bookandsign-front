@@ -1,6 +1,9 @@
 import { CreateNotePayload, Note } from "../../interfaces";
 
-import { axiosInstanceWithToken } from "../config/axiosConfig";
+import {
+  axiosInstanceWithToken,
+  axiosInstanceWithoutToken,
+} from "../config/axiosConfig";
 
 export const createNote = async (payload: CreateNotePayload): Promise<Note> => {
   try {
@@ -26,6 +29,21 @@ export const getNotes = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching notes:", error);
+    return [];
+  }
+};
+
+export const getPublicNotes = async (
+  targetId: number,
+  scope: string
+): Promise<Note[]> => {
+  try {
+    const response = await axiosInstanceWithoutToken.get<Note[]>(
+      `/notes/public/${scope}/${targetId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching public notes:", error);
     return [];
   }
 };
