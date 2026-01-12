@@ -5,9 +5,17 @@ import Image from "next/image";
 import { Container, Row, Col } from "react-bootstrap";
 import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/contract-public.module.css";
-import { getContractByToken } from "src/api/services/contractService";
-import { GetContractByIdResponse, Terms } from "src/interfaces";
+import { getContractByToken } from "../../../api/services/contractService";
+import { getPackageTerms, getTerms } from "../../../api/services/termsService";
+import {
+  ContractSlot,
+  GetContractByIdResponse,
+  Note,
+  Terms,
+} from "../../../interfaces";
+import { translateContractSlotPurpose } from "@common/translations";
 import { formatLongSpanishDate } from "@common/dates";
+import { getNotes } from "src/api/services/notesService";
 
 const ContractPublicPage = () => {
   const router = useRouter();
@@ -16,25 +24,65 @@ const ContractPublicPage = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<GetContractByIdResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [slots, setSlots] = useState<ContractSlot[]>([]);
+  const [terms, setTerms] = useState<Terms[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
-
-    (async () => {
+    const loadContract = async () => {
+      if (!token) return;
       try {
         setLoading(true);
         setError(null);
         const res = await getContractByToken(token);
         setData(res);
+        setSlots(res.contractSlots);
       } catch (_e: unknown) {
         setError("No se pudo cargar tu reserva. Intenta de nuevo más tarde.");
       } finally {
         setLoading(false);
       }
-    })();
+    };
+
+    loadContract();
   }, [token]);
 
-  const slot = data?.slots?.[0] ?? null;
+  useEffect(() => {
+    try {
+      if (!data?.contract?.id) return;
+      const loadTermsAndNotes = async () => {
+        try {
+          const terms = await getTerms({ termScope: "global" });
+          if (
+            data?.packages &&
+            data?.packages.length > 0 &&
+            data?.packages[0].package.id
+          ) {
+            const promises = data?.packages.map((currentPackage) =>
+              getPackageTerms(currentPackage.package.id)
+            );
+            const packageTerms = await Promise.all(promises);
+            setTerms([...terms, ...packageTerms.flat()]);
+
+            const notes = await getNotes(
+              data?.contract?.id,
+              "contract",
+              "public"
+            );
+            setNotes([...notes]);
+          } else {
+            setTerms(terms);
+          }
+        } catch (error) {
+          console.error("Error loading terms and notes:", error);
+        }
+      };
+      loadTermsAndNotes();
+    } catch (error) {
+      console.error("Error loading notes:", error);
+    }
+  }, [data?.contract]);
 
   const formatMoney = (amount: number) => {
     const n = Number.isFinite(amount) ? amount : 0;
@@ -61,13 +109,7 @@ const ContractPublicPage = () => {
     }).format(d);
   };
 
-  const unitPriceForPkg = (base: number, discountPct: number | null) => {
-    const baseSafe = Number.isFinite(base) ? base : 0;
-    const pct = Math.min(100, Math.max(0, discountPct ?? 0));
-    return Math.max(0, baseSafe - (baseSafe * pct) / 100);
-  };
-
-  const items = data?.items ?? [];
+  const items = data?.packages ?? [];
   const packageTerms = useMemo((): Terms[] => {
     const dedup = new Map<number, Terms>();
     for (const it of items) {
@@ -80,30 +122,20 @@ const ContractPublicPage = () => {
     return Array.from(dedup.values());
   }, [items]);
 
-  const totals = useMemo(() => {
-    const baseTotal = items.reduce((sum, it) => {
-      const base = it?.package?.basePrice ?? 0;
-      const qty = it?.quantity ?? 0;
-      return sum + base * qty;
-    }, 0);
+  const productsByPackage = useMemo(() => {
+    return items.map((it) => {
+      const packageId = it.packageId ?? it.package?.id;
 
-    const totalWithDiscount = items.reduce((sum, it) => {
-      const base = it?.package?.basePrice ?? 0;
-      const qty = it?.quantity ?? 0;
-      const unit = unitPriceForPkg(base, it?.package?.discount ?? null);
-      return sum + unit * qty;
-    }, 0);
+      const products =
+        it.package?.packageProducts
+          ?.map((pp) => pp.product?.name)
+          .filter(Boolean) ?? [];
 
-    const discountAmount = Math.max(0, baseTotal - totalWithDiscount);
-    return { baseTotal, totalWithDiscount, discountAmount };
+      return { packageId, products };
+    });
   }, [items]);
 
   const paidAmount = data?.paidAmount ?? 0;
-  const totalFinal =
-    (data?.contract?.totalAmount ?? 0) > 0
-      ? data?.contract?.totalAmount ?? totals.totalWithDiscount
-      : totals.totalWithDiscount;
-  const remaining = Math.max(0, totalFinal - paidAmount);
 
   const paymentsSorted = useMemo(() => {
     const payments = (data?.payments ?? []).slice();
@@ -128,75 +160,9 @@ const ContractPublicPage = () => {
     return paymentsSorted.reduce((sum, p) => sum + (p?.amount ?? 0), 0);
   }, [paidAmount, paymentsSorted]);
 
-  const remainingFromPayments = Math.max(
-    0,
-    totalFinal - paidAmountFromPayments
-  );
-
   const [expandedItemIds, setExpandedItemIds] = useState<Set<number>>(
     () => new Set()
   );
-
-  const toggleItemExpanded = (itemId: number) => {
-    setExpandedItemIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(itemId)) next.delete(itemId);
-      else next.add(itemId);
-      return next;
-    });
-  };
-
-  const parsePackageDescription = (raw: string) => {
-    const text = raw.trim();
-
-    const includesMatch = text.match(/Incluye:\s*([\s\S]*?)(?:\.|$)/i);
-    const durationMatch = text.match(/Duración:\s*([^\.]+)(?:\.|$)/i);
-    const staffMatch = text.match(/Personal:\s*([^\.]+)(?:\.|$)/i);
-
-    const includesRaw = (includesMatch?.[1] ?? "").trim();
-    const duration = (durationMatch?.[1] ?? "").trim();
-    const staff = (staffMatch?.[1] ?? "").trim();
-
-    const includesItems = includesRaw
-      ? includesRaw
-          .split(",")
-          .flatMap((part) => {
-            const t = part.trim();
-            if (!t) return [];
-            if (t.includes(" y ")) {
-              return t
-                .split(" y ")
-                .map((x) => x.trim())
-                .filter(Boolean);
-            }
-            return [t];
-          })
-          .map((s) => s.replace(/\.$/, "").trim())
-          .filter(Boolean)
-      : [];
-
-    // Fallback: split into sentences if we didn't detect the structured format
-    const fallbackLines =
-      includesItems.length === 0 && !duration && !staff
-        ? text
-            .split(".")
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-
-    // Unify detail lines into a single list (same format for everything)
-    const detailItems = (() => {
-      if (fallbackLines.length) return fallbackLines;
-
-      const out: string[] = [];
-      out.push(...includesItems);
-      if (duration) out.push(`Duración: ${duration}`);
-      if (staff) out.push(`Personal: ${staff}`);
-      return out;
-    })();
-
-    return { detailItems };
-  };
 
   const whatsappHref = useMemo(() => {
     const phoneRaw = (
@@ -204,13 +170,17 @@ const ContractPublicPage = () => {
     ).trim();
     const phone = normalizeWhatsAppPhone(phoneRaw);
     const contractId = data?.contract?.id;
-    const date = slot?.eventDate ? ` el ${slot.eventDate}` : "";
+    const date = slots?.length
+      ? slots[0]?.slot?.eventDate
+        ? ` el ${slots[0]?.slot?.eventDate}`
+        : ""
+      : "";
     const text = `Hola, Tengo una duda sobre mi reserva Brillipoint${
       contractId ? ` (Contrato #${contractId})` : ""
     }${date}.`;
     const encoded = encodeURIComponent(text);
     return `https://wa.me/${phone}?text=${encoded}`;
-  }, [data?.contract?.id, slot?.eventDate]);
+  }, [data?.contract?.id, slots?.length ? slots[0]?.slot?.eventDate : null]);
 
   if (loading) {
     return (
@@ -270,7 +240,7 @@ const ContractPublicPage = () => {
             <div className={styles.logoWrap}>
               <Image src={logoWhite} alt="Brillipoint" width={96} height={96} />
             </div>
-            <h1 className={styles.title}>Tu reserva Brillipoint ✨</h1>
+            <h1 className={styles.title}>Tu reserva Brillipoint </h1>
           </header>
 
           <section className={`${styles.card} ${styles.errorCard}`}>
@@ -296,61 +266,56 @@ const ContractPublicPage = () => {
 
   return (
     <div className={styles.contractPublicContainer}>
-      <div className={styles.contentMax}>
-        {/* HEADER */}
-        <header className={styles.header}>
-          <div className={styles.logoWrap}>
-            <Image src={logoWhite} alt="Brillipoint" width={104} height={104} />
-          </div>
+      <Row className="mb-4">
+        <Col xs={12}>
+          <header className={styles.header}>
+            <div className={styles.logoWrap}>
+              <Image
+                src={logoWhite}
+                alt="Brillipoint"
+                width={104}
+                height={104}
+              />
+            </div>
 
-          <h1 className={styles.title}>Tu reserva Brillipoint ✨</h1>
-        </header>
+            <h1 className={styles.title}>
+              Tu reserva Brillipoint #{data.contract.id}✨
+            </h1>
+          </header>
+        </Col>
+      </Row>
 
-        <main style={{ display: "grid", gap: "1rem", marginTop: "1rem" }}>
-          {/* RESUMEN DEL EVENTO */}
+      {/* CLIENT DATA */}
+      <Row className={`mb-4 ${styles["center-information-content"]}`}>
+        <Col xs={12} md={10}>
           <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>
-              Resumen del evento con contrato #{data.contract.id}
-            </h2>
+            <h2 className={styles.sectionTitle}>Datos del cliente</h2>
             <div className={styles.sectionBody}>
               <Container fluid className={styles.noPad}>
                 <Row className={styles.gutterMd}>
-                  <Col xs={12} md={6}>
-                    <div className={styles.kv}>
-                      <div className={styles.kvLabel}>Fecha del evento</div>
-                      <div className={styles.kvValue}>
-                        {slot?.eventDate
-                          ? formatLongSpanishDate(
-                              new Date(`${slot.eventDate}T00:00:00`)
-                            )
-                          : "—"}
-                      </div>
-                    </div>
-                  </Col>
-
-                  <Col xs={12} md={6}>
+                  <Col xs={4}>
                     <div className={styles.kv}>
                       <div className={styles.kvLabel}>Nombre</div>
                       <div className={styles.kvValue}>
-                        {slot?.leadName ?? "—"}
+                        {data.contract?.clientName ?? "—"}
                       </div>
                     </div>
                   </Col>
 
-                  <Col xs={12} md={6}>
+                  <Col xs={4}>
                     <div className={styles.kv}>
                       <div className={styles.kvLabel}>Email</div>
                       <div className={styles.kvValue}>
-                        {slot?.leadEmail ?? "—"}
+                        {data.contract?.clientEmail ?? "—"}
                       </div>
                     </div>
                   </Col>
 
-                  <Col xs={12} md={6}>
+                  <Col xs={4}>
                     <div className={styles.kv}>
                       <div className={styles.kvLabel}>Teléfono</div>
                       <div className={styles.kvValue}>
-                        {slot?.leadPhone ?? "—"}
+                        {data.contract?.clientPhone ?? "—"}
                       </div>
                     </div>
                   </Col>
@@ -358,10 +323,42 @@ const ContractPublicPage = () => {
               </Container>
             </div>
           </section>
+        </Col>
+      </Row>
 
-          {/* SERVICIOS CONTRATADOS */}
+      {/* EVENT DATES */}
+      <Row className={`mb-4 ${styles["center-information-content"]}`}>
+        <Col xs={12} md={10}>
           <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Servicios contratados</h2>
+            <h2 className={styles.sectionTitle}>Fechas de los eventos</h2>
+            <div className={styles.sectionBody}>
+              {slots.map((slot) => (
+                <div key={slot.id} className={styles.financeRow}>
+                  <span>
+                    {formatLongSpanishDate(new Date(slot.slot?.eventDate))}
+                  </span>
+                  <span className={styles.financeValue}>
+                    {translateContractSlotPurpose(slot.purpose)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </Col>
+      </Row>
+
+      <Row className={`mb-4 ${styles["center-information-content"]}`}>
+        <Col xs={12} md={10}>
+          <section className={styles.card}>
+            <h2 className={styles.sectionTitle}>Servicios contratados</h2>{" "}
+            <button
+              type="button"
+              className={styles.detailToggle}
+              onClick={() => setIsExpanded(!isExpanded)}
+              aria-expanded={isExpanded}
+            >
+              {isExpanded ? "Ocultar detalles" : "Ver detalles"}
+            </button>
             <div className={styles.sectionBody}>
               {items.length === 0 ? (
                 <div
@@ -372,17 +369,12 @@ const ContractPublicPage = () => {
               ) : (
                 <ul className={styles.list}>
                   {items.map((it) => {
+                    const products =
+                      it.package?.packageProducts
+                        ?.map((pp) => pp.product?.name)
+                        .filter(Boolean) ?? [];
                     const pkg = it.package;
                     const qty = it.quantity ?? 1;
-                    const base = pkg?.basePrice ?? 0;
-                    const unit = unitPriceForPkg(base, pkg?.discount ?? null);
-                    const line = unit * qty;
-                    const savings = Math.max(0, base * qty - line);
-                    const hasDetails = Boolean(pkg?.description?.trim());
-                    const isExpanded = expandedItemIds.has(it.id);
-                    const parsed = hasDetails
-                      ? parsePackageDescription(pkg!.description!)
-                      : null;
 
                     return (
                       <li key={it.id} className={styles.listItem}>
@@ -394,44 +386,21 @@ const ContractPublicPage = () => {
                                 <span className={styles.itemQty}>×{qty}</span>
                               ) : null}
                             </div>
-
-                            {hasDetails ? (
-                              <button
-                                type="button"
-                                className={styles.detailToggle}
-                                onClick={() => toggleItemExpanded(it.id)}
-                                aria-expanded={isExpanded}
-                              >
-                                {isExpanded ? "ocultar detalle" : "ver detalle"}
-                              </button>
-                            ) : null}
-
-                            {savings > 0 ? (
-                              <div className={styles.promo}>
-                                Incluye descuento Expo (ahorras{" "}
-                                {formatMoney(savings)})
-                              </div>
-                            ) : null}
                           </div>
 
                           <div style={{ flexShrink: 0, textAlign: "right" }}>
                             <div className={styles.itemPrice}>
-                              {formatMoney(line)}
+                              {formatMoney(it.basePriceSnapshot)}
                             </div>
-                            {qty > 1 ? (
-                              <div className={styles.itemUnit}>
-                                {formatMoney(unit)} c/u
-                              </div>
-                            ) : null}
                           </div>
                         </div>
 
-                        {hasDetails && isExpanded ? (
+                        {isExpanded ? (
                           <div className={styles.detailsBlock}>
-                            {parsed?.detailItems?.length ? (
+                            {products.length > 0 ? (
                               <ul className={styles.detailsList}>
-                                {parsed.detailItems.map((s) => (
-                                  <li key={s}>{s}</li>
+                                {products.map((name, idx) => (
+                                  <li key={`${it.packageId}-${idx}`}>{name}</li>
                                 ))}
                               </ul>
                             ) : null}
@@ -444,8 +413,12 @@ const ContractPublicPage = () => {
               )}
             </div>
           </section>
+        </Col>
+      </Row>
 
-          {/* RESUMEN FINANCIERO */}
+      {/* RESUMEN FINANCIERO */}
+      <Row className={`mb-4 ${styles["center-information-content"]}`}>
+        <Col xs={12} md={10}>
           <section className={styles.card}>
             <h2 className={styles.sectionTitle}>Tu pago y saldo</h2>
             <div
@@ -453,16 +426,16 @@ const ContractPublicPage = () => {
               style={{ display: "grid", gap: "0.75rem" }}
             >
               <div className={styles.financeRow}>
-                <span>Precio base</span>
+                <span>Subtotal</span>
                 <span className={styles.financeValue}>
-                  {formatMoney(totals.baseTotal)}
+                  {formatMoney(data.contract.subtotal)}
                 </span>
               </div>
 
               <div className={styles.financeRow}>
                 <span>Descuentos</span>
                 <span className={styles.financeDiscount}>
-                  –{formatMoney(totals.discountAmount)}
+                  –{formatMoney(data.contract.discountTotal)}
                 </span>
               </div>
 
@@ -471,13 +444,13 @@ const ContractPublicPage = () => {
               <div className={styles.totalRow}>
                 <div className={styles.totalLabel}>Total final</div>
                 <div className={styles.totalValue}>
-                  {formatMoney(totalFinal)}
+                  {formatMoney(data.contract.total)}
                 </div>
               </div>
 
               <div className={styles.divider} />
 
-              <div className={styles.subSectionTitle}>Histórico de pagos</div>
+              <div className={styles.subSectionTitle}>Historial de pagos</div>
 
               {paymentsSorted.length === 0 ? (
                 <div className={styles.emptySubText}>
@@ -510,18 +483,43 @@ const ContractPublicPage = () => {
               <div className={styles.financeRow}>
                 <span>Restante por pagar</span>
                 <span className={styles.financeValue}>
-                  {formatMoney(remainingFromPayments)}
+                  {formatMoney(data.contract.total - paidAmountFromPayments)}
                 </span>
               </div>
             </div>
           </section>
+        </Col>
+      </Row>
 
-          {/* CONSIDERACIONES IMPORTANTES */}
+      {/* NOTAS */}
+      {notes?.length > 0 && (
+        <Row className={`mb-4 ${styles["center-information-content"]}`}>
+          <Col xs={12} md={10}>
+            <section className={styles.card}>
+              <h2 className={styles.sectionTitle}>Notas de la reserva</h2>
+              <p className={styles.termsIntro}>
+                Promociones, descuentos y notas importantes aplicados a tu
+                reserva.
+              </p>
+
+              <ul className={styles.termsList}>
+                {notes.map((t) => (
+                  <li key={t.id} className={styles.termsItem}>
+                    <div className={styles.termTitle}>{t.content}</div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </Col>
+        </Row>
+      )}
+
+      {/* CONSIDERACIONES IMPORTANTES */}
+      <Row className={`mb-4 ${styles["center-information-content"]}`}>
+        <Col xs={12} md={10}>
           <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>
-              Consideraciones importantes ✨
-            </h2>
-            {packageTerms.length === 0 ? (
+            <h2 className={styles.sectionTitle}>Consideraciones importantes</h2>
+            {packageTerms.length === 0 && terms.length === 0 ? (
               <p className={styles.termsIntro}>
                 No hay términos y condiciones vinculados a los servicios de este
                 contrato.
@@ -534,6 +532,12 @@ const ContractPublicPage = () => {
                 </p>
 
                 <ul className={styles.termsList}>
+                  {terms.map((t) => (
+                    <li key={t.id} className={styles.termsItem}>
+                      <div className={styles.termTitle}>{t.title}</div>
+                      <div className={styles.termContent}>{t.content}</div>
+                    </li>
+                  ))}
                   {packageTerms.map((t) => (
                     <li key={t.id} className={styles.termsItem}>
                       <div className={styles.termTitle}>{t.title}</div>
@@ -544,137 +548,145 @@ const ContractPublicPage = () => {
               </>
             )}
           </section>
-        </main>
+        </Col>
+      </Row>
 
-        {/* SOCIAL CTA */}
-        <div className={styles.socialCtaWrap}>
-          <div className={styles.socialCtaCard}>
-            <div style={{ display: "grid", gap: "0.25rem" }}>
-              <div className={styles.socialCtaTitle}>
-                ¿Tienes dudas sobre tu reserva?
+      {/* SOCIAL CTA */}
+      <Row className="mb-4">
+        <Col xs={12}>
+          <div className={styles.socialCtaWrap}>
+            <div className={styles.socialCtaCard}>
+              <div style={{ display: "grid", gap: "0.25rem" }}>
+                <div className={styles.socialCtaTitle}>
+                  ¿Tienes dudas sobre tu reserva?
+                </div>
+                <div className={styles.socialCtaSubtitle}>
+                  Estamos listos para ayudarte por WhatsApp
+                </div>
               </div>
-              <div className={styles.socialCtaSubtitle}>
-                Estamos listos para ayudarte por WhatsApp
+
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className={styles.whatsappBtn}
+              >
+                <span className={styles.btnIcon} aria-hidden="true">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 32 32"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16 2.667C8.643 2.667 2.667 8.643 2.667 16c0 2.373.62 4.691 1.799 6.73L2.667 29.333l6.843-1.769A13.27 13.27 0 0 0 16 29.333c7.357 0 13.333-5.976 13.333-13.333S23.357 2.667 16 2.667Zm0 24A10.6 10.6 0 0 1 10.4 25.07l-.4-.235-4.06 1.05 1.085-3.956-.26-.41A10.61 10.61 0 1 1 16 26.667Z"
+                      fill="currentColor"
+                      opacity="0.9"
+                    />
+                    <path
+                      d="M22.24 18.645c-.33-.165-1.957-.965-2.26-1.076-.303-.11-.524-.165-.744.165-.22.33-.855 1.076-1.05 1.296-.193.22-.386.247-.716.082-.33-.165-1.395-.514-2.658-1.64-.982-.876-1.645-1.958-1.84-2.288-.193-.33-.021-.509.144-.674.149-.148.33-.386.495-.579.165-.193.22-.33.33-.55.11-.22.055-.413-.028-.579-.082-.165-.744-1.797-1.02-2.46-.268-.642-.54-.555-.744-.565l-.634-.012c-.22 0-.578.082-.88.413-.303.33-1.156 1.13-1.156 2.756 0 1.626 1.185 3.198 1.35 3.418.165.22 2.333 3.56 5.65 4.99.79.34 1.405.543 1.885.695.792.252 1.512.217 2.08.132.635-.095 1.957-.8 2.233-1.57.275-.772.275-1.434.193-1.57-.082-.138-.303-.22-.634-.386Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </span>
+                Escríbenos por WhatsApp
+              </a>
+
+              <div className={styles.socialFollow}>
+                <div className={styles.socialFollowLabel}>
+                  Síguenos en redes
+                </div>
+
+                <div className={styles.socialButtons}>
+                  <a
+                    href="https://www.instagram.com/brillipoint/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={[
+                      styles.socialBtn,
+                      styles.socialBtnInstagram,
+                    ].join(" ")}
+                  >
+                    <span className={styles.btnIcon} aria-hidden="true">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4A5.8 5.8 0 0 1 16.2 22H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm0 2A3.8 3.8 0 0 0 4 7.8v8.4A3.8 3.8 0 0 0 7.8 20h8.4a3.8 3.8 0 0 0 3.8-3.8V7.8A3.8 3.8 0 0 0 16.2 4H7.8Z"
+                          fill="currentColor"
+                          opacity="0.95"
+                        />
+                        <path
+                          d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
+                          fill="currentColor"
+                        />
+                        <path
+                          d="M17.6 6.4a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                    Instagram
+                  </a>
+
+                  <a
+                    href="https://www.facebook.com/profile.php?id=61579380963496"
+                    target="_blank"
+                    rel="noreferrer"
+                    className={[
+                      styles.socialBtn,
+                      styles.socialBtnFacebook,
+                    ].join(" ")}
+                  >
+                    <span className={styles.btnIcon} aria-hidden="true">
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M13.5 21v-7h2.4l.4-3H13.5V9.2c0-.87.24-1.46 1.5-1.46h1.6V5.06c-.28-.04-1.24-.12-2.36-.12-2.33 0-3.94 1.42-3.94 4.03V11H8v3h2.8v7h2.7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                    Facebook
+                  </a>
+                </div>
               </div>
-            </div>
 
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className={styles.whatsappBtn}
-            >
-              <span className={styles.btnIcon} aria-hidden="true">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M16 2.667C8.643 2.667 2.667 8.643 2.667 16c0 2.373.62 4.691 1.799 6.73L2.667 29.333l6.843-1.769A13.27 13.27 0 0 0 16 29.333c7.357 0 13.333-5.976 13.333-13.333S23.357 2.667 16 2.667Zm0 24A10.6 10.6 0 0 1 10.4 25.07l-.4-.235-4.06 1.05 1.085-3.956-.26-.41A10.61 10.61 0 1 1 16 26.667Z"
-                    fill="currentColor"
-                    opacity="0.9"
-                  />
-                  <path
-                    d="M22.24 18.645c-.33-.165-1.957-.965-2.26-1.076-.303-.11-.524-.165-.744.165-.22.33-.855 1.076-1.05 1.296-.193.22-.386.247-.716.082-.33-.165-1.395-.514-2.658-1.64-.982-.876-1.645-1.958-1.84-2.288-.193-.33-.021-.509.144-.674.149-.148.33-.386.495-.579.165-.193.22-.33.33-.55.11-.22.055-.413-.028-.579-.082-.165-.744-1.797-1.02-2.46-.268-.642-.54-.555-.744-.565l-.634-.012c-.22 0-.578.082-.88.413-.303.33-1.156 1.13-1.156 2.756 0 1.626 1.185 3.198 1.35 3.418.165.22 2.333 3.56 5.65 4.99.79.34 1.405.543 1.885.695.792.252 1.512.217 2.08.132.635-.095 1.957-.8 2.233-1.57.275-.772.275-1.434.193-1.57-.082-.138-.303-.22-.634-.386Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-              Escríbenos por WhatsApp
-            </a>
+              <div className={styles.socialThanks}>
+                ✨ Gracias por vivir la experiencia Brillipoint ✨
+              </div>
 
-            <div className={styles.socialFollow}>
-              <div className={styles.socialFollowLabel}>Síguenos en redes</div>
-
-              <div className={styles.socialButtons}>
+              {/* legacy links (kept for reference) */}
+              <div style={{ display: "none" }} aria-hidden="true">
                 <a
                   href="https://www.instagram.com/brillipoint/"
                   target="_blank"
                   rel="noreferrer"
-                  className={[styles.socialBtn, styles.socialBtnInstagram].join(
-                    " "
-                  )}
                 >
-                  <span className={styles.btnIcon} aria-hidden="true">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4A5.8 5.8 0 0 1 16.2 22H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm0 2A3.8 3.8 0 0 0 4 7.8v8.4A3.8 3.8 0 0 0 7.8 20h8.4a3.8 3.8 0 0 0 3.8-3.8V7.8A3.8 3.8 0 0 0 16.2 4H7.8Z"
-                        fill="currentColor"
-                        opacity="0.95"
-                      />
-                      <path
-                        d="M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
-                        fill="currentColor"
-                      />
-                      <path
-                        d="M17.6 6.4a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </span>
                   Instagram
                 </a>
-
                 <a
                   href="https://www.facebook.com/profile.php?id=61579380963496"
                   target="_blank"
                   rel="noreferrer"
-                  className={[styles.socialBtn, styles.socialBtnFacebook].join(
-                    " "
-                  )}
                 >
-                  <span className={styles.btnIcon} aria-hidden="true">
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M13.5 21v-7h2.4l.4-3H13.5V9.2c0-.87.24-1.46 1.5-1.46h1.6V5.06c-.28-.04-1.24-.12-2.36-.12-2.33 0-3.94 1.42-3.94 4.03V11H8v3h2.8v7h2.7Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </span>
                   Facebook
                 </a>
               </div>
             </div>
-
-            <div className={styles.socialThanks}>
-              ✨ Gracias por vivir la experiencia Brillipoint ✨
-            </div>
-
-            {/* legacy links (kept for reference) */}
-            <div style={{ display: "none" }} aria-hidden="true">
-              <a
-                href="https://www.instagram.com/brillipoint/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Instagram
-              </a>
-              <a
-                href="https://www.facebook.com/profile.php?id=61579380963496"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Facebook
-              </a>
-            </div>
           </div>
-        </div>
-      </div>
+        </Col>
+      </Row>
     </div>
   );
 };

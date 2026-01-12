@@ -27,10 +27,10 @@ export const getSlots = async (date: string): Promise<GetSlotResponse[]> => {
 export const holdSlot = async (payload: {
   eventDate: string;
   period: string;
-  leadName: string;
-  leadEmail: string | null;
-  leadPhone: string | null;
-}) => {
+  leadName?: string;
+  leadEmail?: string | null;
+  leadPhone?: string | null;
+}): Promise<Slot> => {
   try {
     const response = await axiosInstanceWithToken.post(`/slots/hold`, payload);
     return response.data;

@@ -4,5 +4,6 @@ export interface UserInfo {
   role: string;
   firstName: string;
   lastName: string;
+  name?: string;
   phone: string;
 }

@@ -474,6 +474,11 @@
   background: rgba(0, 0, 0, 0.45);
 }
 
+/* Flatpickr popup must be above the "glass" cards/background */
+.contractCreationContainer :global(.flatpickr-calendar) {
+  z-index: 99999 !important;
+}
+
 .formTextarea {
   resize: none;
 }
@@ -567,6 +572,22 @@
   .pageActions .btnCancel,
   .pageActions .btnPrimary {
     width: 100%;
+  }
+}
+
+/* Desktop: make bottom action buttons feel like primary CTAs */
+@media (min-width: 1025px) {
+  .pageActions {
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  .pageActions .btnCancel,
+  .pageActions .btnPrimary {
+    font-size: 1.15rem;
+    padding: 1.15rem 2.15rem;
+    min-height: 58px;
+    min-width: 260px;
   }
 }
 
