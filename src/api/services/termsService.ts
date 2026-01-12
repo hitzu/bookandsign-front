@@ -4,7 +4,10 @@ import {
   UpdateTermsPayload,
 } from "../../interfaces";
 
-import { axiosInstanceWithToken } from "../config/axiosConfig";
+import {
+  axiosInstanceWithToken,
+  axiosInstanceWithoutToken,
+} from "../config/axiosConfig";
 
 export const getTerms = async ({
   termScope,
@@ -108,5 +111,29 @@ export const getTermById = async (id: number): Promise<GetTermsResponse> => {
   } catch (error) {
     console.error("Error fetching package by id:", error);
     throw error;
+  }
+};
+
+export const getPublicTerms = async (params: {
+  targetId?: number;
+  scope: string;
+}): Promise<GetTermsResponse[]> => {
+  try {
+    const { targetId, scope } = params;
+    if (scope === "package" && targetId) {
+      const queryParams = new URLSearchParams();
+      queryParams.append("packageId", targetId.toString());
+      const response = await axiosInstanceWithoutToken.get<GetTermsResponse[]>(
+        `/terms/public/${scope}/?${queryParams.toString()}`
+      );
+      return response.data;
+    }
+    const response = await axiosInstanceWithToken.get<GetTermsResponse[]>(
+      `/terms/public/${scope}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching public terms:", error);
+    return [];
   }
 };

@@ -30,7 +30,6 @@ import { multiSelectStyles } from "@common/reactSelectStyles";
 
 interface ProductFormValues {
   name: string;
-  description: string;
   basePrice: string;
   discount: string;
   status: string;
@@ -39,7 +38,6 @@ interface ProductFormValues {
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("El nombre del paquete es requerido"),
-  description: yup.string().required("La descripción es requerida"),
   basePrice: yup
     .string()
     .required("El precio base es requerido")
@@ -79,7 +77,6 @@ const PackageEdit = () => {
   const formik = useFormik<ProductFormValues>({
     initialValues: {
       name: "",
-      description: "",
       basePrice: "",
       discount: "",
       status: "",
@@ -89,7 +86,6 @@ const PackageEdit = () => {
     onSubmit: async (values) => {
       const payload = {
         name: values.name,
-        description: values.description,
         basePrice: parseFloat(values.basePrice),
         discount: values.discount ? parseFloat(values.discount) : null,
         status: values.status,
@@ -142,7 +138,6 @@ const PackageEdit = () => {
           const packageData = await getPackageById(Number(id));
           formik.setValues({
             name: packageData.name,
-            description: packageData.description,
             basePrice: packageData.basePrice.toString(),
             discount: packageData.discount?.toString() || "",
             status: packageData.status,
@@ -385,24 +380,6 @@ const PackageEdit = () => {
                   />
                   <Form.Control.Feedback type="invalid">
                     {formik.errors.name}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Descripción del paquete</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    placeholder="Descripción del paquete"
-                    name="description"
-                    value={formik.values.description}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur("description")}
-                    isInvalid={
-                      formik.touched.description && !!formik.errors.description
-                    }
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.description}
                   </Form.Control.Feedback>
                 </Form.Group>
 

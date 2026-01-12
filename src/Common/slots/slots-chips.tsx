@@ -37,7 +37,7 @@ const SlotsChips = ({
   useEffect(() => {
     const fetchNotes = async () => {
       if (!slotId) return;
-      const notes = await getNotes(slotId, "slot");
+      const notes = await getNotes(slotId, "slot", "public");
       setNotes(notes);
     };
     fetchNotes();
@@ -100,7 +100,7 @@ const SlotsChips = ({
         {status === "held" && (
           <div>
             <div className={styles.contractInfo}>
-              <p>Cliente: {slot?.slot?.leadName}</p>
+              <p>Cliente:</p>
               {notes.length > 0 && (
                 <p>Notas: {notes.map((note) => note.content).join(", ")}</p>
               )}
@@ -122,11 +122,7 @@ const SlotsChips = ({
 
         {contract && (
           <div className={styles.contractInfo}>
-            <p>Cliente: {slot?.slot?.leadName}</p>
-            <p>
-              Paquetes seleccionados:{" "}
-              {contract.items.map((item) => item.package.name).join(", ")}
-            </p>
+            <p>Cliente:</p>
           </div>
         )}
       </div>

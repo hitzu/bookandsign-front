@@ -87,7 +87,7 @@ const ContractsAddPage = () => {
   const [date, setDate] = useState<string>(() =>
     new Date().toISOString().slice(0, 10)
   );
-  const [promotion, setPromotion] = useState<Promotion[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<
     "am_block" | "pm_block" | null
   >(null);
@@ -170,14 +170,14 @@ const ContractsAddPage = () => {
         const data = await getPromotionsByBrandId({
           brandId: Number(selectedBrandId),
         });
-        setPromotion(Array.isArray(data) ? data : []);
+        setPromotions(Array.isArray(data) ? data : []);
       } catch (e) {
         console.error("Error loading promotions:", e);
-        setPromotion([]);
+        setPromotions([]);
       }
     };
     loadPromotions();
-  }, [selectedBrandId]);
+  }, []);
 
   useEffect(() => {
     const fetchSlot = async () => {
@@ -299,7 +299,7 @@ const ContractsAddPage = () => {
         copy[idx] = { ...copy[idx], quantity: copy[idx].quantity + addQty };
         return copy;
       }
-      const promotionForThisPackage = promotion.find(
+      const promotionForThisPackage = promotions.find(
         (p) => p.brandId === pkg.brandId
       );
       return [
@@ -367,7 +367,6 @@ const ContractsAddPage = () => {
         return;
       }
 
-      // 1) Hold slot (POST /slots/hold) using selected date + period
       const held = await holdSlot({
         eventDate: date,
         period: selectedPeriod,
@@ -393,6 +392,7 @@ const ContractsAddPage = () => {
         packages: items.map((item) => ({
           packageId: item.pkg.id,
           quantity: item.quantity,
+          promotionId: item.promotion?.id,
           basePriceSnapshot:
             item.pkg.basePrice * item.quantity -
             (item.pkg.basePrice *
@@ -889,25 +889,37 @@ const ContractsAddPage = () => {
                           </div>
                         </div>
 
-                        {promotion.length > 0 && items.length > 0 && (
-                          <div className={styles.financialRow}>
-                            <div className={styles.financialLabel}>
-                              Descuento Expo Bodas y Quince
-                            </div>
-                            <div className={styles.discountWrap}>
-                              <span className={styles.discountSubtext}>
+                        {promotions.length > 0 &&
+                          items.length > 0 &&
+                          items.map((it) => (
+                            <div className={styles.financialRow}>
+                              <div className={styles.financialLabel}>
                                 {
-                                  formatCurrencyParts(discountTotal, "MXN")
-                                    .symbol
-                                }{" "}
-                                {
-                                  formatCurrencyParts(discountTotal, "MXN")
-                                    .number
+                                  promotions.find(
+                                    (p) => p.brandId === it.pkg.brandId
+                                  )?.name
                                 }
-                              </span>
+                              </div>
+                              <div className={styles.discountWrap}>
+                                <span className={styles.discountSubtext}>
+                                  -
+                                  {
+                                    formatCurrencyParts(discountTotal, "MXN")
+                                      .symbol
+                                  }{" "}
+                                  {
+                                    formatCurrencyParts(
+                                      (it.pkg.basePrice *
+                                        it.quantity *
+                                        (it.promotion?.value ?? 0)) /
+                                        100,
+                                      "MXN"
+                                    ).number
+                                  }
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          ))}
 
                         <div className={styles.financialRow}>
                           <div className={styles.financialLabel}>
@@ -1004,7 +1016,7 @@ const ContractsAddPage = () => {
                         <div className={styles.financialRow}>
                           <div className={styles.financialLabel}>Restante</div>
                           <div className={styles.remainingDue}>
-                            <span className={styles.moneySymbol}>
+                            <span className={styles.moneyNumberRemaining}>
                               {
                                 formatCurrencyParts(
                                   subtotal - discountTotal - depositNumber,
@@ -1020,6 +1032,7 @@ const ContractsAddPage = () => {
                                 ).number
                               }
                             </span>
+                            + traslado
                           </div>
                         </div>
                       </div>
