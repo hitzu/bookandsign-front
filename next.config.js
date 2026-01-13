@@ -3,6 +3,16 @@ const nextConfig = {
   experimental: {
     // Aquí puedes habilitar características experimentales si es necesario
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.storage.supabase.co",
+      },
+    ],
+    // Explicitly allow our current Supabase host as well.
+    domains: ["uljzbxuxzknilubykrlw.storage.supabase.co"],
+  },
   env: {
     // API URL configuration
     // Defaults to localhost:3000 for local development
