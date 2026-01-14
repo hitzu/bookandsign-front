@@ -1,0 +1,43 @@
+import React from "react";
+import styles from "../../assets/css/sales-section-tabs.module.css";
+
+export type SectionTabsProps = {
+  active: MainSectionKey;
+  onChange: (next: MainSectionKey) => void;
+};
+
+export type MainSectionKey = "calendar" | "transportation-fee" | "photos";
+
+export const SectionTabs = ({ active, onChange }: SectionTabsProps) => {
+  const items: Array<{ key: MainSectionKey; label: string }> = [
+    { key: "calendar", label: "Calendario" },
+    { key: "transportation-fee", label: "Tarifa de traslado" },
+    { key: "photos", label: "Fotos" },
+  ];
+
+  return (
+    <div role="tablist" className={styles.salesSectionTabsContainer}>
+      {items.map((it) => {
+        const isActive = active === it.key;
+        return (
+          <button
+            key={it.key}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onChange(it.key)}
+            className={
+              styles.salesSectionTabs +
+              " " +
+              (isActive
+                ? styles.salesSectionTabsActive
+                : styles.salesSectionTabsInactive)
+            }
+          >
+            {it.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+};

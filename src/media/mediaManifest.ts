@@ -84,3 +84,173 @@ export const MEDIA_MANIFEST: MediaManifest = {
   ],
 };
 
+type MediaData = {
+  sections: Array<{
+    id: string;
+    key: string;
+    label: string;
+    photos: Array<{
+      src: string;
+      fallbackSrc?: string;
+    }>;
+  }>;
+};
+
+export const MEDIA_DATA: MediaData = {
+  sections: [
+    {
+      id: "glitter_bar",
+      key: "glitter bar",
+      label: "Glitter Bar",
+      photos: [
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_265.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/glitter%20bar/photo_274.jpg",
+        },
+      ],
+    },
+    {
+      id: "make_up",
+      key: "make up",
+      label: "Make Up",
+      photos: [
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/IMG_20231114_140229_318.jpg",
+        },
+        {
+          src: "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.webp",
+          fallbackSrc:
+            "https://uljzbxuxzknilubykrlw.storage.supabase.co/storage/v1/object/public/media/make%20up/ba3beedd-744b-4c19-be27-4404e4a0821a.jpg",
+        },
+      ],
+    },
+  ],
+};

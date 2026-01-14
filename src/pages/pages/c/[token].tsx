@@ -290,9 +290,7 @@ const ContractPublicPage = () => {
               />
             </div>
 
-            <h1 className={styles.title}>
-              Tu reserva Brillipoint #{data.contract.id}✨
-            </h1>
+            <h1 className={styles.title}>Tu reserva Brillipoint ✨</h1>
           </header>
         </Col>
       </Row>
@@ -346,11 +344,11 @@ const ContractPublicPage = () => {
             <div className={styles.sectionBody}>
               {slots.map((slot) => (
                 <div key={slot.id} className={styles.financeRow}>
-                  <span>
-                    {formatLongSpanishDate(new Date(slot.slot?.eventDate))}
-                  </span>
                   <span className={styles.financeValue}>
                     {translateContractSlotPurpose(slot.purpose)}
+                  </span>
+                  <span>
+                    {formatLongSpanishDate(new Date(slot.slot?.eventDate))}
                   </span>
                 </div>
               ))}
@@ -485,7 +483,7 @@ const ContractPublicPage = () => {
                   {paymentsSorted.map((p, idx) => (
                     <div key={p.id ?? idx} className={styles.financeRow}>
                       <span>
-                        Pago {idx + 1}:{" "}
+                        Total pagado {idx + 1}:{" "}
                         {formatLongSpanishDate(new Date(p.receivedAt))}
                       </span>
                       <span className={styles.financeValue}>
@@ -499,7 +497,7 @@ const ContractPublicPage = () => {
               <div className={styles.divider} />
 
               <div className={styles.financeRow}>
-                <span>Pagado</span>
+                <span>Total pagado</span>
                 <span className={styles.financeValue}>
                   {formatMoney(paidAmountFromPayments)}
                 </span>
