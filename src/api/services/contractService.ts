@@ -36,6 +36,25 @@ export const getContractById = async (
   }
 };
 
+export const getContracts = async (): Promise<Contract[]> => {
+  try {
+    const response = await axiosInstanceWithToken.get<Contract[]>("/contracts");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contracts:", error);
+    throw error;
+  }
+};
+
+export const deleteContractById = async (id: number): Promise<void> => {
+  try {
+    await axiosInstanceWithToken.delete(`/contracts/${id}`);
+  } catch (error) {
+    console.error("Error deleting contract:", error);
+    throw error;
+  }
+};
+
 export const generateContract = async (
   payload: GenerateContractPayload
 ): Promise<Contract> => {

@@ -1,4 +1,10 @@
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  ReactElement,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Select from "react-select";
 import NonLayout from "@layout/NonLayout";
 import logoWhite from "@assets/images/logo-white.png";
@@ -18,7 +24,7 @@ type WeekendWeekRow = {
   days: Partial<Record<WeekendKey, Date>>;
 };
 
-type MainSectionKey = "calendar" | "photos" | "map";
+type MainSectionKey = "calendar" | "transportation-fee" | "photos";
 
 const WEEKEND_HEADER_LABELS: Record<WeekendKey, string> = {
   fri: "Viernes",
@@ -51,8 +57,8 @@ type SectionTabsProps = {
 const SectionTabs = ({ active, onChange }: SectionTabsProps) => {
   const items: Array<{ key: MainSectionKey; label: string }> = [
     { key: "calendar", label: "Calendario" },
+    { key: "transportation-fee", label: "Tarifa de traslado" },
     { key: "photos", label: "Fotos" },
-    { key: "map", label: "Mapa" },
   ];
 
   return (
@@ -84,7 +90,9 @@ const SectionTabs = ({ active, onChange }: SectionTabsProps) => {
               fontSize: 18,
               lineHeight: 1,
               border: "1px solid rgba(255,255,255,0.25)",
-              background: isActive ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.15)",
+              background: isActive
+                ? "rgba(255,255,255,0.12)"
+                : "rgba(0,0,0,0.15)",
               color: "white",
               minWidth: 130,
               touchAction: "manipulation",
@@ -293,9 +301,7 @@ const PhotosSection = ({
             }}
           >
             {isLoading && (
-              <div style={{ fontSize: 18, opacity: 0.9 }}>
-                Cargando fotos…
-              </div>
+              <div style={{ fontSize: 18, opacity: 0.9 }}>Cargando fotos…</div>
             )}
             {!isLoading && error && (
               <div style={{ fontSize: 18, opacity: 0.9 }}>{error}</div>
@@ -374,7 +380,9 @@ const PhotosSection = ({
                   height: 14,
                   borderRadius: 999,
                   border: "1px solid rgba(255,255,255,0.6)",
-                  background: isActive ? "rgba(255,255,255,0.85)" : "transparent",
+                  background: isActive
+                    ? "rgba(255,255,255,0.85)"
+                    : "transparent",
                   padding: 0,
                   touchAction: "manipulation",
                 }}
@@ -395,8 +403,8 @@ const PhotosSection = ({
           {items.length > 0
             ? "Desliza para cambiar · Toca un punto para saltar"
             : isLoading
-              ? "Preparando galería…"
-              : "Sin elementos para mostrar"}
+            ? "Preparando galería…"
+            : "Sin elementos para mostrar"}
         </div>
       </div>
 
@@ -491,9 +499,11 @@ const PhotosSection = ({
               }}
             >
               <div style={{ fontSize: 16, opacity: 0.9 }}>
-                {collections.find((c) => c.id === selectedCollectionId)?.title ??
-                  "Fotos"}
-                {items.length > 0 ? ` · ${activeIndex + 1}/${items.length}` : ""}
+                {collections.find((c) => c.id === selectedCollectionId)
+                  ?.title ?? "Fotos"}
+                {items.length > 0
+                  ? ` · ${activeIndex + 1}/${items.length}`
+                  : ""}
               </div>
             </div>
           </div>
@@ -524,7 +534,9 @@ const MapSection = ({ resetToken }: MapSectionProps) => {
   }, [query]);
 
   return (
-    <div style={{ width: "100%", maxWidth: 980, margin: "0 auto", padding: 12 }}>
+    <div
+      style={{ width: "100%", maxWidth: 980, margin: "0 auto", padding: 12 }}
+    >
       <div
         style={{
           display: "flex",
@@ -612,7 +624,8 @@ const CalendarPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [activeSection, setActiveSection] = useState<MainSectionKey>("calendar");
+  const [activeSection, setActiveSection] =
+    useState<MainSectionKey>("calendar");
   const [photosCollectionId, setPhotosCollectionId] = useState<string>("");
   const [photosResetToken, setPhotosResetToken] = useState(0);
   const [mapResetToken, setMapResetToken] = useState(0);
@@ -770,7 +783,7 @@ const CalendarPage = () => {
         // Reset Photos "status" when returning from other sections, but keep filter
         setPhotosResetToken((t) => t + 1);
       }
-      if (prev !== "map" && next === "map") {
+      if (prev !== "transportation-fee" && next === "transportation-fee") {
         setMapResetToken((t) => t + 1);
       }
       return next;
@@ -953,7 +966,7 @@ const CalendarPage = () => {
             </FadeInSection>
           )}
 
-          {activeSection === "map" && (
+          {activeSection === "transportation-fee" && (
             <FadeInSection>
               <MapSection resetToken={mapResetToken} />
             </FadeInSection>

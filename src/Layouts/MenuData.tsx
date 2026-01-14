@@ -112,20 +112,14 @@ const menuItems = [
       {
         id: "slots",
         label: "Listado de Contratos",
-        link: "/application/contracts-list",
-        dataPage: "slots",
+        link: "/application/contract-list",
+        dataPage: "contracts-list",
       },
       {
         id: "contracts-add",
         label: "Agregar Contrato",
         link: "/pages/contracts-add",
         dataPage: "contracts-add",
-      },
-      {
-        id: "contracts-edit",
-        label: "Editar Contrato",
-        link: "/application/contracts-edit",
-        dataPage: "contracts-edit",
       },
     ],
   },
