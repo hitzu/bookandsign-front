@@ -26,10 +26,7 @@ import { multiSelectStyles } from "@common/reactSelectStyles";
 
 interface PackageFormValues {
   name: string;
-  description: string;
   basePrice: string;
-  discount: string;
-  status: string;
   brandId: number | "";
 }
 
@@ -39,11 +36,6 @@ const validationSchema = yup.object().shape({
     .string()
     .required("El precio base es requerido")
     .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un precio base válido"),
-  discount: yup
-    .string()
-    .nullable()
-    .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un descuento válido"),
-  status: yup.string().required("El status es requerido"),
   brandId: yup
     .number()
     .required("La marca es requerida")
@@ -52,7 +44,6 @@ const validationSchema = yup.object().shape({
 
 const PackageAdd = () => {
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
-  const [productStatuses, setProductStatuses] = useState<string[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<"success" | "danger">(
@@ -69,20 +60,14 @@ const PackageAdd = () => {
   const formik = useFormik<PackageFormValues>({
     initialValues: {
       name: "",
-      description: "",
       basePrice: "",
-      discount: "",
-      status: "active",
       brandId: "",
     },
     validationSchema,
     onSubmit: async (values) => {
       const payload = {
         name: values.name,
-        description: values.description,
         basePrice: parseFloat(values.basePrice),
-        discount: values.discount ? parseFloat(values.discount) : null,
-        status: values.status,
         brandId: values.brandId as number,
       };
       try {
@@ -120,18 +105,6 @@ const PackageAdd = () => {
       }
     };
     fetchBrands();
-  }, []);
-
-  useEffect(() => {
-    const fetchProductStatuses = async () => {
-      try {
-        const response = (await getPackagesStatuses()) as string[];
-        setProductStatuses(response);
-      } catch (error) {
-        console.error("Error fetching product statuses:", error);
-      }
-    };
-    fetchProductStatuses();
   }, []);
 
   useEffect(() => {

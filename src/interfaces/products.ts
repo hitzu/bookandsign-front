@@ -25,9 +25,6 @@ export interface GetProductsResponse {
 
 export interface CreateProductPayload {
   name: string;
-  description: string;
-  price: number;
-  status: string;
   brandId: number;
 }
 
