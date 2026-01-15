@@ -29,20 +29,11 @@ import { translateProductStatus } from "../../../Common/translations";
 
 interface ProductFormValues {
   name: string;
-  description: string;
-  price: string;
-  status: string;
   brandId: number | "";
 }
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("El nombre del producto es requerido"),
-  description: yup.string().required("La descripción es requerida"),
-  price: yup
-    .string()
-    .required("El precio es requerido")
-    .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un precio válido"),
-  status: yup.string().required("El status es requerido"),
   brandId: yup
     .number()
     .required("La marca es requerida")
@@ -53,7 +44,6 @@ const ProductEdit = () => {
   const router = useRouter();
   const { id } = router.query;
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
-  const [productStatuses, setProductStatuses] = useState<string[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<"success" | "danger">(
@@ -66,18 +56,13 @@ const ProductEdit = () => {
   const formik = useFormik<ProductFormValues>({
     initialValues: {
       name: "",
-      description: "",
-      price: "",
-      status: "",
       brandId: "",
     },
     validationSchema,
     onSubmit: async (values) => {
       const payload = {
         name: values.name,
-        description: values.description,
-        price: parseFloat(values.price),
-        status: values.status,
+
         brandId: values.brandId as number,
       };
       try {
@@ -107,17 +92,7 @@ const ProductEdit = () => {
       }
     };
 
-    const fetchProductStatuses = async () => {
-      try {
-        const response = (await getProductsStatuses()) as string[];
-        setProductStatuses(response);
-      } catch (error) {
-        console.error("Error fetching product statuses:", error);
-      }
-    };
-
     fetchBrands();
-    fetchProductStatuses();
   }, []);
 
   useEffect(() => {
@@ -127,9 +102,6 @@ const ProductEdit = () => {
           const product = await getProductById(Number(id));
           formik.setValues({
             name: product.name,
-            description: product.description,
-            price: product.price?.toString() || "",
-            status: product.status,
             brandId: product.brandId,
           });
           setSearchTerm(product.name);

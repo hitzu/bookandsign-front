@@ -34,8 +34,7 @@ export interface GetPackageProductsResponse {
 export interface CreatePackagePayload {
   name: string;
   basePrice: number;
-  discount: number | null;
-  status: string;
+
   brandId: number;
 }
 

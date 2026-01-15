@@ -22,7 +22,6 @@ import {
   getPackageById,
   getPackages,
   updatePackageById,
-  getPackagesStatuses,
   uploadProductsBulk,
 } from "../../../api/services/packageService";
 import { getProducts } from "src/api/services/productsService";
@@ -31,8 +30,6 @@ import { multiSelectStyles } from "@common/reactSelectStyles";
 interface ProductFormValues {
   name: string;
   basePrice: string;
-  discount: string;
-  status: string;
   brandId: number | "";
 }
 
@@ -42,11 +39,6 @@ const validationSchema = yup.object().shape({
     .string()
     .required("El precio base es requerido")
     .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un precio base válido"),
-  discount: yup
-    .string()
-    .nullable()
-    .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un descuento válido"),
-  status: yup.string().required("El status es requerido"),
   brandId: yup
     .number()
     .required("La marca es requerida")
@@ -57,7 +49,6 @@ const PackageEdit = () => {
   const router = useRouter();
   const { id } = router.query;
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
-  const [packageStatuses, setPackageStatuses] = useState<string[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<"success" | "danger">(
@@ -78,8 +69,6 @@ const PackageEdit = () => {
     initialValues: {
       name: "",
       basePrice: "",
-      discount: "",
-      status: "",
       brandId: "",
     },
     validationSchema,
@@ -87,8 +76,6 @@ const PackageEdit = () => {
       const payload = {
         name: values.name,
         basePrice: parseFloat(values.basePrice),
-        discount: values.discount ? parseFloat(values.discount) : null,
-        status: values.status,
         brandId: values.brandId as number,
       };
       try {
@@ -118,17 +105,7 @@ const PackageEdit = () => {
       }
     };
 
-    const fetchPackageStatuses = async () => {
-      try {
-        const response = (await getPackagesStatuses()) as string[];
-        setPackageStatuses(response);
-      } catch (error) {
-        console.error("Error fetching product statuses:", error);
-      }
-    };
-
     fetchBrands();
-    fetchPackageStatuses();
   }, []);
 
   useEffect(() => {
@@ -139,8 +116,6 @@ const PackageEdit = () => {
           formik.setValues({
             name: packageData.name,
             basePrice: packageData.basePrice.toString(),
-            discount: packageData.discount?.toString() || "",
-            status: packageData.status,
             brandId: packageData.brand.id,
           });
           setSearchTerm(packageData.name);

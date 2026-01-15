@@ -22,20 +22,11 @@ import { translateProductStatus } from "../../Common/translations";
 
 interface ProductFormValues {
   name: string;
-  description: string;
-  price: string;
-  status: string;
   brandId: number | "";
 }
 
 const validationSchema = yup.object().shape({
   name: yup.string().required("El nombre del producto es requerido"),
-  description: yup.string().required("La descripción es requerida"),
-  price: yup
-    .string()
-    .nullable()
-    .matches(/^\d+(\.\d{1,2})?$/, "Ingrese un precio válido"),
-  status: yup.string().required("El status es requerido"),
   brandId: yup
     .number()
     .required("La marca es requerida")
@@ -44,7 +35,6 @@ const validationSchema = yup.object().shape({
 
 const ProductAdd = () => {
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
-  const [productStatuses, setProductStatuses] = useState<string[]>([]);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<"success" | "danger">(
@@ -54,18 +44,12 @@ const ProductAdd = () => {
   const formik = useFormik<ProductFormValues>({
     initialValues: {
       name: "",
-      description: "",
-      price: "",
-      status: "active",
       brandId: "",
     },
     validationSchema,
     onSubmit: async (values) => {
       const payload = {
         name: values.name,
-        description: values.description,
-        price: parseFloat(values.price),
-        status: values.status,
         brandId: values.brandId as number,
       };
       try {
@@ -95,18 +79,6 @@ const ProductAdd = () => {
       }
     };
     fetchBrands();
-  }, []);
-
-  useEffect(() => {
-    const fetchProductStatuses = async () => {
-      try {
-        const response = (await getProductsStatuses()) as string[];
-        setProductStatuses(response);
-      } catch (error) {
-        console.error("Error fetching product statuses:", error);
-      }
-    };
-    fetchProductStatuses();
   }, []);
 
   return (
