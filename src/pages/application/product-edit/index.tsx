@@ -89,8 +89,7 @@ const ProductEditIndex = () => {
                         <strong>{product.name}</strong>
                         <br />
                         <small className="text-muted">
-                          {product.brand.name} - Status:{" "}
-                          {translateProductStatus(product.status)}
+                          {product.brand.name}
                         </small>
                       </div>
                     ))}

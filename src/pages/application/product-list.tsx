@@ -86,16 +86,6 @@ const ProductList = () => {
         },
       },
       {
-        header: "Descripción",
-        enableColumnFilter: false,
-        accessorKey: "description",
-      },
-      {
-        header: "Precio",
-        enableColumnFilter: false,
-        accessorKey: "price",
-      },
-      {
         header: "Acciones",
         enableColumnFilter: false,
         cell: (cellProps: any) => {

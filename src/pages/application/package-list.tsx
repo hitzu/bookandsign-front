@@ -95,29 +95,7 @@ const PackageList = () => {
           return <div>${cellProps.row.original.basePrice}</div>;
         },
       },
-      {
-        header: "Descuento",
-        enableColumnFilter: false,
-        accessorKey: "discount",
-        cell: (cellProps: any) => {
-          return <div>{cellProps.row.original.discount}%</div>;
-        },
-      },
-      {
-        header: "Precio con descuento",
-        enableColumnFilter: false,
-        cell: (cellProps: any) => {
-          return (
-            <div>
-              $
-              {cellProps.row.original.basePrice -
-                (cellProps.row.original.basePrice *
-                  cellProps.row.original.discount) /
-                  100}
-            </div>
-          );
-        },
-      },
+
       {
         header: "Acciones",
         enableColumnFilter: false,

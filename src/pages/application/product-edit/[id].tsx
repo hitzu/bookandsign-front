@@ -244,8 +244,7 @@ const ProductEdit = () => {
                         <strong>{product.name}</strong>
                         <br />
                         <small className="text-muted">
-                          {product.brand.name} - Status:{" "}
-                          {translateProductStatus(product.status)}
+                          {product.brand.name}
                         </small>
                       </div>
                     ))}
@@ -302,66 +301,6 @@ const ProductEdit = () => {
                   />
                   <Form.Control.Feedback type="invalid">
                     {formik.errors.name}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Descripción del producto</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    placeholder="Descripción del producto"
-                    name="description"
-                    value={formik.values.description}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur("description")}
-                    isInvalid={
-                      formik.touched.description && !!formik.errors.description
-                    }
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.description}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    Precio (Por ahora no se usa dejar vacio)
-                  </Form.Label>
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text>$</InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Price"
-                      name="price"
-                      value={formik.values.price}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      isInvalid={formik.touched.price && !!formik.errors.price}
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {formik.errors.price}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Status</Form.Label>
-                  <Form.Select
-                    name="status"
-                    value={formik.values.status}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    isInvalid={formik.touched.status && !!formik.errors.status}
-                  >
-                    <option value="">Seleccione un status</option>
-                    {productStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {translateProductStatus(status)}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.status}
                   </Form.Control.Feedback>
                 </Form.Group>
 

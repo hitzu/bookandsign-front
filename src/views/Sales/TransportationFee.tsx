@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Table } from "react-bootstrap";
 import styles from "../../assets/css/sales-transportation-fee.module.css";
 
@@ -15,11 +15,20 @@ const MXN_FORMAT = new Intl.NumberFormat("es-MX", {
 });
 
 // Reglas de negocio / supuestos de cálculo (ajustables)
-const FREE_UNDER_KM = 0; // si la distancia (ida) es menor a esto, el servicio es gratis
+const FREE_UNDER_KM = 13; // si la distancia (ida) es menor a esto, el servicio es gratis
 const AVG_SPEED_KMH = 40; // velocidad promedio para estimar tiempo (urbano/mixto)
 const DRIVER_COST_PER_HOUR_MXN = 200; // costo por hora del conductor (MXN)
 const TIME_MULTIPLIER = 2; // multiplicador por tiempo (ej. 1.2 por demanda/horario)
 const TOP_N = 25; // mostrar solo el "top" (más cercanos). Ajusta a 25 si quieres ver todos.
+const EXPO_DISCOUNT_MXN = 200;
+
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
 
 function estimateGasCostRangeMxn(kmOneWay: number) {
   // Supuestos simples para dar una idea (no es tarifa final):
@@ -63,6 +72,8 @@ function estimateServiceCostRangeMxn(kmOneWay: number) {
 }
 
 export const TransportationFee = () => {
+  const [query, setQuery] = useState("");
+
   const rows: TransportationRow[] = useMemo(
     () =>
       [
@@ -103,7 +114,15 @@ export const TransportationFee = () => {
     []
   );
 
-  const topRows = useMemo(() => rows.slice(0, TOP_N), [rows]);
+  const visibleRows = useMemo(() => {
+    const q = normalizeSearchText(query);
+    const source = q
+      ? rows.filter((r) =>
+          normalizeSearchText(`${r.municipio} ${r.estado}`).includes(q)
+        )
+      : rows;
+    return source.slice(0, TOP_N);
+  }, [rows, query]);
 
   return (
     <div className={styles.transportationFeeContainer}>
@@ -112,23 +131,58 @@ export const TransportationFee = () => {
           <div className="d-flex align-items-center justify-content-between flex-wrap ">
             <div>
               <h3 className="mb-1">Tarifa de traslado (referencia)</h3>
-              <p className="text-muted">
-                200 Pesos de descuento por exposición a bodas y quince años
-              </p>
             </div>
           </div>
 
+          <div className={`mt-3 ${styles.searchWrap}`}>
+            <div className={`input-group ${styles.searchGroup}`}>
+              <input
+                type="search"
+                className={`form-control ${styles.searchInput}`}
+                placeholder="Buscar destino (municipio o estado)..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                aria-label="Buscar destino (municipio o estado)"
+              />
+              {query ? (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setQuery("")}
+                >
+                  Limpiar
+                </button>
+              ) : null}
+            </div>
+            {query ? (
+              <div className={`text-muted ${styles.searchMeta}`}>
+                Mostrando {visibleRows.length} resultado(s)
+              </div>
+            ) : null}
+          </div>
+
           <div className={`mt-3 ${styles.tableWrap}`}>
-            <Table responsive="lg" bordered hover className="mb-0">
+            <Table
+              responsive="lg"
+              bordered
+              hover
+              className={`mb-0 ${styles.table}`}
+            >
               <thead>
                 <tr>
                   <th style={{ width: "60%" }}>Municipio</th>
-                  <th style={{ width: "40%" }}>Costo aprox. servicio mxn</th>
+                  <th style={{ width: "40%" }}>
+                    Costo aprox. de traslado (con bono aplicado)
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {topRows.map((r) => {
+                {visibleRows.map((r) => {
                   const cost = estimateServiceCostRangeMxn(r.kmAprox);
+                  const discountedMax = Math.max(
+                    cost.max - EXPO_DISCOUNT_MXN,
+                    0
+                  );
                   return (
                     <tr key={`${r.municipio}-${r.estado}`}>
                       <td>
@@ -136,17 +190,36 @@ export const TransportationFee = () => {
                           {r.municipio}, {r.estado}
                         </div>
                         <div className="text-muted" style={{ fontSize: 12 }}>
-                          Distancia aprox: {r.kmAprox} km (ida)
+                          Distancia aprox: {r.kmAprox} km
                         </div>
                       </td>
                       <td className="fw-semibold">
-                        {cost.isFree
-                          ? "Gratis"
-                          : `${MXN_FORMAT.format(cost.max)}`}
+                        {cost.isFree ? (
+                          "Gratis"
+                        ) : (
+                          <>
+                            {MXN_FORMAT.format(discountedMax)}
+                            <div
+                              className="text-muted"
+                              style={{ fontSize: 12 }}
+                            >
+                              Bono de traslado por Expo:{" "}
+                              {MXN_FORMAT.format(EXPO_DISCOUNT_MXN)} (solo
+                              aplica al costo de traslado)
+                            </div>
+                          </>
+                        )}
                       </td>
                     </tr>
                   );
                 })}
+                {visibleRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={2} className="text-center text-muted py-4">
+                      No hay resultados para “{query}”.
+                    </td>
+                  </tr>
+                ) : null}
               </tbody>
             </Table>
           </div>

@@ -231,36 +231,6 @@ const PackageAdd = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Descripción del paquete</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    placeholder="Descripción del paquete"
-                    name="description"
-                    value={formik.values.description}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur("description")}
-                    isInvalid={
-                      formik.touched.description && !!formik.errors.description
-                    }
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.description}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Productos del paquete</Form.Label>
-                  <Select
-                    isMulti
-                    options={productOptions}
-                    value={selectedProducts}
-                    onChange={(newValues) => setSelectedProducts(newValues)}
-                    placeholder="Seleccione productos"
-                    styles={multiSelectStyles}
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
                   <Form.Label>Precio</Form.Label>
                   <InputGroup className="mb-3">
                     <InputGroup.Text>$</InputGroup.Text>
@@ -282,71 +252,15 @@ const PackageAdd = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-3">
-                  <Form.Label>Descuento</Form.Label>
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text>%</InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Descuento"
-                      name="discount"
-                      value={formik.values.discount}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      isInvalid={
-                        formik.touched.discount && !!formik.errors.discount
-                      }
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {formik.errors.basePrice}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Precio con descuento</Form.Label>
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text>%</InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Precio con descuento"
-                      name="priceWithDiscount"
-                      value={
-                        (parseFloat(formik.values.basePrice) || 0) -
-                        ((parseFloat(formik.values.basePrice) || 0) *
-                          (parseFloat(formik.values.discount) || 0)) /
-                          100
-                      }
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      isInvalid={
-                        formik.touched.discount && !!formik.errors.discount
-                      }
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {formik.errors.basePrice}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Status</Form.Label>
-                  <Form.Select
-                    name="status"
-                    value={formik.values.status}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    isInvalid={formik.touched.status && !!formik.errors.status}
-                  >
-                    <option value="">Seleccione un status</option>
-                    {productStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {translateProductStatus(status)}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.status}
-                  </Form.Control.Feedback>
+                  <Form.Label>Productos del paquete</Form.Label>
+                  <Select
+                    isMulti
+                    options={productOptions}
+                    value={selectedProducts}
+                    onChange={(newValues) => setSelectedProducts(newValues)}
+                    placeholder="Seleccione productos"
+                    styles={multiSelectStyles}
+                  />
                 </Form.Group>
 
                 <Button

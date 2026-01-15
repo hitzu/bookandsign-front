@@ -11,7 +11,8 @@ import { TransportationFee } from "@views/Sales/TransportationFee";
 import { Photos } from "@views/Sales/Photos";
 
 const SalesPage = () => {
-  const [activeSection, setActiveSection] = useState<MainSectionKey>("photos");
+  const [activeSection, setActiveSection] =
+    useState<MainSectionKey>("calendar");
   const onChangeSection = (next: MainSectionKey) => {
     setActiveSection(next);
   };

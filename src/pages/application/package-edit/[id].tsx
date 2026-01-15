@@ -309,8 +309,7 @@ const PackageEdit = () => {
                         <strong>{packageSelected.name}</strong>
                         <br />
                         <small className="text-muted">
-                          {packageSelected.brand.name} - Status:{" "}
-                          {translatePackageStatus(packageSelected.status)}
+                          {packageSelected.brand.name}
                         </small>
                       </div>
                     ))}
@@ -402,74 +401,6 @@ const PackageEdit = () => {
                       {formik.errors.basePrice}
                     </Form.Control.Feedback>
                   </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Descuento</Form.Label>
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text>%</InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Descuento"
-                      name="discount"
-                      value={formik.values.discount}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      isInvalid={
-                        formik.touched.discount && !!formik.errors.discount
-                      }
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {formik.errors.basePrice}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Precio con descuento</Form.Label>
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text>%</InputGroup.Text>
-                    <Form.Control
-                      type="text"
-                      placeholder="Precio con descuento"
-                      name="priceWithDiscount"
-                      value={
-                        (parseFloat(formik.values.basePrice) || 0) -
-                        ((parseFloat(formik.values.basePrice) || 0) *
-                          (parseFloat(formik.values.discount) || 0)) /
-                          100
-                      }
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      isInvalid={
-                        formik.touched.discount && !!formik.errors.discount
-                      }
-                    />
-                    <Form.Control.Feedback type="invalid">
-                      {formik.errors.basePrice}
-                    </Form.Control.Feedback>
-                  </InputGroup>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Status</Form.Label>
-                  <Form.Select
-                    name="status"
-                    value={formik.values.status}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    isInvalid={formik.touched.status && !!formik.errors.status}
-                  >
-                    <option value="">Seleccione un status</option>
-                    {packageStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {translatePackageStatus(status)}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.status}
-                  </Form.Control.Feedback>
                 </Form.Group>
 
                 <Row className="g-2">
