@@ -123,6 +123,22 @@ const menuItems = [
       },
     ],
   },
+  {
+    type: "HASHMENU",
+    id: 4,
+    label: "Promociones",
+    icon: "ph-duotone ph-percent",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "slots",
+        label: "Listado de Promociones",
+        link: "/application/promotions-list",
+        dataPage: "promotions-list",
+      },
+    ],
+  },
 ];
 
 // const menuItems = [

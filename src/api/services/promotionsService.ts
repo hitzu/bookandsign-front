@@ -20,3 +20,13 @@ export const getPromotionsByBrandId = async ({
     return [];
   }
 };
+
+export const getPromotions = async (): Promise<Promotion[]> => {
+  try {
+    const response = await axiosInstanceWithToken.get("/promotions");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching promotions:", error);
+    return [];
+  }
+};
