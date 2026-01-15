@@ -237,10 +237,10 @@
 }
 
 .financeRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.35rem 0.9rem;
   color: rgba(255, 255, 255, 0.82);
   font-size: 0.98rem;
 }
@@ -248,7 +248,14 @@
 .financeValue {
   color: rgba(255, 255, 255, 0.96);
   font-weight: 700;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.financeRow > span:last-child {
+  text-align: right;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .financeDiscount {
@@ -622,5 +629,15 @@
   }
   .card {
     padding: 1.25rem 1.25rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .financeRow {
+    grid-template-columns: 1fr;
+  }
+
+  .financeRow > span:last-child {
+    text-align: left;
   }
 }
