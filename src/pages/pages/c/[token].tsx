@@ -45,7 +45,6 @@ const ContractPublicPage = () => {
         setError(null);
         const res = await getContractByToken(token);
         setData(res);
-        console.log("res", res.contractSlots[0].slot.eventDate);
         const eventDate = new Date(res.contractSlots[0].slot.eventDate);
         const slotsToShow: ContractSlot[] = [
           {
@@ -303,7 +302,7 @@ const ContractPublicPage = () => {
             <div className={styles.sectionBody}>
               <Container fluid className={styles.noPad}>
                 <Row className={styles.gutterMd}>
-                  <Col xs={4}>
+                  <Col xs={12} md={4}>
                     <div className={styles.kv}>
                       <div className={styles.kvLabel}>Nombre</div>
                       <div className={styles.kvValue}>
@@ -312,7 +311,7 @@ const ContractPublicPage = () => {
                     </div>
                   </Col>
 
-                  <Col xs={4}>
+                  <Col xs={12} md={4}>
                     <div className={styles.kv}>
                       <div className={styles.kvLabel}>Email</div>
                       <div className={styles.kvValue}>
@@ -321,7 +320,7 @@ const ContractPublicPage = () => {
                     </div>
                   </Col>
 
-                  <Col xs={4}>
+                  <Col xs={12} md={4}>
                     <div className={styles.kv}>
                       <div className={styles.kvLabel}>Teléfono</div>
                       <div className={styles.kvValue}>
