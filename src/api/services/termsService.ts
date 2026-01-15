@@ -78,7 +78,7 @@ export const uploadTermsPackagesInBulk = async (
 ): Promise<void> => {
   try {
     const payload = {
-      packagesId: packages,
+      packageIds: packages,
     };
     await axiosInstanceWithToken.post(
       `/terms/${idTerm}/packages/bulk`,
