@@ -17,7 +17,10 @@ export type PhotosCollection = {
   urlFallback: string;
 };
 
-const NewProductSlider = (params: { images: PhotosCollection[] }) => {
+const NewProductSlider = (params: {
+  images: PhotosCollection[];
+  onImageClick?: (index: number) => void;
+}) => {
   const [mainSwiper, setMainSwiper] = useState<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -49,7 +52,13 @@ const NewProductSlider = (params: { images: PhotosCollection[] }) => {
           >
             {slides.map((img, idx) => (
               <SwiperSlide key={img.id}>
-                <div className={styles.slideFrame}>
+                <div
+                  className={styles.slideFrame}
+                  onClick={() => params.onImageClick?.(idx)}
+                  style={{
+                    cursor: params.onImageClick ? "zoom-in" : undefined,
+                  }}
+                >
                   <img
                     src={img.url}
                     alt={`Foto ${idx + 1}`}
