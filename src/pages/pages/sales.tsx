@@ -27,7 +27,7 @@ const SalesPage = () => {
 
       <Row className="justify-content-center mt-3">
         <Col>
-          <SectionTabs active={activeSection} onChange={onChangeSection} />
+          <SectionTabs active={activeSection} onChange={onChangeSection} sectionType="main" />
         </Col>
       </Row>
 

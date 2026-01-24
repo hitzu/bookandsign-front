@@ -121,6 +121,12 @@ const menuItems = [
         link: "/pages/contracts-add",
         dataPage: "contracts-add",
       },
+      {
+        id: "contracts-edit",
+        label: "Editar Contrato",
+        link: "/application/contract-edit",
+        dataPage: "contracts-edit",
+      },
     ],
   },
   {

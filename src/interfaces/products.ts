@@ -1,3 +1,13 @@
+import { Provider } from "./provider";
+
+export interface Product {
+  id: number;
+  name: string;
+  brandId: number;
+  promotionalType: string;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface GetProductsResponse {
   id: number;
   name: string;
@@ -28,4 +38,19 @@ export interface CreateProductPayload {
   brandId: number;
 }
 
-export interface UpdateProductPayload extends CreateProductPayload {}
+export interface UpdateProductPayload extends CreateProductPayload { }
+
+export interface CreatePaymentObligationPayload {
+  productId?: number;
+  providerId: number;
+  amount: number;
+}
+
+export interface PaymentObligation {
+  id: number;
+  productId: number;
+  providerId: number;
+  amount: number;
+  product: Product;
+  provider: Provider;
+}

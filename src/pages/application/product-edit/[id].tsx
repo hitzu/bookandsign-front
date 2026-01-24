@@ -8,28 +8,34 @@ import {
   Form,
   Row,
   Toast,
-  InputGroup,
   Button,
 } from "react-bootstrap";
 import { useFormik } from "formik";
 import {
   GetBrandsResponse,
   GetProductsResponse,
-  UpdateProductPayload,
+  Provider,
 } from "../../../interfaces";
 import { getBrands } from "../../../api/services/brandService";
 import {
-  getProductsStatuses,
+  createPaymentObligationBulk,
+  getPaymentObligationByProductId,
   getProductById,
   getProducts,
   updateProductById,
 } from "../../../api/services/productsService";
 import * as yup from "yup";
-import { translateProductStatus } from "../../../Common/translations";
+import { getProviders } from "../../../api/services/providerService";
+
+interface PaymentObligationInitialValues {
+  providerId: number | "";
+  amount: number | "";
+}
 
 interface ProductFormValues {
   name: string;
   brandId: number | "";
+  paymentObligation: PaymentObligationInitialValues[];
 }
 
 const validationSchema = yup.object().shape({
@@ -52,27 +58,41 @@ const ProductEdit = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<GetProductsResponse[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showPaymentForms, setShowPaymentForms] = useState(false);
+  const [providers, setProviders] = useState<Provider[]>([]);
+
+  const makeEmptyPaymentObligationRow = (): PaymentObligationInitialValues => ({
+    providerId: "",
+    amount: "",
+  });
 
   const formik = useFormik<ProductFormValues>({
     initialValues: {
       name: "",
       brandId: "",
+      paymentObligation: [makeEmptyPaymentObligationRow()],
     },
     validationSchema,
     onSubmit: async (values) => {
       const payload = {
         name: values.name,
-
         brandId: values.brandId as number,
       };
       try {
         await updateProductById(Number(id), payload);
+        
+        const rowsToSave = values.paymentObligation.filter(
+          (row) => row.providerId !== "" && row.amount !== ""
+        );
+
+        await createPaymentObligationBulk(Number(id),rowsToSave.map((row) => ({
+          providerId: row.providerId as number,
+          amount: row.amount as number,
+        })));
+        
         setToastMessage("Producto actualizado exitosamente");
         setToastVariant("success");
         setShowToast(true);
-        setTimeout(() => {
-          formik.resetForm();
-        }, 500);
       } catch (error: any) {
         console.error("Error actualizando el producto:", error);
         setToastMessage("Error al actualizar el producto");
@@ -81,6 +101,18 @@ const ProductEdit = () => {
       }
     },
   });
+
+  const removePaymentObligationRow = (indexToRemove: number) => {
+    const currentRows = formik.values.paymentObligation || [];
+    if (currentRows.length <= 1) {
+      setShowPaymentForms(false);
+    }
+    const nextRows = currentRows.filter((_, idx) => idx !== indexToRemove);
+    formik.setFieldValue(
+      "paymentObligation",
+      nextRows
+    );
+  };
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -103,7 +135,24 @@ const ProductEdit = () => {
           formik.setValues({
             name: product.name,
             brandId: product.brandId,
+            paymentObligation: [makeEmptyPaymentObligationRow()],
           });
+
+          const paymentObligation = await getPaymentObligationByProductId(Number(id));
+
+          if (paymentObligation.length > 0) {
+            setShowPaymentForms(true);
+            formik.setFieldValue(
+              "paymentObligation",
+              paymentObligation.map((po) => ({
+                providerId: po.providerId,
+                amount: po.amount,
+              }))
+            );
+          } else {
+            setShowPaymentForms(false);
+          }
+
           setSearchTerm(product.name);
         } catch (error) {
           console.error("Error fetching product:", error);
@@ -115,6 +164,14 @@ const ProductEdit = () => {
       fetchProduct();
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      const response = await getProviders();
+      setProviders(response);
+    };
+    fetchProviders();
+  }, []);
 
   const handleSearch = async (term: string) => {
     setSearchTerm(term);
@@ -275,6 +332,106 @@ const ProductEdit = () => {
                     {formik.errors.name}
                   </Form.Control.Feedback>
                 </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>¿Tiene un proveedor asociado?</Form.Label>
+                  <Form.Check
+                    type="checkbox"
+                    name="hasProvider"
+                    checked={showPaymentForms}
+                    onChange={() => {
+                      const next = !showPaymentForms;
+                      setShowPaymentForms(next);
+                      if (!next) {
+                        formik.setFieldValue("paymentObligation", [
+                          makeEmptyPaymentObligationRow(),
+                        ]);
+                      }
+                    }}
+                  />
+                </Form.Group>
+
+                {showPaymentForms && (
+                  <>
+                    {(formik.values.paymentObligation || []).map((row, index) => (
+                      <Row key={index} className="align-items-end">
+                        <Col md={6}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Proveedor</Form.Label>
+                            <Form.Select
+                              name={`paymentObligation.${index}.providerId`}
+                              value={row.providerId}
+                              onChange={(e) =>
+                                formik.setFieldValue(
+                                  `paymentObligation.${index}.providerId`,
+                                  e.target.value ? parseInt(e.target.value) : ""
+                                )
+                              }
+                              onBlur={formik.handleBlur(
+                                `paymentObligation.${index}.providerId`
+                              )}
+                            >
+                              <option>Seleccione un proveedor</option>
+                              {providers.map((provider) => (
+                                <option key={provider.id} value={provider.id}>
+                                  {provider.name}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={5}>
+                          <Form.Group className="mb-3">
+                            <Form.Label>Cantidad</Form.Label>
+                            <Form.Control
+                              type="number"
+                              placeholder="Cantidad"
+                              name={`paymentObligation.${index}.amount`}
+                              value={row.amount}
+                              onChange={(e) =>
+                                formik.setFieldValue(
+                                  `paymentObligation.${index}.amount`,
+                                  e.target.value ? Number(e.target.value) : ""
+                                )
+                              }
+                              onBlur={formik.handleBlur(
+                                `paymentObligation.${index}.amount`
+                              )}
+                            />
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={1}>
+                          <Form.Group className="mb-3">
+                            <Button
+                              type="button"
+                              variant="outline-primary"
+                              onClick={() => removePaymentObligationRow(index)}
+                            >
+                              -
+                            </Button>
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    ))}
+
+                    <div className="d-flex justify-content-end mb-3">
+                      <Button
+                        type="button"
+                        variant="outline-primary"
+                        onClick={() =>
+                          formik.setFieldValue("paymentObligation", [
+                            ...(formik.values.paymentObligation || []),
+                            makeEmptyPaymentObligationRow(),
+                          ])
+                        }
+                      >
+                        +
+                      </Button>
+                    </div>
+                  </>
+                )}
 
                 <Button
                   type="submit"
