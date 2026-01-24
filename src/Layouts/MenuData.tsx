@@ -19,6 +19,34 @@
 const menuItems = [
   {
     type: "HASHMENU",
+    id: 4,
+    label: "Contratos",
+    icon: "ph-duotone ph-calendar-blank",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "slots",
+        label: "Listado de Contratos",
+        link: "/application/contract-list",
+        dataPage: "contracts-list",
+      },
+      {
+        id: "contracts-add",
+        label: "Agregar Contrato",
+        link: "/pages/contracts-add",
+        dataPage: "contracts-add",
+      },
+      {
+        id: "contracts-edit",
+        label: "Editar Contrato",
+        link: "/application/contract-edit",
+        dataPage: "contracts-edit",
+      },
+    ],
+  },
+  {
+    type: "HASHMENU",
     id: 1,
     label: "Productos",
     icon: "ph-duotone ph-shopping-cart",
@@ -103,35 +131,7 @@ const menuItems = [
   },
   {
     type: "HASHMENU",
-    id: 4,
-    label: "Contratos",
-    icon: "ph-duotone ph-calendar-blank",
-    dataPage: null,
-    link: "#",
-    submenu: [
-      {
-        id: "slots",
-        label: "Listado de Contratos",
-        link: "/application/contract-list",
-        dataPage: "contracts-list",
-      },
-      {
-        id: "contracts-add",
-        label: "Agregar Contrato",
-        link: "/pages/contracts-add",
-        dataPage: "contracts-add",
-      },
-      {
-        id: "contracts-edit",
-        label: "Editar Contrato",
-        link: "/application/contract-edit",
-        dataPage: "contracts-edit",
-      },
-    ],
-  },
-  {
-    type: "HASHMENU",
-    id: 4,
+    id: 5,
     label: "Promociones",
     icon: "ph-duotone ph-percent",
     dataPage: null,
@@ -142,6 +142,34 @@ const menuItems = [
         label: "Listado de Promociones",
         link: "/application/promotions-list",
         dataPage: "promotions-list",
+      },
+    ],
+  },
+  {
+    type: "HASHMENU",
+    id: 0,
+    label: "Proveedores",
+    icon: "ph-duotone ph-truck",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "provider-list",
+        label: "Listado de proveedores",
+        link: "/application/provider-list",
+        dataPage: "provider-list",
+      },
+      {
+        id: "provider-edit",
+        label: "Editar proveedor",
+        link: "/application/provider-edit",
+        dataPage: "provider-edit",
+      },
+      {
+        id: "provider-add",
+        label: "Agregar proveedor",
+        link: "/application/provider-add",
+        dataPage: "provider-add",
       },
     ],
   },

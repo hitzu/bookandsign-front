@@ -54,3 +54,6 @@ export interface PaymentObligation {
   product: Product;
   provider: Provider;
 }
+
+export type CreatePaymentObligationBulkItem =
+  Omit<CreatePaymentObligationPayload, "productId">;

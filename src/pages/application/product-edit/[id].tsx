@@ -2,14 +2,7 @@ import Layout from "@layout/index";
 import { useRouter } from "next/router";
 import React, { ReactElement, useState, useEffect } from "react";
 import BreadcrumbItem from "@common/BreadcrumbItem";
-import {
-  Card,
-  Col,
-  Form,
-  Row,
-  Toast,
-  Button,
-} from "react-bootstrap";
+import { Card, Col, Form, Row, Toast, Button } from "react-bootstrap";
 import { useFormik } from "formik";
 import {
   GetBrandsResponse,
@@ -80,16 +73,21 @@ const ProductEdit = () => {
       };
       try {
         await updateProductById(Number(id), payload);
-        
+
         const rowsToSave = values.paymentObligation.filter(
           (row) => row.providerId !== "" && row.amount !== ""
         );
 
-        await createPaymentObligationBulk(Number(id),rowsToSave.map((row) => ({
-          providerId: row.providerId as number,
-          amount: row.amount as number,
-        })));
-        
+        if (rowsToSave.length > 0) {
+          await createPaymentObligationBulk(
+            Number(id),
+            rowsToSave.map((row) => ({
+              providerId: row.providerId as number,
+              amount: row.amount as number,
+            }))
+          );
+        }
+
         setToastMessage("Producto actualizado exitosamente");
         setToastVariant("success");
         setShowToast(true);
@@ -106,12 +104,13 @@ const ProductEdit = () => {
     const currentRows = formik.values.paymentObligation || [];
     if (currentRows.length <= 1) {
       setShowPaymentForms(false);
+      formik.setFieldValue("paymentObligation", [
+        makeEmptyPaymentObligationRow(),
+      ]);
+      return;
     }
     const nextRows = currentRows.filter((_, idx) => idx !== indexToRemove);
-    formik.setFieldValue(
-      "paymentObligation",
-      nextRows
-    );
+    formik.setFieldValue("paymentObligation", nextRows);
   };
 
   useEffect(() => {
@@ -138,7 +137,9 @@ const ProductEdit = () => {
             paymentObligation: [makeEmptyPaymentObligationRow()],
           });
 
-          const paymentObligation = await getPaymentObligationByProductId(Number(id));
+          const paymentObligation = await getPaymentObligationByProductId(
+            Number(id)
+          );
 
           if (paymentObligation.length > 0) {
             setShowPaymentForms(true);
@@ -167,8 +168,12 @@ const ProductEdit = () => {
 
   useEffect(() => {
     const fetchProviders = async () => {
-      const response = await getProviders();
-      setProviders(response);
+      try {
+        const response = await getProviders();
+        setProviders(response);
+      } catch (error) {
+        console.error("Error fetching providers:", error);
+      }
     };
     fetchProviders();
   }, []);
@@ -353,68 +358,74 @@ const ProductEdit = () => {
 
                 {showPaymentForms && (
                   <>
-                    {(formik.values.paymentObligation || []).map((row, index) => (
-                      <Row key={index} className="align-items-end">
-                        <Col md={6}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>Proveedor</Form.Label>
-                            <Form.Select
-                              name={`paymentObligation.${index}.providerId`}
-                              value={row.providerId}
-                              onChange={(e) =>
-                                formik.setFieldValue(
-                                  `paymentObligation.${index}.providerId`,
-                                  e.target.value ? parseInt(e.target.value) : ""
-                                )
-                              }
-                              onBlur={formik.handleBlur(
-                                `paymentObligation.${index}.providerId`
-                              )}
-                            >
-                              <option>Seleccione un proveedor</option>
-                              {providers.map((provider) => (
-                                <option key={provider.id} value={provider.id}>
-                                  {provider.name}
-                                </option>
-                              ))}
-                            </Form.Select>
-                          </Form.Group>
-                        </Col>
+                    {(formik.values.paymentObligation || []).map(
+                      (row, index) => (
+                        <Row key={index} className="align-items-end">
+                          <Col md={6}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Proveedor</Form.Label>
+                              <Form.Select
+                                name={`paymentObligation.${index}.providerId`}
+                                value={row.providerId}
+                                onChange={(e) =>
+                                  formik.setFieldValue(
+                                    `paymentObligation.${index}.providerId`,
+                                    e.target.value
+                                      ? parseInt(e.target.value)
+                                      : ""
+                                  )
+                                }
+                                onBlur={formik.handleBlur(
+                                  `paymentObligation.${index}.providerId`
+                                )}
+                              >
+                                <option>Seleccione un proveedor</option>
+                                {providers.map((provider) => (
+                                  <option key={provider.id} value={provider.id}>
+                                    {provider.name}
+                                  </option>
+                                ))}
+                              </Form.Select>
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={5}>
-                          <Form.Group className="mb-3">
-                            <Form.Label>Cantidad</Form.Label>
-                            <Form.Control
-                              type="number"
-                              placeholder="Cantidad"
-                              name={`paymentObligation.${index}.amount`}
-                              value={row.amount}
-                              onChange={(e) =>
-                                formik.setFieldValue(
-                                  `paymentObligation.${index}.amount`,
-                                  e.target.value ? Number(e.target.value) : ""
-                                )
-                              }
-                              onBlur={formik.handleBlur(
-                                `paymentObligation.${index}.amount`
-                              )}
-                            />
-                          </Form.Group>
-                        </Col>
+                          <Col md={5}>
+                            <Form.Group className="mb-3">
+                              <Form.Label>Cantidad</Form.Label>
+                              <Form.Control
+                                type="number"
+                                placeholder="Cantidad"
+                                name={`paymentObligation.${index}.amount`}
+                                value={row.amount}
+                                onChange={(e) =>
+                                  formik.setFieldValue(
+                                    `paymentObligation.${index}.amount`,
+                                    e.target.value ? Number(e.target.value) : ""
+                                  )
+                                }
+                                onBlur={formik.handleBlur(
+                                  `paymentObligation.${index}.amount`
+                                )}
+                              />
+                            </Form.Group>
+                          </Col>
 
-                        <Col md={1}>
-                          <Form.Group className="mb-3">
-                            <Button
-                              type="button"
-                              variant="outline-primary"
-                              onClick={() => removePaymentObligationRow(index)}
-                            >
-                              -
-                            </Button>
-                          </Form.Group>
-                        </Col>
-                      </Row>
-                    ))}
+                          <Col md={1}>
+                            <Form.Group className="mb-3">
+                              <Button
+                                type="button"
+                                variant="outline-primary"
+                                onClick={() =>
+                                  removePaymentObligationRow(index)
+                                }
+                              >
+                                -
+                              </Button>
+                            </Form.Group>
+                          </Col>
+                        </Row>
+                      )
+                    )}
 
                     <div className="d-flex justify-content-end mb-3">
                       <Button

@@ -7,18 +7,15 @@ import {
   Form,
   Row,
   Toast,
-  InputGroup,
   Button,
 } from "react-bootstrap";
 import { useFormik } from "formik";
 import { GetBrandsResponse, CreateProductPayload } from "../../interfaces";
 import { getBrands } from "../../api/services/brandService";
 import {
-  getProductsStatuses,
   createProduct,
 } from "../../api/services/productsService";
 import * as yup from "yup";
-import { translateProductStatus } from "../../Common/translations";
 
 interface ProductFormValues {
   name: string;

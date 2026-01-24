@@ -4,6 +4,7 @@ import {
   UpdateProductPayload,
   CreatePaymentObligationPayload,
   PaymentObligation,
+  CreatePaymentObligationBulkItem,
 } from "../../interfaces/products";
 import { axiosInstanceWithToken } from "../config/axiosConfig";
 
@@ -91,10 +92,11 @@ export const deleteProductById = async (id: number): Promise<void> => {
 };
 
 export const createPaymentObligation = async (
-  payload: CreatePaymentObligationPayload
+  productId: number,
+  payload: Omit<CreatePaymentObligationPayload, "productId">
 ): Promise<void> => {
   try {
-    await axiosInstanceWithToken.post(`/products/${payload.productId}/payment-obligations`, payload);
+    await axiosInstanceWithToken.post(`/products/${productId}/payment-obligations`, payload);
   } catch (error) {
     console.error("Error creating payment obligation:", error);
     throw error;
@@ -103,7 +105,7 @@ export const createPaymentObligation = async (
 
 export const createPaymentObligationBulk = async (
   productId: number,
-  payload: CreatePaymentObligationPayload[]
+  payload: CreatePaymentObligationBulkItem[]
 ): Promise<void> => {
   try {
     await axiosInstanceWithToken.post(`/products/${productId}/payment-obligations/bulk`, payload);

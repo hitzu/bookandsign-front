@@ -26,7 +26,7 @@ export const getContractByToken = async (
 
 export const getContractBySku = async (sku: string): Promise<ContractCompleteResponse> => {
   try {
-    const response = await axiosInstanceWithoutToken.get<ContractCompleteResponse>(`/contracts/get-by-sku/${sku}`);
+    const response = await axiosInstanceWithoutToken.get<ContractCompleteResponse>(`/contracts/get-by-sku/${encodeURIComponent(sku)}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching contract by sku:", error);

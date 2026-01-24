@@ -50,14 +50,11 @@ const ContractEditIndex = () => {
               <h5>Buscar contrato por SKU</h5>
             </Card.Header>
             <Card.Body>
-
               <Form.Group>
-                <Form.Label>
-                  Buscar termino y condicion por titulo o contenido
-                </Form.Label>
+                <Form.Label>Buscar contrato por SKU</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Escriba el titulo o contenido del termino y condicion..."
+                  placeholder="Escriba el titulo o contenido del contrato..."
                   value={searchContract}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
@@ -79,6 +76,14 @@ const ContractEditIndex = () => {
                       <div
                         key={contract.id}
                         onClick={() => handleSelectContract(contract)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleSelectContract(contract);
+                          }
+                        }}
                         style={{
                           padding: "8px 12px",
                           cursor: "pointer",
@@ -113,7 +118,7 @@ const ContractEditIndex = () => {
                       }}
                     >
                       <small className="text-muted">
-                        No se encontraron terminos y condiciones con ese nombre
+                        No se encontraron contratos con ese SKU
                       </small>
                     </div>
                   )}

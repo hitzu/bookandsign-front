@@ -93,7 +93,7 @@ const ContractList = () => {
           return (
             <React.Fragment>
               <ul className="list-inline me-auto mb-0">
-              <li
+                <li
                   className="list-inline-item align-bottom"
                   data-bs-toggle="tooltip"
                   title="Edit"
@@ -101,6 +101,7 @@ const ContractList = () => {
                   <Link
                     href={`/application/contract-edit/${cellProps.row.original.sku}`}
                     className="avtar avtar-xs btn-link-success btn-pc-default"
+                    aria-label="Editar contrato"
                   >
                     <i className="ti ti-edit-circle f-18"></i>
                   </Link>

@@ -10,9 +10,10 @@ import { getContractBySku } from "src/api/services/contractService";
 const ContractEdit = () => {
   const router = useRouter();
   const { sku } = router.query;
-  const [activeSection, setActiveSection] =
-    useState<MainSectionKey>("receipt");
-  const [contract, setContract] = useState<ContractCompleteResponse | null>(null);
+  const [activeSection, setActiveSection] = useState<MainSectionKey>("receipt");
+  const [contract, setContract] = useState<ContractCompleteResponse | null>(
+    null
+  );
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<"success" | "danger">(
@@ -27,7 +28,9 @@ const ContractEdit = () => {
     const fetchContractBySku = async () => {
       try {
         if (sku && typeof sku === "string") {
-          const response = await getContractBySku(sku as string) as ContractCompleteResponse;
+          const response = (await getContractBySku(
+            sku as string
+          )) as ContractCompleteResponse;
           setContract(response);
         }
       } catch (error) {
@@ -39,10 +42,7 @@ const ContractEdit = () => {
 
   return (
     <React.Fragment>
-      <BreadcrumbItem
-        mainTitle="Contratos"
-        subTitle="Revision Contrato"
-      />
+      <BreadcrumbItem mainTitle="Contratos" subTitle="Revision Contrato" />
 
       <div
         style={{
@@ -81,7 +81,7 @@ const ContractEdit = () => {
                     <Form.Label>SKU</Form.Label>
                     <Form.Control
                       name="scope"
-                      value={contract?.contract.sku}
+                      value={contract?.contract.sku ?? ""}
                       disabled
                     />
                   </Form.Group>
@@ -124,7 +124,6 @@ const ContractEdit = () => {
               </Row>
 
               <Row>
-
                 <Form.Group className="mb-3 col-sm-12 col-md-4">
                   <Form.Label>subtotal</Form.Label>
                   <Form.Control
@@ -158,7 +157,6 @@ const ContractEdit = () => {
                   />
                 </Form.Group>
               </Row>
-              
             </Card.Body>
           </Card>
         </Col>
@@ -166,7 +164,11 @@ const ContractEdit = () => {
 
       <Row className="justify-content-center mt-3">
         <Col>
-          <SectionTabs active={activeSection} onChange={onChangeSection} sectionType="payments" />
+          <SectionTabs
+            active={activeSection}
+            onChange={onChangeSection}
+            sectionType="payments"
+          />
         </Col>
       </Row>
 
