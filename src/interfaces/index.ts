@@ -11,3 +11,4 @@ export * from "./notes";
 export * from "./contracts";
 export * from "./payments";
 export * from "./promotions";
+export * from "./provider";

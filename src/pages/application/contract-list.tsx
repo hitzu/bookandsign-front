@@ -96,6 +96,19 @@ const ContractList = () => {
                 <li
                   className="list-inline-item align-bottom"
                   data-bs-toggle="tooltip"
+                  title="Edit"
+                >
+                  <Link
+                    href={`/application/contract-edit/${cellProps.row.original.sku}`}
+                    className="avtar avtar-xs btn-link-success btn-pc-default"
+                    aria-label="Editar contrato"
+                  >
+                    <i className="ti ti-edit-circle f-18"></i>
+                  </Link>
+                </li>
+                <li
+                  className="list-inline-item align-bottom"
+                  data-bs-toggle="tooltip"
                   title="Delete"
                 >
                   <Link

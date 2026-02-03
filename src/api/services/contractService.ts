@@ -1,5 +1,6 @@
 import {
   Contract,
+  ContractCompleteResponse,
   GenerateContractPayload,
   GetContractByIdResponse,
 } from "../../interfaces";
@@ -23,6 +24,16 @@ export const getContractByToken = async (
   }
 };
 
+export const getContractBySku = async (sku: string): Promise<ContractCompleteResponse> => {
+  try {
+    const response = await axiosInstanceWithoutToken.get<ContractCompleteResponse>(`/contracts/get-by-sku/${encodeURIComponent(sku)}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contract by sku:", error);
+    throw error;
+  }
+};
+
 export const getContractById = async (
   id: number
 ): Promise<GetContractByIdResponse> => {
@@ -42,6 +53,18 @@ export const getContracts = async (): Promise<Contract[]> => {
     return response.data;
   } catch (error) {
     console.error("Error fetching contracts:", error);
+    throw error;
+  }
+};
+
+export const getContractsBySku = async (sku: string): Promise<Contract[]> => {
+  try {
+    const queryParams = new URLSearchParams();
+    queryParams.append("sku", sku);
+    const response = await axiosInstanceWithToken.get<Contract[]>(`/contracts?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching contracts by sku:", error);
     throw error;
   }
 };

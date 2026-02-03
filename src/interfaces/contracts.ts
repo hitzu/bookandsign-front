@@ -47,6 +47,18 @@ export interface GetContractByIdResponse {
   contractSlots: ContractSlot[];
 }
 
+
+
+export interface ContractCompleteResponse {
+  contract: Contract;
+  slots?: Slot[];
+  packages: ContractPackages[];
+  payments: Payment[];
+  paidAmount: number;
+  contractSlots: ContractSlot[];
+}
+
+
 export interface GenerateContractItem {
   packageId: number;
   quantity: number;

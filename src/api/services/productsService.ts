@@ -2,6 +2,9 @@ import {
   GetProductsResponse,
   CreateProductPayload,
   UpdateProductPayload,
+  CreatePaymentObligationPayload,
+  PaymentObligation,
+  CreatePaymentObligationBulkItem,
 } from "../../interfaces/products";
 import { axiosInstanceWithToken } from "../config/axiosConfig";
 
@@ -84,6 +87,40 @@ export const deleteProductById = async (id: number): Promise<void> => {
     await axiosInstanceWithToken.delete(`/products/${id}`);
   } catch (error) {
     console.error("Error deleting product by id:", error);
+    throw error;
+  }
+};
+
+export const createPaymentObligation = async (
+  productId: number,
+  payload: Omit<CreatePaymentObligationPayload, "productId">
+): Promise<void> => {
+  try {
+    await axiosInstanceWithToken.post(`/products/${productId}/payment-obligations`, payload);
+  } catch (error) {
+    console.error("Error creating payment obligation:", error);
+    throw error;
+  }
+};
+
+export const createPaymentObligationBulk = async (
+  productId: number,
+  payload: CreatePaymentObligationBulkItem[]
+): Promise<void> => {
+  try {
+    await axiosInstanceWithToken.post(`/products/${productId}/payment-obligations/bulk`, payload);
+  } catch (error) {
+    console.error("Error creating payment obligation bulk:", error);
+    throw error;
+  }
+};
+
+export const getPaymentObligationByProductId = async (productId: number): Promise<PaymentObligation[]> => {
+  try {
+    const response = await axiosInstanceWithToken.get(`/products/${productId}/payment-obligations`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching payment obligation by product id:", error);
     throw error;
   }
 };

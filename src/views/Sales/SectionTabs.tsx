@@ -4,16 +4,26 @@ import styles from "../../assets/css/sales-section-tabs.module.css";
 export type SectionTabsProps = {
   active: MainSectionKey;
   onChange: (next: MainSectionKey) => void;
+  sectionType: "main" | "payments";
 };
 
-export type MainSectionKey = "calendar" | "transportation-fee" | "photos";
+export type MainSectionKey = "calendar" | "transportation-fee" | "photos" | "receipt" | "payments";
 
-export const SectionTabs = ({ active, onChange }: SectionTabsProps) => {
-  const items: Array<{ key: MainSectionKey; label: string }> = [
-    { key: "calendar", label: "Calendario" },
-    { key: "transportation-fee", label: "Tarifa de traslado" },
-    { key: "photos", label: "Fotos" },
-  ];
+export const SectionTabs = ({ active, onChange, sectionType }: SectionTabsProps) => {
+
+  let items: Array<{ key: MainSectionKey; label: string }> = [];
+  if (sectionType === "main") {
+    items = [
+      { key: "calendar", label: "Calendario" },
+      { key: "transportation-fee", label: "Tarifa de traslado" },
+      { key: "photos", label: "Fotos" },
+    ];
+  } else if (sectionType === "payments") {
+    items = [
+      { key: "receipt", label: "Recibidos" },
+      { key: "payments", label: "Pagos" },
+    ];
+  }
 
   return (
     <div role="tablist" className={styles.salesSectionTabsContainer}>
