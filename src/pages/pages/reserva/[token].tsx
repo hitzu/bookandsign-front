@@ -2,7 +2,7 @@ import NonLayout from "@layout/NonLayout";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import { Container, Row, Col } from "react-bootstrap";
+import { Container, Row, Col, Nav, Offcanvas } from "react-bootstrap";
 import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/contract-public.module.css";
 import { getContractByToken } from "../../../api/services/contractService";
@@ -10,14 +10,17 @@ import { getPublicTerms } from "../../../api/services/termsService";
 import {
   ContractSlot,
   GetContractByIdResponse,
+  GetTermsResponse,
   Note,
-  Terms,
 } from "../../../interfaces";
-import { translateContractSlotPurpose } from "@common/translations";
-import { formatLongSpanishDate } from "@common/dates";
 import { getPublicNotes } from "../../../api/services/notesService";
 import { SocialMediaPlugin } from "../../../views/Booking/SocialMediaPlugin";
 import TermsAndConditions from "@views/Booking/TermsAndConditions";
+import { ReservationClientSection } from "@views/Booking/ReservationClientSection";
+import { ReservationDatesSection } from "@views/Booking/ReservationDatesSection";
+import { ReservationServicesSection } from "@views/Booking/ReservationServicesSection";
+import { ReservationFinanceSection } from "@views/Booking/ReservationFinanceSection";
+import { ReservationNotesSection } from "@views/Booking/ReservationNotesSection";
 
 const ContractPublicPage = () => {
   const router = useRouter();
@@ -27,9 +30,13 @@ const ContractPublicPage = () => {
   const [data, setData] = useState<GetContractByIdResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [slots, setSlots] = useState<ContractSlot[]>([]);
-  const [terms, setTerms] = useState<Terms[]>([]);
+  const [terms, setTerms] = useState<GetTermsResponse[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [isExpanded, setIsExpanded] = useState(false);
+
+  type SectionId = "resume" | "terms";
+
+  const [activeSectionId, setActiveSectionId] = useState<SectionId>("resume");
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const halfwayDate = (start: Date, end: Date): Date => {
     return new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
@@ -43,12 +50,16 @@ const ContractPublicPage = () => {
         setError(null);
         const res = await getContractByToken(token);
         setData(res);
-        const eventDate = new Date(res.contractSlots[0].slot.eventDate);
+        const firstSlot = res.contractSlots[0];
+        const eventDateRaw =
+          firstSlot?.slot?.eventDate ?? res.contract.createdAt;
+        const eventDate = new Date(eventDateRaw);
+
         const slotsToShow: ContractSlot[] = [
           {
             id: 0,
             purpose: "creation_date",
-            slotId: 0,
+            slotId: -1,
             contractId: 0,
             slot: {
               contractId: 0,
@@ -60,7 +71,7 @@ const ContractPublicPage = () => {
           {
             id: 0,
             purpose: "halfway_date",
-            slotId: 0,
+            slotId: -2,
             contractId: 0,
             slot: {
               contractId: 0,
@@ -72,7 +83,7 @@ const ContractPublicPage = () => {
               status: "reserved",
             },
           },
-          ...res.contractSlots,
+          ...(res.contractSlots ?? []),
         ];
         setSlots(slotsToShow);
       } catch (_e: unknown) {
@@ -91,6 +102,8 @@ const ContractPublicPage = () => {
       const loadTermsAndNotes = async () => {
         try {
           const terms = await getPublicTerms({ scope: "global" });
+          const notes = await getPublicNotes(data?.contract?.id, "contract");
+          setNotes([...notes]);
           if (
             data?.packages &&
             data?.packages.length > 0 &&
@@ -104,9 +117,6 @@ const ContractPublicPage = () => {
             );
             const packageTerms = await Promise.all(promises);
             setTerms([...terms, ...packageTerms.flat()]);
-
-            const notes = await getPublicNotes(data?.contract?.id, "contract");
-            setNotes([...notes]);
           } else {
             setTerms(terms);
           }
@@ -120,18 +130,9 @@ const ContractPublicPage = () => {
     }
   }, [data?.contract]);
 
-  const formatMoney = (amount: number) => {
-    const n = Number.isFinite(amount) ? amount : 0;
-    return new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-      maximumFractionDigits: 0,
-    }).format(n);
-  };
-
   const items = data?.packages ?? [];
-  const packageTerms = useMemo((): Terms[] => {
-    const dedup = new Map<number, Terms>();
+  const packageTerms = useMemo((): GetTermsResponse[] => {
+    const dedup = new Map<number, GetTermsResponse>();
     for (const it of items) {
       const terms = it?.package?.terms ?? [];
       for (const t of terms) {
@@ -142,122 +143,159 @@ const ContractPublicPage = () => {
     return Array.from(dedup.values());
   }, [items]);
 
-  const paidAmount = data?.paidAmount ?? 0;
+  const showNav = Boolean(!loading && !error && data);
 
-  const paymentsSorted = useMemo(() => {
-    const payments = (data?.payments ?? []).slice();
-    payments.sort((a, b) => {
-      const aRaw = a?.receivedAt ?? "";
-      const bRaw = b?.receivedAt ?? "";
-      const aD = aRaw.includes("T")
-        ? new Date(aRaw)
-        : new Date(`${aRaw}T00:00:00`);
-      const bD = bRaw.includes("T")
-        ? new Date(bRaw)
-        : new Date(`${bRaw}T00:00:00`);
-      const aT = Number.isNaN(aD.getTime()) ? 0 : aD.getTime();
-      const bT = Number.isNaN(bD.getTime()) ? 0 : bD.getTime();
-      return aT - bT; // oldest -> newest
-    });
-    return payments;
-  }, [data?.payments]);
+  type Section = {
+    id: SectionId;
+    label: string;
+    enabled: boolean;
+    render: () => React.ReactNode;
+  };
 
-  const paidAmountFromPayments = useMemo(() => {
-    if (paymentsSorted.length === 0) return paidAmount;
-    return paymentsSorted.reduce((sum, p) => sum + (p?.amount ?? 0), 0);
-  }, [paidAmount, paymentsSorted]);
+  const allSections: Section[] = data
+    ? ([
+        {
+          id: "resume",
+          label: "Resumen",
+          enabled: true,
+          render: () => {
+            return (
+              <>
+                <ReservationClientSection contract={data.contract} />
+                <ReservationDatesSection slots={slots} />
+                <ReservationServicesSection items={items} />
+                <ReservationFinanceSection
+                  contract={data.contract}
+                  payments={data.payments ?? []}
+                  paidAmount={data.paidAmount ?? 0}
+                />
+                <ReservationNotesSection notes={notes} />
+              </>
+            );
+          },
+        },
+        {
+          id: "terms",
+          label: "Términos",
+          enabled: true,
+          render: () => (
+            <TermsAndConditions packageTerms={packageTerms} terms={terms} />
+          ),
+        },
+      ] satisfies Section[])
+    : [];
 
-  const [expandedItemIds, setExpandedItemIds] = useState<Set<number>>(
-    () => new Set()
-  );
+  const sections = allSections.filter((s) => s.enabled);
 
-  if (loading) {
-    return (
-      <div className={styles.contractPublicContainer}>
-        <div className={styles.contentMax}>
-          <header className={styles.header}>
-            <div className={styles.logoWrap} style={{ opacity: 0.9 }}>
-              <Image src={logoWhite} alt="Brillipoint" width={96} height={96} />
-            </div>
-            <div className={styles.skeletonLineLg} />
-            <div className={styles.skeletonLineMd} />
-          </header>
+  const safeActiveSectionId =
+    sections.find((s) => s.id === activeSectionId)?.id ??
+    sections[0]?.id ??
+    activeSectionId;
 
-          <div style={{ display: "grid", gap: "1rem" }}>
-            <section className={styles.card}>
-              <div className={styles.skeletonLineMd} style={{ margin: 0 }} />
-              <div className={styles.sectionBody}>
-                <Container fluid className={styles.noPad}>
-                  <Row className={styles.gutterMd}>
-                    <Col xs={12} md={6}>
-                      <div className={styles.skeletonBox} />
-                    </Col>
-                    <Col xs={12} md={6}>
-                      <div className={styles.skeletonBox} />
-                    </Col>
-                    <Col xs={12} md={6}>
-                      <div className={styles.skeletonBox} />
-                    </Col>
-                    <Col xs={12} md={6}>
-                      <div className={styles.skeletonBox} />
-                    </Col>
-                  </Row>
-                </Container>
-              </div>
-            </section>
+  useEffect(() => {
+    if (sections.length === 0) return;
+    if (safeActiveSectionId !== activeSectionId) {
+      setActiveSectionId(safeActiveSectionId);
+    }
+  }, [activeSectionId, safeActiveSectionId, sections.length]);
 
-            <section className={styles.card}>
-              <div className={styles.skeletonLineMd} style={{ margin: 0 }} />
-              <div className={styles.sectionBody}>
-                <div style={{ display: "grid", gap: "0.75rem" }}>
+  const selectSection = (id: SectionId) => {
+    setActiveSectionId(id);
+    setShowMobileMenu(false);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const activeSection = sections.find((s) => s.id === safeActiveSectionId);
+
+  const contentNode = loading ? (
+    <div className={styles.contentMax}>
+      <div style={{ display: "grid", gap: "1rem" }}>
+        <section className={styles.card}>
+          <div className={styles.skeletonLineMd} style={{ margin: 0 }} />
+          <div className={styles.sectionBody}>
+            <Container fluid className={styles.noPad}>
+              <Row className={styles.gutterMd}>
+                <Col xs={12} md={6}>
                   <div className={styles.skeletonBox} />
+                </Col>
+                <Col xs={12} md={6}>
                   <div className={styles.skeletonBox} />
-                </div>
-              </div>
-            </section>
+                </Col>
+                <Col xs={12} md={6}>
+                  <div className={styles.skeletonBox} />
+                </Col>
+                <Col xs={12} md={6}>
+                  <div className={styles.skeletonBox} />
+                </Col>
+              </Row>
+            </Container>
           </div>
-        </div>
-      </div>
-    );
-  }
+        </section>
 
-  if (error || !data) {
-    return (
-      <div className={styles.contractPublicContainer}>
-        <div className={styles.contentMax}>
-          <header className={styles.header}>
-            <div className={styles.logoWrap}>
-              <Image src={logoWhite} alt="Brillipoint" width={96} height={96} />
+        <section className={styles.card}>
+          <div className={styles.skeletonLineMd} style={{ margin: 0 }} />
+          <div className={styles.sectionBody}>
+            <div style={{ display: "grid", gap: "0.75rem" }}>
+              <div className={styles.skeletonBox} />
+              <div className={styles.skeletonBox} />
             </div>
-            <h1 className={styles.title}>Tu reserva Brillipoint </h1>
-          </header>
-
-          <section className={`${styles.card} ${styles.errorCard}`}>
-            <div className={styles.errorTitle}>
-              No pudimos cargar tu reserva
-            </div>
-            <p className={styles.errorText}>
-              {error ??
-                "Ocurrió un problema al cargar la información del contrato."}
-            </p>
-            <button
-              type="button"
-              onClick={() => router.reload()}
-              className={styles.btnRetry}
-            >
-              Reintentar
-            </button>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
-    );
-  }
+    </div>
+  ) : error || !data ? (
+    <div className={styles.contentMax}>
+      <section className={`${styles.card} ${styles.errorCard}`}>
+        <div className={styles.errorTitle}>No pudimos cargar tu reserva</div>
+        <p className={styles.errorText}>
+          {error ??
+            "Ocurrió un problema al cargar la información del contrato."}
+        </p>
+        <button
+          type="button"
+          onClick={() => router.reload()}
+          className={styles.btnRetry}
+        >
+          Reintentar
+        </button>
+      </section>
+    </div>
+  ) : (
+    <>{activeSection?.render()}</>
+  );
 
   return (
     <div className={styles.contractPublicContainer}>
-      <Row className="mb-4">
-        <Col xs={12}>
-          <header className={styles.header}>
+      <div className={styles.stickyHeader}>
+        <div className={styles.contentMax}>
+          <header className={[styles.header, styles.headerSticky].join(" ")}>
+            {showNav ? (
+              <button
+                type="button"
+                className={[styles.hamburgerBtn, "d-md-none"].join(" ")}
+                onClick={() => setShowMobileMenu(true)}
+                aria-label="Abrir menú"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 7h16M4 12h16M4 17h16"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            ) : null}
+
             <div className={styles.logoWrap}>
               <Image
                 src={logoWhite}
@@ -268,264 +306,87 @@ const ContractPublicPage = () => {
             </div>
 
             <h1 className={styles.title}>Tu reserva Brillipoint ✨</h1>
-          </header>
-        </Col>
-      </Row>
 
-      {/* CLIENT DATA */}
-      <Row className={`mb-4 ${styles["center-information-content"]}`}>
-        <Col xs={12} md={10}>
-          <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Datos del cliente</h2>
-            <div className={styles.sectionBody}>
-              <Container fluid className={styles.noPad}>
-                <Row className={styles.gutterMd}>
-                  <Col xs={12} md={4}>
-                    <div className={styles.kv}>
-                      <div className={styles.kvLabel}>Nombre</div>
-                      <div className={styles.kvValue}>
-                        {data.contract?.clientName ?? "—"}
-                      </div>
-                    </div>
-                  </Col>
-
-                  <Col xs={12} md={4}>
-                    <div className={styles.kv}>
-                      <div className={styles.kvLabel}>Email</div>
-                      <div className={styles.kvValue}>
-                        {data.contract?.clientEmail ?? "—"}
-                      </div>
-                    </div>
-                  </Col>
-
-                  <Col xs={12} md={4}>
-                    <div className={styles.kv}>
-                      <div className={styles.kvLabel}>Teléfono</div>
-                      <div className={styles.kvValue}>
-                        {data.contract?.clientPhone ?? "—"}
-                      </div>
-                    </div>
-                  </Col>
-                </Row>
-              </Container>
-            </div>
-          </section>
-        </Col>
-      </Row>
-
-      {/* EVENT DATES */}
-      <Row className={`mb-4 ${styles["center-information-content"]}`}>
-        <Col xs={12} md={10}>
-          <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Fechas de los eventos</h2>
-            <div className={styles.sectionBody}>
-              {slots.map((slot) => (
-                <div key={slot.id} className={styles.financeRow}>
-                  <span className={styles.financeValue}>
-                    {translateContractSlotPurpose(slot.purpose)}
-                  </span>
-                  <span>
-                    {formatLongSpanishDate(new Date(slot.slot?.eventDate))}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        </Col>
-      </Row>
-
-      <Row className={`mb-4 ${styles["center-information-content"]}`}>
-        <Col xs={12} md={10}>
-          <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Servicios contratados</h2>{" "}
-            <button
-              type="button"
-              className={styles.detailToggle}
-              onClick={() => setIsExpanded(!isExpanded)}
-              aria-expanded={isExpanded}
-            >
-              {isExpanded ? "Ocultar detalles" : "Ver detalles"}
-            </button>
-            <div className={styles.sectionBody}>
-              {items.length === 0 ? (
-                <div
-                  style={{ color: "rgba(255,255,255,0.75)", lineHeight: 1.55 }}
+            {showNav ? (
+              <div className={[styles.tabsWrap, "d-none d-md-flex"].join(" ")}>
+                <Nav
+                  variant="tabs"
+                  activeKey={safeActiveSectionId}
+                  className={styles.tabsNav}
                 >
-                  Aún no hay servicios vinculados a este contrato.
-                </div>
-              ) : (
-                <ul className={styles.list}>
-                  {items.map((it) => {
-                    const products =
-                      it.package?.packageProducts
-                        ?.map((pp) => pp.product?.name)
-                        .filter(Boolean) ?? [];
-                    const pkg = it.package;
-                    const qty = it.quantity ?? 1;
-
-                    return (
-                      <li key={it.id} className={styles.listItem}>
-                        <div className={styles.itemRow}>
-                          <div style={{ minWidth: 0 }}>
-                            <div className={styles.itemName}>
-                              {pkg?.name ?? "Paquete"}
-                              {qty > 1 ? (
-                                <span className={styles.itemQty}>×{qty}</span>
-                              ) : null}
-                            </div>
-                            <div className={styles.itemName}>
-                              {it.promotion?.name ?? "—"}
-                            </div>
-                          </div>
-
-                          <div style={{ flexShrink: 0, textAlign: "right" }}>
-                            <div className={styles.itemPrice}>
-                              {formatMoney(it.package.basePrice * qty)}
-                            </div>
-                            <div className={styles.itemPrice}>
-                              -{" "}
-                              {formatMoney(
-                                (it.package.basePrice *
-                                  qty *
-                                  (it.promotion?.value ?? 0)) /
-                                  100
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {isExpanded ? (
-                          <div className={styles.detailsBlock}>
-                            {products.length > 0 ? (
-                              <ul className={styles.detailsList}>
-                                {products.map((name, idx) => (
-                                  <li key={`${it.packageId}-${idx}`}>{name}</li>
-                                ))}
-                              </ul>
-                            ) : null}
-                          </div>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </section>
-        </Col>
-      </Row>
-
-      {/* RESUMEN FINANCIERO */}
-      <Row className={`mb-4 ${styles["center-information-content"]}`}>
-        <Col xs={12} md={10}>
-          <section className={styles.card}>
-            <h2 className={styles.sectionTitle}>Tu pago y saldo</h2>
-            <div
-              className={styles.sectionBody}
-              style={{ display: "grid", gap: "0.75rem" }}
-            >
-              <div className={styles.financeRow}>
-                <span>Subtotal</span>
-                <span className={styles.financeValue}>
-                  {formatMoney(data.contract.subtotal)}
-                </span>
-              </div>
-
-              <div className={styles.financeRow}>
-                <span>Descuentos</span>
-                <span className={styles.financeDiscount}>
-                  –{formatMoney(data.contract.discountTotal)}
-                </span>
-              </div>
-
-              <div className={styles.divider} />
-
-              <div className={styles.totalRow}>
-                <div className={styles.totalLabel}>Total final</div>
-                <div className={styles.totalValue}>
-                  {formatMoney(data.contract.total)}{" "}
-                </div>
-              </div>
-
-              <div className={styles.divider} />
-
-              <div className={styles.subSectionTitle}>Historial de pagos</div>
-
-              {paymentsSorted.length === 0 ? (
-                <div className={styles.emptySubText}>
-                  Aún no hay pagos registrados.
-                </div>
-              ) : (
-                <div style={{ display: "grid", gap: "0.35rem" }}>
-                  {paymentsSorted.map((p, idx) => (
-                    <div key={p.id ?? idx} className={styles.financeRow}>
-                      <span>
-                        Total pagado {idx + 1}:{" "}
-                        {formatLongSpanishDate(new Date(p.receivedAt))}
-                      </span>
-                      <span className={styles.financeValue}>
-                        {formatMoney(p.amount ?? 0)}
-                      </span>
-                    </div>
+                  {sections.map((s) => (
+                    <Nav.Link
+                      key={s.id}
+                      eventKey={s.id}
+                      href="#"
+                      className={[
+                        styles.tabLink,
+                        safeActiveSectionId === s.id
+                          ? styles.tabLinkActive
+                          : "",
+                      ].join(" ")}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        selectSection(s.id);
+                      }}
+                    >
+                      {s.label}
+                    </Nav.Link>
                   ))}
-                </div>
-              )}
-
-              <div className={styles.divider} />
-
-              <div className={styles.financeRow}>
-                <span>Total pagado</span>
-                <span className={styles.financeValue}>
-                  {formatMoney(paidAmountFromPayments)}
-                </span>
+                </Nav>
               </div>
+            ) : null}
+          </header>
+        </div>
+      </div>
 
-              <div className={styles.financeRow}>
-                <span>Restante por pagar</span>
-                <span
-                  className={
-                    styles.financeValue +
-                    " " +
-                    styles.financeValuePaymentPending
-                  }
-                >
-                  {formatMoney(data.contract.total - paidAmountFromPayments)}
-                  <span className={styles.moveValueText}> + traslado</span>
-                </span>
-              </div>
-            </div>
-          </section>
-        </Col>
-      </Row>
-
-      {/* NOTAS */}
-      {notes?.length > 0 && (
-        <Row className={`mb-4 ${styles["center-information-content"]}`}>
-          <Col xs={12} md={10}>
-            <section className={styles.card}>
-              <h2 className={styles.sectionTitle}>Notas de la reserva</h2>
-              <p className={styles.termsIntro}>
-                Promociones, descuentos y notas importantes aplicados a tu
-                reserva.
-              </p>
-
-              <ul className={styles.termsList}>
-                {notes.map((t) => (
-                  <li key={t.id} className={styles.termsItem}>
-                    <div className={styles.termTitle}>{t.content}</div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </Col>
-        </Row>
-      )}
-
-      {/* CONSIDERACIONES IMPORTANTES */}
-      <TermsAndConditions packageTerms={packageTerms} terms={terms} />
+      {contentNode}
 
       {/* SOCIAL MEDIA PLUGIN */}
-      <SocialMediaPlugin data={data} slot={slots[0]} />
+      {showNav ? (
+        <SocialMediaPlugin
+          data={data as GetContractByIdResponse}
+          slot={
+            slots.find(
+              (s) => !["creation_date", "halfway_date"].includes(s.purpose)
+            ) ?? (slots[0] as ContractSlot)
+          }
+        />
+      ) : null}
+
+      <Offcanvas
+        show={showMobileMenu}
+        onHide={() => setShowMobileMenu(false)}
+        placement="start"
+        className={styles.mobileMenu}
+      >
+        <Offcanvas.Header closeButton closeVariant="white">
+          <Offcanvas.Title>Secciones</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <Nav className="flex-column" activeKey={safeActiveSectionId}>
+            {sections.map((s) => (
+              <Nav.Link
+                key={s.id}
+                eventKey={s.id}
+                href="#"
+                className={[
+                  styles.mobileMenuLink,
+                  safeActiveSectionId === s.id
+                    ? styles.mobileMenuLinkActive
+                    : "",
+                ].join(" ")}
+                onClick={(e) => {
+                  e.preventDefault();
+                  selectSection(s.id);
+                }}
+              >
+                {s.label}
+              </Nav.Link>
+            ))}
+          </Nav>
+        </Offcanvas.Body>
+      </Offcanvas>
     </div>
   );
 };

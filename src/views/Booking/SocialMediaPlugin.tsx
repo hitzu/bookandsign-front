@@ -14,7 +14,7 @@ export const SocialMediaPlugin = ({
 
   const whatsappHref = useMemo(() => {
     const phoneRaw = (
-      process.env.NEXT_PUBLIC_WHATSAPP_PHONE ?? "5212215775211"
+      process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "5212215775211"
     ).trim();
     const phone = normalizeWhatsAppPhone(phoneRaw);
     const contractId = data?.contract?.id;
