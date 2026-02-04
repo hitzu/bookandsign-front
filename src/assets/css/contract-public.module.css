@@ -4,9 +4,118 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 1.5rem 1rem 6.5rem;
+  padding: 1.5rem 1rem calc(6.5rem + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
+}
+
+.stickyHeader {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  padding-top: 0.25rem;
+  padding-bottom: 0.75rem;
+  margin: -1.5rem -1rem 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.75),
+    rgba(0, 0, 0, 0.45),
+    rgba(0, 0, 0, 0)
+  );
+  backdrop-filter: blur(14px);
+}
+
+.headerSticky {
+  position: relative;
+}
+
+.hamburgerBtn {
+  position: absolute;
+  left: 0;
+  top: 0.35rem;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.hamburgerBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hamburgerBtn:active {
+  transform: translateY(1px);
+}
+
+.tabsWrap {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: center;
+}
+
+.tabsNav {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.tabLink {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 800;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  padding: 0.6rem 0.85rem !important;
+  background: transparent !important;
+}
+
+.tabLink:hover {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.tabLinkActive {
+  color: rgba(255, 255, 255, 0.98) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.mobileMenu {
+  background: rgba(10, 10, 25, 0.92);
+  color: #fff;
+  backdrop-filter: blur(18px);
+}
+
+.mobileMenuLink {
+  color: rgba(255, 255, 255, 0.86) !important;
+  font-weight: 800;
+  padding: 0.85rem 0.25rem !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mobileMenuLinkActive {
+  color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.footerFixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.82),
+    rgba(0, 0, 0, 0.45),
+    rgba(0, 0, 0, 0)
+  );
+  backdrop-filter: blur(14px);
 }
 
 .center-information-content {
@@ -340,132 +449,6 @@
   color: rgba(255, 255, 255, 0.75);
   line-height: 1.6;
   white-space: pre-wrap;
-}
-
-.socialCtaWrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.socialCtaCard {
-  width: 100%;
-  max-width: 560px;
-  text-align: center;
-  padding: 1.25rem 1.25rem;
-  border-radius: 22px;
-  background: rgba(10, 10, 25, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
-  backdrop-filter: blur(18px);
-  display: grid;
-  gap: 1.2rem;
-}
-
-.socialCtaTitle {
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  font-size: 1.25rem;
-}
-
-.socialCtaSubtitle {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.whatsappBtn {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  background: #25d366;
-  color: #fff;
-  border-radius: 999px;
-  padding: 1rem 1rem;
-  font-weight: 700;
-  text-decoration: none;
-  box-shadow: 0 10px 30px rgba(37, 211, 102, 0.35);
-  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
-}
-
-.whatsappBtn:hover {
-  background: #1fb85a;
-  transform: translateY(-1px);
-}
-
-.whatsappBtn:active {
-  transform: translateY(0);
-}
-
-.btnIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-}
-
-.socialFollow {
-  display: grid;
-  gap: 0.8rem;
-  justify-items: center;
-}
-
-.socialFollowLabel {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.socialButtons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.socialBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  border-radius: 15px;
-  padding: 0.85rem 1.2rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
-  text-decoration: none;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.socialBtn:hover {
-  transform: translateY(-1px);
-  opacity: 0.98;
-}
-
-.socialBtn:active {
-  transform: translateY(0);
-}
-
-.socialBtnInstagram {
-  background: linear-gradient(135deg, #e1306c, #c13584);
-  box-shadow: 0 4px 15px rgba(225, 48, 108, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
-}
-
-.socialBtnFacebook {
-  background: linear-gradient(135deg, #1877f2, #42a5f5);
-  box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3),
-    inset 0 1px 2px rgba(255, 255, 255, 0.1);
-}
-
-.socialThanks {
-  font-size: 0.95rem;
-  padding-top: 0.25rem;
-  color: rgba(255, 255, 255, 0.6);
 }
 
 .ctaSticky {

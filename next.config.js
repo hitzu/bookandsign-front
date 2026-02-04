@@ -3,6 +3,15 @@ const nextConfig = {
   experimental: {
     // Aquí puedes habilitar características experimentales si es necesario
   },
+  async redirects() {
+    return [
+      {
+        source: "/pages/c/:token",
+        destination: "/pages/reserva/:token",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
