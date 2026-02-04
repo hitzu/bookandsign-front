@@ -77,7 +77,7 @@ const ContractList = () => {
           return (
             <div>
               <Link
-                href={`/pages/c/${cellProps.row.original.token}`}
+                href={`/pages/reserva/${cellProps.row.original.token}`}
                 target="_blank"
               >
                 {cellProps.row.original.token}

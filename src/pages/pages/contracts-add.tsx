@@ -437,7 +437,7 @@ const ContractsAddPage = () => {
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const contractLink = contract?.token
-    ? `${origin}/pages/c/${contract.token}`
+    ? `${origin}/pages/reserva/${contract.token}`
     : "";
 
   function clearFormData(): void {
