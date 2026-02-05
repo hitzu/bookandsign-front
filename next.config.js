@@ -7,7 +7,27 @@ const nextConfig = {
     return [
       {
         source: "/pages/c/:token",
-        destination: "/pages/reserva/:token",
+        destination: "/reserva/:token",
+        permanent: true,
+      },
+      {
+        source: "/pages/reserva/:token",
+        destination: "/reserva/:token",
+        permanent: true,
+      },
+      {
+        source: "/pages/sales",
+        destination: "/sales",
+        permanent: true,
+      },
+      {
+        source: "/",
+        destination: "/contracts",
+        permanent: true,
+      },
+      {
+        source: "/contract-list",
+        destination: "/contracts",
         permanent: true,
       },
     ];

@@ -1,13 +1,12 @@
 import "@assets/scss/custom.scss";
 import "flatpickr/dist/flatpickr.min.css";
-
+import React, { ReactElement, ReactNode } from "react";
 import Head from "next/head";
-import type { AppProps } from "next/app";
-import type { NextPage } from "next";
-import type { ReactElement, ReactNode } from "react";
 import { Provider } from "react-redux";
+import { wrapper } from "../toolkit/index";
 
-import { wrapper } from "../toolkit";
+import { AppProps } from "next/app";
+import type { NextPage } from "next";
 
 type NextPageWithLayout = NextPage & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -16,8 +15,7 @@ type NextPageWithLayout = NextPage & {
 type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
-
-export default function MyApp({ Component, pageProps, ...rest }: AppPropsWithLayout) {
+const MyApp: any = ({ Component, pageProps, ...rest }: AppPropsWithLayout) => {
   const { store } = wrapper.useWrappedStore(rest);
   const getLayout = Component.getLayout || ((page) => page);
 
@@ -29,10 +27,14 @@ export default function MyApp({ Component, pageProps, ...rest }: AppPropsWithLay
           name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no"
         />
-        <title>Book And Sign</title>
+        {/* <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"></link> */}
+        <title> Book And Sign </title>
       </Head>
-      <Provider store={store}>{getLayout(<Component {...pageProps} />)}</Provider>
+      <Provider store={store}>
+        {getLayout(<Component {...pageProps} />)}
+      </Provider>
     </>
   );
-}
+};
 
+export default MyApp;
