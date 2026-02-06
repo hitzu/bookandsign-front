@@ -37,6 +37,9 @@
       "@common/*": [
         "src/Common/*"
       ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
       "@data/*": [
         "src/Common/JsonData/*"
       ],

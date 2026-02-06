@@ -20,10 +20,19 @@ import { ReservationDatesSection } from "../components/ReservationDatesSection";
 import { ReservationServicesSection } from "../components/ReservationServicesSection";
 import { ReservationFinanceSection } from "../components/ReservationFinanceSection";
 import { ReservationNotesSection } from "../components/ReservationNotesSection";
+import { PreparationSection } from "../preparation/PreparationSection";
 
 type Props = {
   token?: string;
 };
+
+const MOCK_CONTRACT_FOR_PREP = {
+  id: 77,
+  packages: [
+    { id: 1, name: "Paquete Brillipoint (mock)", brandId: 2 },
+    { id: 2, name: "Otro paquete (mock)", brandId: 1 },
+  ],
+} as const;
 
 const ReservationPublicPage = ({ token }: Props) => {
   const router = useRouter();
@@ -35,7 +44,7 @@ const ReservationPublicPage = ({ token }: Props) => {
   const [terms, setTerms] = useState<GetTermsResponse[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
 
-  type SectionId = "resume" | "terms";
+  type SectionId = "resume" | "prep" | "terms";
 
   const [activeSectionId, setActiveSectionId] = useState<SectionId>("resume");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -133,6 +142,19 @@ const ReservationPublicPage = ({ token }: Props) => {
   }, [data?.contract]);
 
   const items = data?.packages ?? [];
+  const packagesForPrep = useMemo(() => {
+    const normalized = (data?.packages ?? []).map((p) => ({
+      id: p.package?.id ?? p.packageId ?? p.id,
+      name: p.package?.name ?? "Paquete",
+      brandId: p.package?.brandId ?? 0,
+    }));
+    return data ? normalized : MOCK_CONTRACT_FOR_PREP.packages;
+  }, [data]);
+
+  const hasBrillipoint = useMemo(() => {
+    return packagesForPrep.some((p) => p.brandId === 2);
+  }, [packagesForPrep]);
+
   const packageTerms = useMemo((): GetTermsResponse[] => {
     const dedup = new Map<number, GetTermsResponse>();
     for (const it of items) {
@@ -175,6 +197,21 @@ const ReservationPublicPage = ({ token }: Props) => {
               </>
             );
           },
+        },
+        {
+          id: "prep",
+          label: "Preparación",
+          enabled: hasBrillipoint,
+          render: () => (
+            <Row className={`mb-4 ${styles["center-information-content"]}`}>
+              <Col xs={12} md={10}>
+                <PreparationSection
+                  contractId={data?.contract?.id ?? MOCK_CONTRACT_FOR_PREP.id}
+                  mode="public"
+                />
+              </Col>
+            </Row>
+          ),
         },
         {
           id: "terms",
