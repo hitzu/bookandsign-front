@@ -16,6 +16,12 @@ export type FormDropzoneProps = {
   disabled?: boolean;
   embedded?: boolean;
   showUploadButton?: boolean;
+  /**
+   * When true, shows a local preview list of the selected files.
+   * Useful for generic uploads, but can be confusing when the parent UI
+   * already shows uploaded previews (e.g. prep profile assets).
+   */
+  showPreviews?: boolean;
   onFilesSelected?: (files: File[]) => void;
   className?: string;
 };
@@ -38,16 +44,25 @@ const FormDropzone = ({
   disabled = false,
   embedded = false,
   showUploadButton = false,
+  showPreviews = true,
   onFilesSelected,
   className,
 }: FormDropzoneProps) => {
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
 
   const acceptsLabel = useMemo(() => {
-    return multiple ? "Arrastra tus archivos aquí" : "Arrastra tu archivo aquí";
+    return multiple
+      ? "Arrastra tus archivos aquí o pulsa para agregarlos"
+      : "Arrastra tu archivo aquí o pulsa para agregarlo";
   }, [multiple]);
 
   function handleAcceptedFiles(files: File[]) {
+    if (!showPreviews) {
+      setSelectedFiles([]);
+      onFilesSelected?.(files);
+      return;
+    }
+
     const enhanced: SelectedFile[] = files.map((file) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file),
@@ -75,11 +90,14 @@ const FormDropzone = ({
       >
         {({ getRootProps, getInputProps }) => (
           <div
-            className={["dropzone dz-clickable text-center", className ?? ""].join(
-              " ",
-            )}
+            className={[
+              "dropzone dz-clickable text-center",
+              className ?? "",
+            ].join(" ")}
             style={
-              embedded ? { padding: 0, background: "transparent", border: 0 } : undefined
+              embedded
+                ? { padding: 0, background: "transparent", border: 0 }
+                : undefined
             }
           >
             <div
@@ -98,7 +116,10 @@ const FormDropzone = ({
               }
             >
               <input {...getInputProps()} />
-              <div className="mb-2" style={embedded ? { opacity: 0.85 } : undefined}>
+              <div
+                className="mb-2"
+                style={embedded ? { opacity: 0.85 } : undefined}
+              >
                 <i className="display-4 text-muted ri-upload-cloud-2-fill" />
               </div>
               <div style={{ fontWeight: 800 }}>{acceptsLabel}</div>
@@ -110,61 +131,69 @@ const FormDropzone = ({
         )}
       </Dropzone>
 
-      <div
-        className="list-unstyled mb-0"
-        id="file-previews"
-        style={{ marginTop: "0.75rem" }}
-      >
-        {selectedFiles.map((f, i) => {
-          return (
-            <Card
-              className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-              key={i + "-file"}
-              style={
-                embedded
-                  ? {
-                      background: "rgba(255,255,255,0.06)",
-                      borderColor: "rgba(255,255,255,0.12)",
-                    }
-                  : undefined
-              }
-            >
-              <div className="p-2">
-                <Row className="align-items-center">
-                  <Col className="col-auto">
-                    {f.preview ? (
-                      <Image
-                        height={80}
-                        width={100}
-                        className="avatar-sm rounded bg-light"
-                        alt={f.name}
-                        src={f.preview}
-                      />
-                    ) : null}
-                  </Col>
-                  <Col>
-                    <Link
-                      href="#"
-                      className={embedded ? "text-white" : "text-muted font-weight-bold"}
-                      onClick={(e) => e.preventDefault()}
-                    >
-                      {f.name}
-                    </Link>
-                    <p
-                      className="mb-0"
-                      style={
-                        embedded ? { color: "rgba(255,255,255,0.72)" } : undefined
+      {showPreviews ? (
+        <div
+          className="list-unstyled mb-0"
+          id="file-previews"
+          style={{ marginTop: "0.75rem" }}
+        >
+          {selectedFiles.map((f, i) => {
+            return (
+              <Card
+                className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
+                key={i + "-file"}
+                style={
+                  embedded
+                    ? {
+                        background: "rgba(255,255,255,0.06)",
+                        borderColor: "rgba(255,255,255,0.12)",
                       }
-                    >
-                      <strong>{f.formattedSize}</strong>
-                    </p>
-                  </Col>
-                </Row>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+                    : undefined
+                }
+              >
+                <div className="p-2">
+                  <Row className="align-items-center">
+                    <Col className="col-auto">
+                      {f.preview ? (
+                        <Image
+                          height={80}
+                          width={100}
+                          className="avatar-sm rounded bg-light"
+                          alt={f.name}
+                          src={f.preview}
+                        />
+                      ) : null}
+                    </Col>
+                    <Col>
+                      <Link
+                        href="#"
+                        className={
+                          embedded
+                            ? "text-white"
+                            : "text-muted font-weight-bold"
+                        }
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        {f.name}
+                      </Link>
+                      <p
+                        className="mb-0"
+                        style={
+                          embedded
+                            ? { color: "rgba(255,255,255,0.72)" }
+                            : undefined
+                        }
+                      >
+                        <strong>{f.formattedSize}</strong>
+                      </p>
+                    </Col>
+                  </Row>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      ) : null}
 
       {showUploadButton ? (
         <div className="text-center m-t-20" style={{ marginTop: "0.75rem" }}>
@@ -191,4 +220,3 @@ const FormDropzone = ({
 };
 
 export default FormDropzone;
-

@@ -20,7 +20,7 @@ import { ReservationDatesSection } from "../components/ReservationDatesSection";
 import { ReservationServicesSection } from "../components/ReservationServicesSection";
 import { ReservationFinanceSection } from "../components/ReservationFinanceSection";
 import { ReservationNotesSection } from "../components/ReservationNotesSection";
-import { PreparationSection } from "../preparation/PreparationSection";
+import { PreparationSection } from "../components/PreparationSection";
 
 type Props = {
   token?: string;
@@ -44,7 +44,7 @@ const ReservationPublicPage = ({ token }: Props) => {
   const [terms, setTerms] = useState<GetTermsResponse[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
 
-  type SectionId = "resume" | "prep" | "terms";
+  type SectionId = "resume" | "prep_bride" | "prep_social" | "terms";
 
   const [activeSectionId, setActiveSectionId] = useState<SectionId>("resume");
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -199,15 +199,34 @@ const ReservationPublicPage = ({ token }: Props) => {
           },
         },
         {
-          id: "prep",
-          label: "Preparación",
+          id: "prep_bride",
+          label: "Preparación novia",
           enabled: hasBrillipoint,
           render: () => (
             <Row className={`mb-4 ${styles["center-information-content"]}`}>
               <Col xs={12} md={10}>
                 <PreparationSection
-                  contractId={data?.contract?.id ?? MOCK_CONTRACT_FOR_PREP.id}
+                  contractToken={data?.contract?.token ?? token}
+                  phone={data?.contract?.clientPhone ?? ""}
                   mode="public"
+                  view="bride"
+                />
+              </Col>
+            </Row>
+          ),
+        },
+        {
+          id: "prep_social",
+          label: "Preparación social",
+          enabled: hasBrillipoint,
+          render: () => (
+            <Row className={`mb-4 ${styles["center-information-content"]}`}>
+              <Col xs={12} md={10}>
+                <PreparationSection
+                  contractToken={data?.contract?.token ?? token}
+                  phone={data?.contract?.clientPhone ?? ""}
+                  mode="public"
+                  view="social"
                 />
               </Col>
             </Row>
