@@ -2,24 +2,31 @@ import { useEffect, useRef, useState } from "react";
 
 type Params = {
   storageKey: string | null;
-  hintPhone?: string;
   onReset?: () => void;
 };
 
 /**
  * Manages the "public contract + phone" gating state.
  *
- * Behavior mirrors the previous inline effect in `PreparationSection`:
+ * Behavior:
  * - resets auth state when contract token (storageKey) changes
- * - restores verified phone from localStorage when available
- * - prefills the input with a server-provided phone hint when no local value exists
+ * - does NOT prefill the phone input (keeps it empty)
+ * - auto-restores a previously verified phone from localStorage (if present)
  */
 export function usePublicContractPhoneGate(params: Params) {
-  const { storageKey, hintPhone, onReset } = params;
+  const { storageKey, onReset } = params;
 
   const [authError, setAuthError] = useState<string | null>(null);
   const [phoneInput, setPhoneInput] = useState<string>("");
-  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(() => {
+    if (!storageKey) return null;
+    if (typeof window === "undefined") return null;
+    try {
+      return window.localStorage.getItem(storageKey) || null;
+    } catch {
+      return null;
+    }
+  });
 
   // Avoid making the caller memoize `onReset` just for dependency stability.
   const onResetRef = useRef<Params["onReset"]>(onReset);
@@ -32,20 +39,18 @@ export function usePublicContractPhoneGate(params: Params) {
     onResetRef.current?.();
     setVerifiedPhone(null);
     setAuthError(null);
+    setPhoneInput("");
 
+    // Restore previous verification for this token (if any).
+    if (!storageKey) return;
     if (typeof window === "undefined") return;
-
-    const stored =
-      storageKey != null ? window.localStorage.getItem(storageKey) : null;
-    if (stored && stored.trim()) {
-      setVerifiedPhone(stored.trim());
-      setPhoneInput(stored.trim());
-      return;
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) setVerifiedPhone(stored);
+    } catch {
+      // Ignore storage access errors (e.g., private mode restrictions).
     }
-
-    // Prefill with server-provided phone (hint), but still require user confirmation.
-    setPhoneInput(hintPhone?.toString() ?? "");
-  }, [hintPhone, storageKey]);
+  }, [storageKey]);
 
   return {
     authError,

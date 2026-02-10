@@ -40,6 +40,17 @@ export function PreparationSection({
 }: Props) {
   const QUESTIONS = PREP_PROFILE_QUESTIONS;
 
+  const maskPhoneHint = (raw?: string): string | null => {
+    const digits = (raw ?? "").toString().replace(/\D/g, "");
+    if (!digits) return null;
+    if (digits.length <= 4) return digits;
+    return `${"*".repeat(digits.length - 4)}${digits.slice(-4)}`;
+  };
+
+  const maskedPhoneHint = useMemo(() => {
+    return maskPhoneHint(phone);
+  }, [phone]);
+
   const [answers, setAnswers] = useState<PrepProfileAnswers>({});
   // Keep a mutable pointer to the latest answers so async callbacks (e.g. uploads)
   // don't close over a stale render-time snapshot.
@@ -105,24 +116,19 @@ export function PreparationSection({
       title: "Concepto y mood",
       subtitle: "La vibra que quieres proyectar",
     },
-    vestido: {
+    look_nupcial: {
       step: "Paso 3",
-      title: "Vestido",
-      subtitle: "Tu base para maquillaje + peinado",
-    },
-    accesorios: {
-      step: "Paso 4",
-      title: "Accesorios",
-      subtitle: "Detalles que completan el look",
+      title: "Tu look nupcial (Vestido y accesorios)",
+      subtitle: "La base y los detalles que completan tu look",
     },
     maquillaje: {
-      step: "Paso 5",
-      title: "Maquillaje",
+      step: "Paso 4",
+      title: "Tu maquillaje de novia",
       subtitle: "Preferencias, no negociables y fotos",
     },
     peinado: {
-      step: "Paso 6",
-      title: "Peinado",
+      step: "Paso 5",
+      title: "Tu peinado de novia",
       subtitle: "Preferencias, no negociables y fotos",
     },
   };
@@ -236,7 +242,6 @@ export function PreparationSection({
     setVerifiedPhone,
   } = usePublicContractPhoneGate({
     storageKey,
-    hintPhone: phone?.toString() ?? "",
     onReset: () => {
       setAnswers({});
       setLocked({});
@@ -578,7 +583,7 @@ export function PreparationSection({
               value: "sucursal",
               title: "En nuestra sucursal (opción recomendada)",
               description:
-                "Recomendamos realizar el arreglo en sucursal para garantizar tiempos, comodidad y el mejor resultado posible el día de tu boda. Trabajamos en un espacio totalmente acondicionado para novias, con iluminación profesional, clima controlado y todo el equipo necesario para cuidar cada detalle de tu arreglo.",
+                "Recomendamos realizar el arreglo en sucursal para garantizar tiempos, comodidad y el mejor resultado. Contamos con iluminación adecuada, espacio para acompañantes y yo personalmente te ayudo a cambiarte y a colocar tu ajuar con todo el cuidado que merece tu gran día",
             })}
             {option({
               value: "otra_ubicacion",
@@ -942,8 +947,9 @@ export function PreparationSection({
                 files: [f],
                 computeNextValue: (uploaded) => {
                   const prev =
-                    (answersRef.current[q.id] as PrepAssetMetadata[] | undefined) ??
-                    [];
+                    (answersRef.current[q.id] as
+                      | PrepAssetMetadata[]
+                      | undefined) ?? [];
                   const merged = [
                     ...prev,
                     ...(uploaded as PrepAssetMetadata[]),
@@ -1489,7 +1495,7 @@ export function PreparationSection({
                   className="form-control"
                   type="tel"
                   inputMode="numeric"
-                  placeholder="Ej: 2201752767"
+                  placeholder="Ej: 2222232323"
                   value={phoneInput}
                   disabled={isAuthorizing}
                   onChange={(e) => setPhoneInput(e.target.value)}
@@ -1497,6 +1503,14 @@ export function PreparationSection({
                     if (e.key === "Enter") void authorizePhone();
                   }}
                 />
+
+                {maskedPhoneHint ? (
+                  <div
+                    style={{ color: "rgba(255,255,255,0.72)", fontSize: 13 }}
+                  >
+                    Número registrado en el contrato: {maskedPhoneHint}
+                  </div>
+                ) : null}
 
                 {authError ? (
                   <div

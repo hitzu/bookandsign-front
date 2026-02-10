@@ -1,8 +1,7 @@
 export type PrepProfileQuestionGroup =
   | "celebracion"
   | "concepto"
-  | "vestido"
-  | "accesorios"
+  | "look_nupcial"
   | "maquillaje"
   | "peinado";
 
@@ -131,7 +130,7 @@ const BRIDE_QUESTIONS: PrepProfileQuestionDefinition[] = [
     type: "string",
     group: "concepto",
     label: "¿Hay colores que NO quieres (vetados)?",
-    placeholder: "Ej: rojo, morado, neón, etc.",
+    placeholder: "Ej: rojo, morado, etc.",
   },
   {
     id: "ready_by_time",
@@ -140,36 +139,21 @@ const BRIDE_QUESTIONS: PrepProfileQuestionDefinition[] = [
     label: "¿A qué hora necesitas estar lista (ya arreglada)?",
     placeholder: "Ej: 14:00",
   },
-  {
-    id: "desired_feeling",
-    type: "radio",
-    group: "concepto",
-    label: "¿Cómo te gustaría verte y sentirte con tu arreglo?",
-    options: [
-      { value: "juvenil", label: "Juvenil" },
-      { value: "natural", label: "Natural" },
-      { value: "romantica", label: "Romántica" },
-      { value: "elegante", label: "Elegante" },
-      { value: "sofisticada", label: "Sofisticada" },
-      { value: "atrevida", label: "Atrevida" },
-    ],
-  },
 
-  // VESTIDO
+  // TU LOOK NUPCIAL (VESTIDO + ACCESORIOS)
   {
     id: "dress",
     type: "object",
-    group: "vestido",
+    group: "look_nupcial",
     label: "Vestido de novia",
     placeholder:
       "Si ya lo tienes, marca la casilla y sube una foto con buena luz. Si aún no lo tienes, cuéntanos tu idea (silueta, escote, tela o estilo).",
   },
 
-  // ACCESORIOS
   {
     id: "accessories",
     type: "object",
-    group: "accesorios",
+    group: "look_nupcial",
     label: "Accesorios",
     placeholder:
       "Marca lo que ya tienes y sube fotos. Tip: en joyería puedes subir varias (aretes, collar, pulseras, etc.).",
@@ -193,7 +177,7 @@ const BRIDE_QUESTIONS: PrepProfileQuestionDefinition[] = [
     group: "maquillaje",
     label: "¿Qué te gustaría resaltar o disimular?",
     placeholder:
-      "Ej: resaltar ojos / disimular ojeras / piel más luminosa / labios / contorno / etc.",
+      "Ej: resaltar ojos / disimular ojeras / labios / contorno / etc.",
   },
   {
     id: "makeup_idea",
@@ -202,6 +186,14 @@ const BRIDE_QUESTIONS: PrepProfileQuestionDefinition[] = [
     label: "¿Qué idea general tienes para tu maquillaje?",
     placeholder:
       "Ej: piel luminosa, ojos suaves, delineado marcado, labios nude, etc.",
+  },
+  {
+    id: "skincare_routine",
+    type: "textarea",
+    group: "maquillaje",
+    label: "¿Sigues alguna rutina de skincare?",
+    placeholder:
+      "Cuéntanos brevemente cuáles son los productos que utilizas y cómo sueles aplicarlos.",
   },
   {
     id: "dislikes_makeup",

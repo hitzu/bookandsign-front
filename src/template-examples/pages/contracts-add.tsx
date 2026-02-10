@@ -31,7 +31,7 @@ import { getPromotionsByBrandId } from "../../api/services/promotionsService";
 
 const Flatpickr = dynamic(
   () => import("react-flatpickr").then((mod: any) => mod.default as any),
-  { ssr: false }
+  { ssr: false },
 ) as any;
 
 type ClientDraft = {
@@ -85,14 +85,14 @@ const formatSkuDate = (isoDate?: string | null) => {
 const ContractsAddPage = () => {
   const [slot, setSlot] = useState<Slot | null>(null);
   const [date, setDate] = useState<string>(() =>
-    new Date().toISOString().slice(0, 10)
+    new Date().toISOString().slice(0, 10),
   );
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<
     "am_block" | "pm_block" | null
   >(null);
   const [slotAvailability, setSlotAvailability] = useState<GetSlotResponse[]>(
-    []
+    [],
   );
   const [contract, setContract] = useState<Contract | null>(null);
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
@@ -111,7 +111,7 @@ const ContractsAddPage = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<"success" | "danger">(
-    "success"
+    "success",
   );
 
   const [clientDraft, setClientDraft] = useState<ClientDraft>({
@@ -237,10 +237,10 @@ const ContractsAddPage = () => {
 
   const formatCurrencyParts = (
     amount: number,
-    currency: CurrencyCode = "MXN"
+    currency: CurrencyCode = "MXN",
   ) => {
     const roundedCents = Math.round(
-      (Number.isFinite(amount) ? amount : 0) * 100
+      (Number.isFinite(amount) ? amount : 0) * 100,
     );
     const hasCents = Math.abs(roundedCents % 100) !== 0;
     const nf = new Intl.NumberFormat(currency === "USD" ? "en-US" : "es-MX", {
@@ -268,7 +268,7 @@ const ContractsAddPage = () => {
 
   const depositNumber = Math.max(
     0,
-    Number((deposit || "0").replace(/[^\d.]/g, "")) || 0
+    Number((deposit || "0").replace(/[^\d.]/g, "")) || 0,
   );
 
   const subtotal = useMemo(() => {
@@ -280,7 +280,7 @@ const ContractsAddPage = () => {
       (sum, it) =>
         sum +
         (it.pkg.basePrice * it.quantity * (it.promotion?.value ?? 0)) / 100,
-      0
+      0,
     );
   }, [items]);
 
@@ -300,7 +300,7 @@ const ContractsAddPage = () => {
         return copy;
       }
       const promotionForThisPackage = promotions.find(
-        (p) => p.brandId === pkg.brandId
+        (p) => p.brandId === pkg.brandId,
       );
       return [
         ...prev,
@@ -316,8 +316,8 @@ const ContractsAddPage = () => {
     if (isLocked) return;
     setItems((prev) =>
       prev.map((it) =>
-        it.pkg.id === packageId ? { ...it, quantity: it.quantity + 1 } : it
-      )
+        it.pkg.id === packageId ? { ...it, quantity: it.quantity + 1 } : it,
+      ),
     );
   };
 
@@ -328,9 +328,9 @@ const ContractsAddPage = () => {
         .map((it) =>
           it.pkg.id === packageId
             ? { ...it, quantity: Math.max(1, it.quantity - 1) }
-            : it
+            : it,
         )
-        .filter(Boolean)
+        .filter(Boolean),
     );
   };
 
@@ -374,9 +374,9 @@ const ContractsAddPage = () => {
       setSlot(held);
 
       const sku = `${normalizeSkuText(
-        items?.[0]?.pkg?.name
+        items?.[0]?.pkg?.name,
       ).toLowerCase()}${formatSkuDate(held?.eventDate)}${normalizeSkuText(
-        clientDraft.leadName
+        clientDraft.leadName,
       )}`;
 
       const payload: GenerateContractPayload = {
@@ -422,7 +422,7 @@ const ContractsAddPage = () => {
               content: notes,
               scope: "contract",
               kind: "public",
-            })
+            }),
           );
         }
         await Promise.all(promises);
@@ -597,7 +597,7 @@ const ContractsAddPage = () => {
                         disabled={isLocked}
                         onChange={(e) =>
                           setSelectedUserId(
-                            e.target.value ? Number(e.target.value) : ""
+                            e.target.value ? Number(e.target.value) : "",
                           )
                         }
                       >
@@ -724,7 +724,7 @@ const ContractsAddPage = () => {
                         disabled={isLocked}
                         onChange={(e) =>
                           setSelectedBrandId(
-                            e.target.value ? Number(e.target.value) : ""
+                            e.target.value ? Number(e.target.value) : "",
                           )
                         }
                       >
@@ -749,7 +749,7 @@ const ContractsAddPage = () => {
                         disabled={isLocked}
                         onChange={(e) =>
                           setSelectedPackageId(
-                            e.target.value ? Number(e.target.value) : ""
+                            e.target.value ? Number(e.target.value) : "",
                           )
                         }
                       >
@@ -896,7 +896,7 @@ const ContractsAddPage = () => {
                               <div className={styles.financialLabel}>
                                 {
                                   promotions.find(
-                                    (p) => p.brandId === it.pkg.brandId
+                                    (p) => p.brandId === it.pkg.brandId,
                                   )?.name
                                 }
                               </div>
@@ -913,7 +913,7 @@ const ContractsAddPage = () => {
                                         it.quantity *
                                         (it.promotion?.value ?? 0)) /
                                         100,
-                                      "MXN"
+                                      "MXN",
                                     ).number
                                   }
                                 </span>
@@ -930,7 +930,7 @@ const ContractsAddPage = () => {
                               {
                                 formatCurrencyParts(
                                   subtotal - discountTotal,
-                                  "MXN"
+                                  "MXN",
                                 ).symbol
                               }
                             </span>
@@ -938,7 +938,7 @@ const ContractsAddPage = () => {
                               {
                                 formatCurrencyParts(
                                   subtotal - discountTotal,
-                                  "MXN"
+                                  "MXN",
                                 ).number
                               }
                             </span>
@@ -1020,7 +1020,7 @@ const ContractsAddPage = () => {
                               {
                                 formatCurrencyParts(
                                   subtotal - discountTotal - depositNumber,
-                                  "MXN"
+                                  "MXN",
                                 ).symbol
                               }
                             </span>
@@ -1028,7 +1028,7 @@ const ContractsAddPage = () => {
                               {
                                 formatCurrencyParts(
                                   subtotal - discountTotal - depositNumber,
-                                  "MXN"
+                                  "MXN",
                                 ).number
                               }
                             </span>
