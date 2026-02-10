@@ -2,6 +2,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import styles from "@assets/css/social-media-plugin.module.css";
 import { useMemo } from "react";
 import { ContractSlot, GetContractByIdResponse } from "../../../interfaces";
+import { formatLongSpanishDate } from "@common/dates";
 
 export const SocialMediaPlugin = ({
   data,
@@ -17,14 +18,16 @@ export const SocialMediaPlugin = ({
       process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "5212215775211"
     ).trim();
     const phone = normalizeWhatsAppPhone(phoneRaw);
-    const contractId = data?.contract?.id;
-    const date = slot?.slot?.eventDate ? ` el ${slot?.slot?.eventDate}` : "";
-    const text = `Hola, Tengo una duda sobre mi reserva Brillipoint${
-      contractId ? ` (Contrato #${contractId})` : ""
-    }${date}.`;
+    const clientName = data?.contract?.clientName;
+    const humanDate = slot?.slot?.eventDate
+      ? formatLongSpanishDate(new Date(slot.slot.eventDate))
+      : undefined;
+    const text = `Hola, tengo duda sobre mi reserva Brillipoint${
+      clientName ? `, esta a nombre de ${clientName}` : ""
+    }${humanDate ? ` y es el ${humanDate}` : ""}.`;
     const encoded = encodeURIComponent(text);
     return `https://wa.me/${phone}?text=${encoded}`;
-  }, [data?.contract?.id, slot]);
+  }, [data?.contract?.clientName, slot?.slot?.eventDate]);
 
   return (
     <div>
