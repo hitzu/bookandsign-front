@@ -1039,6 +1039,7 @@ export function PreparationSection({
           (value as {
             noDress?: boolean;
             photo?: PrepAssetMetadata;
+            note?: string;
           }) ?? {};
         const isUploading = Boolean(uploadingByQuestionId[q.id]);
         const existingUrl = getAssetDisplayUrl(obj.photo);
@@ -1070,7 +1071,20 @@ export function PreparationSection({
               </label>
             </div>
 
-            {!obj.noDress ? (
+            {obj.noDress ? (
+              <div style={{ display: "grid", gap: "0.6rem" }}>
+                <textarea
+                  className="form-control"
+                  rows={4}
+                  placeholder="Cuéntanos tu idea (silueta, escote, tela o estilo)"
+                  disabled={disabled}
+                  value={typeof obj.note === "string" ? obj.note : ""}
+                  onChange={(e) =>
+                    onChangeAnswer(q.id, { ...obj, note: e.target.value })
+                  }
+                />
+              </div>
+            ) : (
               <div style={{ display: "grid", gap: "0.6rem" }}>
                 {showUploader ? (
                   <FormDropzone
@@ -1125,7 +1139,7 @@ export function PreparationSection({
                   </div>
                 ) : null}
               </div>
-            ) : null}
+            )}
           </div>
         );
       }
