@@ -2,7 +2,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import styles from "@assets/css/social-media-plugin.module.css";
 import { useMemo } from "react";
 import { ContractSlot, GetContractByIdResponse } from "../../../interfaces";
-import { formatLongSpanishDate } from "@common/dates";
+import { formatLongSpanishDate, parseLocalDate } from "@common/dates";
 
 export const SocialMediaPlugin = ({
   data,
@@ -20,7 +20,7 @@ export const SocialMediaPlugin = ({
     const phone = normalizeWhatsAppPhone(phoneRaw);
     const clientName = data?.contract?.clientName;
     const humanDate = slot?.slot?.eventDate
-      ? formatLongSpanishDate(new Date(slot.slot.eventDate))
+      ? formatLongSpanishDate(parseLocalDate(slot.slot.eventDate))
       : undefined;
     const text = `Hola, tengo duda sobre mi reserva Brillipoint${
       clientName ? `, esta a nombre de ${clientName}` : ""

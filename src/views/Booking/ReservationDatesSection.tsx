@@ -2,7 +2,7 @@ import { Col, Row } from "react-bootstrap";
 import styles from "@assets/css/contract-public.module.css";
 import { ContractSlot } from "../../interfaces";
 import { translateContractSlotPurpose } from "@common/translations";
-import { formatLongSpanishDate } from "@common/dates";
+import { formatLongSpanishDate, parseLocalDate } from "@common/dates";
 
 export const ReservationDatesSection = ({
   slots,
@@ -22,7 +22,7 @@ export const ReservationDatesSection = ({
                 </span>
                 <span>
                   {slot.slot?.eventDate
-                    ? formatLongSpanishDate(new Date(slot.slot.eventDate))
+                    ? formatLongSpanishDate(parseLocalDate(slot.slot.eventDate))
                     : "—"}
                 </span>
               </div>

@@ -21,6 +21,7 @@ import { ReservationServicesSection } from "../components/ReservationServicesSec
 import { ReservationFinanceSection } from "../components/ReservationFinanceSection";
 import { ReservationNotesSection } from "../components/ReservationNotesSection";
 import { PreparationSection } from "../components/PreparationSection";
+import { parseLocalDate } from "@common/dates";
 
 type Props = {
   token?: string;
@@ -64,7 +65,10 @@ const ReservationPublicPage = ({ token }: Props) => {
         const firstSlot = res.contractSlots[0];
         const eventDateRaw =
           firstSlot?.slot?.eventDate ?? res.contract.createdAt;
-        const eventDate = new Date(eventDateRaw);
+        const eventDate =
+          /^\d{4}-\d{2}-\d{2}$/.test(String(eventDateRaw ?? ""))
+            ? parseLocalDate(eventDateRaw!)
+            : new Date(eventDateRaw);
 
         const slotsToShow: ContractSlot[] = [
           {

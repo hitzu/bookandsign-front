@@ -21,6 +21,7 @@ import { ReservationDatesSection } from "@views/Booking/ReservationDatesSection"
 import { ReservationServicesSection } from "@views/Booking/ReservationServicesSection";
 import { ReservationFinanceSection } from "@views/Booking/ReservationFinanceSection";
 import { ReservationNotesSection } from "@views/Booking/ReservationNotesSection";
+import { parseLocalDate } from "@common/dates";
 
 const ContractPublicPage = () => {
   const router = useRouter();
@@ -53,7 +54,10 @@ const ContractPublicPage = () => {
         const firstSlot = res.contractSlots[0];
         const eventDateRaw =
           firstSlot?.slot?.eventDate ?? res.contract.createdAt;
-        const eventDate = new Date(eventDateRaw);
+        const eventDate =
+          /^\d{4}-\d{2}-\d{2}$/.test(String(eventDateRaw ?? ""))
+            ? parseLocalDate(eventDateRaw!)
+            : new Date(eventDateRaw);
 
         const slotsToShow: ContractSlot[] = [
           {
