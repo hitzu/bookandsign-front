@@ -87,6 +87,21 @@ const ContractsListPage = () => {
         },
       },
       {
+        header: "token QR",
+        enableColumnFilter: false,
+        accessorKey: "tokenQR",
+        cell: (cellProps: any) => {
+          return (
+            <Link
+              href={`/party/${cellProps.row.original.eventToken}`}
+              target="_blank"
+            >
+              {cellProps.row.original.eventToken}
+            </Link>
+          );
+        },
+      },
+      {
         header: "Acciones",
         enableColumnFilter: false,
         cell: (cellProps: any) => {
@@ -113,7 +128,7 @@ const ContractsListPage = () => {
         },
       },
     ],
-    [handleDelete]
+    [handleDelete],
   );
 
   return (
@@ -152,4 +167,3 @@ ContractsListPage.getLayout = (page: ReactElement) => {
 };
 
 export default ContractsListPage;
-
