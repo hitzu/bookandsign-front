@@ -274,6 +274,9 @@
 
 .heroRail {
   display: grid;
+  grid-auto-flow: row;
+  grid-auto-rows: max-content;
+  align-content: start;
   gap: 0.7rem;
   max-height: 86vh;
   overflow-y: auto;
@@ -295,11 +298,15 @@
 }
 
 .previewCard {
+  display: block;
+  width: 100%;
+  padding: 0;
   border: none;
   border-radius: 0.95rem;
   overflow: hidden;
   position: relative;
   aspect-ratio: 4 / 5;
+  flex: 0 0 auto;
   min-height: 0;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.06);

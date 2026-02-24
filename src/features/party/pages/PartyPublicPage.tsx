@@ -7,26 +7,18 @@ import React, {
 } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AxiosError } from "axios";
 import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/party-public.module.css";
-import { ApiError, apiGet } from "../../../lib/api";
+import {
+  getPublicEventByToken,
+  getPublicPhotosByEventToken,
+} from "../../../api/services/partyPublicService";
+import { EventPhoto, PublicEvent } from "../../../interfaces";
 import { SocialMediaPlugin } from "../../booking/components/SocialMediaPlugin";
 
 type Props = {
   token?: string;
-};
-
-type EventPhoto = {
-  id: number;
-  storagePath: string;
-  publicUrl: string;
-  consentAt: string;
-  createdAt: string;
-};
-
-type PublicEvent = {
-  token: string;
-  name?: string;
 };
 
 const POLLING_INTERVAL_MS = 8000;
@@ -105,40 +97,14 @@ const PartyPublicPage = ({ token }: Props) => {
   }, []);
 
   const fetchEvent = useCallback(
-    async (eventToken: string): Promise<PublicEvent> => {
-      const normalizedToken = encodeURIComponent(eventToken);
-      const candidates = [
-        `/events/get-by-token/${normalizedToken}`,
-        `/events/public/${normalizedToken}`,
-      ];
-
-      for (const candidate of candidates) {
-        try {
-          const response = await apiGet<any>(candidate);
-          return {
-            token: eventToken,
-            name:
-              response?.name ||
-              response?.title ||
-              response?.eventName ||
-              "Experiencia Brillipoint",
-          };
-        } catch (error) {
-          if (error instanceof ApiError && error.status === 404) continue;
-        }
-      }
-
-      return { token: eventToken, name: "Experiencia Brillipoint" };
-    },
+    async (eventToken: string): Promise<PublicEvent> =>
+      getPublicEventByToken(eventToken),
     [],
   );
 
   const fetchPhotos = useCallback(
     async (eventToken: string, signal?: AbortSignal) => {
-      const normalizedToken = encodeURIComponent(eventToken);
-      return apiGet<EventPhoto[]>(`/photos/event/${normalizedToken}`, {
-        signal,
-      });
+      return getPublicPhotosByEventToken(eventToken, signal);
     },
     [],
   );
@@ -160,7 +126,7 @@ const PartyPublicPage = ({ token }: Props) => {
       setHeroIndex(0);
       setLastSeenCreatedAt(orderedPhotos[0]?.createdAt || null);
     } catch (error) {
-      if (error instanceof ApiError && error.status === 404) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
         setNotFound(true);
       } else {
         setError("No pudimos cargar las fotos del evento. Intenta de nuevo.");
@@ -197,7 +163,7 @@ const PartyPublicPage = ({ token }: Props) => {
       });
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") return;
-      if (error instanceof ApiError && error.status === 404) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
         setNotFound(true);
         return;
       }
