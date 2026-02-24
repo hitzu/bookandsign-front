@@ -24,6 +24,8 @@ type Props = {
 const POLLING_INTERVAL_MS = 8000;
 const SLIDESHOW_INTERVAL_MS = 4000;
 const INTRO_DURATION_MS = 2500;
+const MOBILE_BREAKPOINT_PX = 768;
+const MOBILE_PREVIEW_LIMIT = 2;
 
 const isOptimizedImageHost = (url: string): boolean => {
   try {
@@ -83,6 +85,8 @@ const PartyPublicPage = ({ token }: Props) => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [isPreviewRailExpanded, setIsPreviewRailExpanded] = useState(false);
 
   useEffect(() => {
     lastSeenRef.current = lastSeenCreatedAt;
@@ -216,12 +220,39 @@ const PartyPublicPage = ({ token }: Props) => {
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia(
+      `(max-width: ${MOBILE_BREAKPOINT_PX}px)`,
+    );
+    const applyViewportState = (matches: boolean) => {
+      setIsMobileViewport(matches);
+      if (!matches) setIsPreviewRailExpanded(false);
+    };
+
+    applyViewportState(mediaQuery.matches);
+
+    const handleMediaChange = (event: MediaQueryListEvent) => {
+      applyViewportState(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleMediaChange);
+    return () => mediaQuery.removeEventListener("change", handleMediaChange);
+  }, []);
+
   const heroPhoto = photos[heroIndex] || photos[0] || null;
   const canUseNextImage = heroPhoto
     ? isOptimizedImageHost(heroPhoto.publicUrl)
     : false;
   const eventTitle = event?.name || "Experiencia Brillipoint";
   const isEmptyPhotos = !loading && !notFound && !error && photos.length === 0;
+  const canTogglePreviewRail =
+    isMobileViewport && photos.length > MOBILE_PREVIEW_LIMIT;
+  const visiblePhotos =
+    canTogglePreviewRail && !isPreviewRailExpanded
+      ? photos.slice(0, MOBILE_PREVIEW_LIMIT)
+      : photos;
 
   const setHeroFromPhoto = (photoId: number) => {
     setHasInteracted(true);
@@ -502,8 +533,23 @@ const PartyPublicPage = ({ token }: Props) => {
                         </div>
                       </div>
                     </div>
-                    <aside className={styles.heroRail}>
-                      {photos.map((photo) => {
+                    {canTogglePreviewRail ? (
+                      <button
+                        type="button"
+                        className={styles.previewToggleBtn}
+                        aria-controls="party-preview-rail"
+                        aria-expanded={isPreviewRailExpanded}
+                        onClick={() =>
+                          setIsPreviewRailExpanded((previous) => !previous)
+                        }
+                      >
+                        {isPreviewRailExpanded
+                          ? "Mostrar menos"
+                          : "Ver mas fotos"}
+                      </button>
+                    ) : null}
+                    <aside id="party-preview-rail" className={styles.heroRail}>
+                      {visiblePhotos.map((photo) => {
                         const useNextImage = isOptimizedImageHost(
                           photo.publicUrl,
                         );
