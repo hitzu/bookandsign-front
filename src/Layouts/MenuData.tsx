@@ -19,7 +19,7 @@
 const menuItems = [
   {
     type: "HASHMENU",
-    id: 4,
+    id: 0,
     label: "Contratos",
     icon: "ph-duotone ph-calendar-blank",
     dataPage: null,
@@ -119,14 +119,14 @@ const menuItems = [
   },
   {
     type: "HASHMENU",
-    id: 5,
+    id: 4,
     label: "Promociones",
     icon: "ph-duotone ph-percent",
     dataPage: null,
     link: "#",
     submenu: [
       {
-        id: "slots",
+        id: "promotions-list",
         label: "Listado de Promociones",
         link: "/promotions-list",
         dataPage: "promotions-list",
@@ -135,7 +135,7 @@ const menuItems = [
   },
   {
     type: "HASHMENU",
-    id: 0,
+    id: 5,
     label: "Proveedores",
     icon: "ph-duotone ph-truck",
     dataPage: null,
