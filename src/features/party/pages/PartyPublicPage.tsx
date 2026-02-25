@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AxiosError } from "axios";
+import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/party-public.module.css";
 import {
   getEventPhotosPage,
@@ -8,7 +11,7 @@ import {
 import { EventPhoto, PublicEvent } from "../../../interfaces";
 import { SocialMediaPlugin } from "../../booking/components/SocialMediaPlugin";
 import { parseLocalDate } from "@common/dates";
-import EmptyStateNoPhotos from "../components/EmptyStateNoPhotos";
+import EventEmptyState from "../components/EventEmptyState";
 import EmptyStateNotFound from "../components/EmptyStateNotFound";
 import MobileWowLanding from "../components/MobileWowLanding";
 import PhotoViewerModal from "../components/PhotoViewerModal";
@@ -20,6 +23,7 @@ type Props = {
 
 const MOBILE_BREAKPOINT_PX = 767;
 const INITIAL_PAGE_LIMIT = 60;
+const INTRO_DURATION_MS = 2500;
 
 const sortByNewest = (photos: EventPhoto[]) =>
   [...photos].sort(
@@ -57,13 +61,35 @@ const downloadPhoto = async (url: string, filename: string) => {
 const copyToClipboard = async (value: string): Promise<boolean> => {
   if (typeof navigator === "undefined") return false;
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return true;
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch (_error) {
+      // Continue with fallback.
+    }
   }
-  return false;
+  if (typeof document === "undefined") return false;
+
+  const textArea = document.createElement("textarea");
+  textArea.value = value;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "absolute";
+  textArea.style.left = "-9999px";
+
+  try {
+    document.body.appendChild(textArea);
+    textArea.select();
+    textArea.setSelectionRange(0, textArea.value.length);
+    return document.execCommand("copy");
+  } catch (_error) {
+    return false;
+  } finally {
+    textArea.remove();
+  }
 };
 
 const PartyPublicPage = ({ token }: Props) => {
+  const reduceMotion = useReducedMotion();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [initialError, setInitialError] = useState<string | null>(null);
@@ -78,41 +104,69 @@ const PartyPublicPage = ({ token }: Props) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [parallaxOffset, setParallaxOffset] = useState(0);
+  const [showIntro, setShowIntro] = useState(true);
+  const [isRetryingEmpty, setIsRetryingEmpty] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setShowIntro(false),
+      INTRO_DURATION_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const fetchEvent = useCallback(async (eventToken: string): Promise<PublicEvent> => {
     return getPublicEventByToken(eventToken);
   }, []);
 
-  const handleInitialLoad = useCallback(async () => {
+  const handleInitialLoad = useCallback(
+    async (options?: { keepCurrentView?: boolean }) => {
+      if (!token) return;
+
+      if (!options?.keepCurrentView) {
+        setLoading(true);
+      }
+      setInitialError(null);
+      setLoadMoreError(null);
+      setNotFound(false);
+
+      try {
+        const page = await getEventPhotosPage(token, {
+          limit: INITIAL_PAGE_LIMIT,
+        });
+        const orderedPhotos = sortByNewest(page.items);
+        const eventResponse = page.event || (await fetchEvent(token));
+
+        setEvent(eventResponse);
+        setPhotos(orderedPhotos);
+        setDesktopSelectedPhotoIndex(0);
+        setNextCursor(page.nextCursor || null);
+        setHasMore(Boolean(page.hasMore || page.nextCursor));
+      } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 404) {
+          setNotFound(true);
+        } else {
+          setInitialError("No pudimos cargar las fotos del evento. Intenta de nuevo.");
+        }
+      } finally {
+        if (!options?.keepCurrentView) {
+          setLoading(false);
+        }
+      }
+    },
+    [fetchEvent, token],
+  );
+
+  const handleRetryEmptyState = useCallback(async () => {
     if (!token) return;
 
-    setLoading(true);
-    setInitialError(null);
-    setLoadMoreError(null);
-    setNotFound(false);
-
     try {
-      const page = await getEventPhotosPage(token, {
-        limit: INITIAL_PAGE_LIMIT,
-      });
-      const orderedPhotos = sortByNewest(page.items);
-      const eventResponse = page.event || (await fetchEvent(token));
-
-      setEvent(eventResponse);
-      setPhotos(orderedPhotos);
-      setDesktopSelectedPhotoIndex(0);
-      setNextCursor(page.nextCursor || null);
-      setHasMore(Boolean(page.hasMore || page.nextCursor));
-    } catch (error) {
-      if (error instanceof AxiosError && error.response?.status === 404) {
-        setNotFound(true);
-      } else {
-        setInitialError("No pudimos cargar las fotos del evento. Intenta de nuevo.");
-      }
+      setIsRetryingEmpty(true);
+      await handleInitialLoad({ keepCurrentView: true });
     } finally {
-      setLoading(false);
+      setIsRetryingEmpty(false);
     }
-  }, [fetchEvent, token]);
+  }, [handleInitialLoad, token]);
 
   useEffect(() => {
     handleInitialLoad();
@@ -253,6 +307,16 @@ const PartyPublicPage = ({ token }: Props) => {
     section.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const handleCopyCurrentLink = useCallback(async () => {
+    const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+    if (!currentUrl) return;
+
+    const copied = await copyToClipboard(currentUrl);
+    if (copied) {
+      setToastMessage("Enlace copiado ✨");
+    }
+  }, []);
+
   const eventTitle = event?.name || "Experiencia Brillipoint";
   const eventDateLabel = useMemo(() => {
     const rawDate = event?.createdAt;
@@ -272,8 +336,21 @@ const PartyPublicPage = ({ token }: Props) => {
     const candidates = [event?.coverUrl, ...photos.map((photo) => photo.publicUrl)];
     return Array.from(new Set(candidates.filter(Boolean) as string[]));
   }, [event?.coverUrl, photos]);
-  const isEmptyPhotos = !loading && !notFound && !initialError && photos.length === 0;
+  const isEmptyPhotos =
+    Boolean(event) &&
+    !loading &&
+    !notFound &&
+    !initialError &&
+    photos.length === 0;
+  const hasPhotosLoaded = !loading && !notFound && !initialError && photos.length > 0;
   const activePhoto = viewerIndex !== null ? photos[viewerIndex] || null : null;
+  const floatingParticles = useMemo(
+    () =>
+      new Array(8)
+        .fill(0)
+        .map((_, index) => <div key={index} className={styles.particle} />),
+    [],
+  );
 
   if (!token) {
     return <div className={styles.pageRoot}>Cargando experiencia...</div>;
@@ -281,6 +358,46 @@ const PartyPublicPage = ({ token }: Props) => {
 
   return (
     <div className={styles.pageRoot}>
+      <AnimatePresence>
+        {showIntro ? (
+          <motion.section
+            className={styles.introScreen}
+            initial={{ opacity: 1 }}
+            exit={{
+              opacity: 0,
+              transition: { duration: reduceMotion ? 0 : 0.8 },
+            }}
+          >
+            <div className={styles.particleLayer}>{floatingParticles}</div>
+            <motion.div
+              className={styles.introLogo}
+              initial={{ scale: 0.96, opacity: 0.6 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: reduceMotion ? 0 : 1.2 }}
+            >
+              <Image
+                src={logoWhite}
+                alt="Brillipoint"
+                width={220}
+                height={220}
+                priority
+              />
+            </motion.div>
+            <motion.h1
+              className={styles.introTitle}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: reduceMotion ? 0 : 0.9,
+                delay: reduceMotion ? 0 : 0.3,
+              }}
+            >
+              Bienvenido a la experiencia Brillipoint ✨
+            </motion.h1>
+          </motion.section>
+        ) : null}
+      </AnimatePresence>
+
       {loading ? (
         <section className={styles.centerState}>
           <div className={styles.loaderOrb} />
@@ -292,12 +409,42 @@ const PartyPublicPage = ({ token }: Props) => {
         <section className={styles.centerState}>
           <h2>Algo salió mal</h2>
           <p>{initialError}</p>
-          <button className={styles.primaryBtn} type="button" onClick={handleInitialLoad}>
+          <button
+            className={styles.primaryBtn}
+            type="button"
+            onClick={() => handleInitialLoad()}
+          >
             Reintentar
           </button>
         </section>
       ) : isEmptyPhotos ? (
-        <EmptyStateNoPhotos onRetry={handleInitialLoad} />
+        <>
+          <EventEmptyState
+            onRetry={handleRetryEmptyState}
+            isRetrying={isRetryingEmpty}
+            onCopyLink={handleCopyCurrentLink}
+          />
+          <section className={styles.socialSection}>
+            <SocialMediaPlugin
+              copy={{
+                title: "¿Estás listo para tu propio evento Brillipoint?",
+                subtitle:
+                  "Reserva tu fecha o solicita información personalizada por WhatsApp.",
+                followLabel:
+                  "Sigue nuestras redes sociales para que no te pierdas nuestras promociones",
+                thanksText: "✨ Nos encantara ser parte de tu evento ✨",
+                ctas: [
+                  {
+                    label: "Reservar fecha",
+                    message:
+                      "Hola, quiero reservar la experiencia Brillipoint para mi evento.",
+                    variant: "primary",
+                  },
+                ],
+              }}
+            />
+          </section>
+        </>
       ) : (
         <>
           {isMobileViewport ? (
@@ -349,14 +496,16 @@ const PartyPublicPage = ({ token }: Props) => {
         </>
       )}
 
-      <PhotoViewerModal
-        isOpen={isMobileViewport && viewerIndex !== null}
-        photo={activePhoto}
-        eventTitle={eventTitle}
-        onClose={() => setViewerIndex(null)}
-        onDownload={handleDownload}
-        onShare={handleShare}
-      />
+      {hasPhotosLoaded ? (
+        <PhotoViewerModal
+          isOpen={isMobileViewport && viewerIndex !== null}
+          photo={activePhoto}
+          eventTitle={eventTitle}
+          onClose={() => setViewerIndex(null)}
+          onDownload={handleDownload}
+          onShare={handleShare}
+        />
+      ) : null}
       {toastMessage ? <div className={styles.toast}>{toastMessage}</div> : null}
     </div>
   );
