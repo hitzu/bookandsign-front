@@ -22,6 +22,19 @@ const PhotoViewerModal = ({
   useEffect(() => {
     if (!isOpen) return;
 
+    const { overflow, touchAction } = document.body.style;
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+
+    return () => {
+      document.body.style.overflow = overflow;
+      document.body.style.touchAction = touchAction;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
