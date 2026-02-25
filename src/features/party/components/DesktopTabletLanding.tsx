@@ -3,6 +3,7 @@ import { EventPhoto } from "../../../interfaces";
 import styles from "@assets/css/party-public.module.css";
 
 type DesktopTabletLandingProps = {
+  eventName?: string;
   eventSubtitle?: string;
   photos: EventPhoto[];
   selectedPhotoIndex: number;
@@ -12,6 +13,7 @@ type DesktopTabletLandingProps = {
 };
 
 const DesktopTabletLanding = ({
+  eventName,
   eventSubtitle,
   photos,
   selectedPhotoIndex,
@@ -20,6 +22,7 @@ const DesktopTabletLanding = ({
   onShare,
 }: DesktopTabletLandingProps) => {
   const heroPhoto = photos[selectedPhotoIndex] || photos[0] || null;
+  const heroTitle = eventName?.trim() || "Tu momento tu brillo";
   if (!heroPhoto) return null;
 
   return (
@@ -30,12 +33,12 @@ const DesktopTabletLanding = ({
           <div className={styles.heroPrimary}>
             <img
               src={heroPhoto.publicUrl}
-              alt="Tu momento tu brillo"
+              alt={heroTitle}
               className={styles.coverImage}
             />
             <div className={styles.heroOverlay} />
             <div className={styles.heroContent}>
-              <h2>Tu momento tu brillo</h2>
+              <h2>{heroTitle}</h2>
               {eventSubtitle ? (
                 <p className={styles.pollingHint}>{eventSubtitle}</p>
               ) : null}

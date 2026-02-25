@@ -5,6 +5,7 @@ import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/party-public.module.css";
 
 type HeroCoverMobileProps = {
+  eventName?: string;
   subtitle: string;
   coverUrls: string[];
   parallaxOffset?: number;
@@ -13,6 +14,7 @@ type HeroCoverMobileProps = {
 };
 
 const HeroCoverMobile = ({
+  eventName,
   subtitle,
   coverUrls,
   parallaxOffset = 0,
@@ -20,6 +22,7 @@ const HeroCoverMobile = ({
   onShareLink,
 }: HeroCoverMobileProps) => {
   const reduceMotion = useReducedMotion();
+  const heroTitle = eventName?.trim() || "Tu momento tu brillo";
   const [activeCoverIndex, setActiveCoverIndex] = useState(0);
   const availableCovers = useMemo(
     () => coverUrls.filter(Boolean),
@@ -69,7 +72,7 @@ const HeroCoverMobile = ({
             <motion.img
               key={activeCoverUrl}
               src={activeCoverUrl}
-              alt="Tu momento tu brillo"
+              alt={heroTitle}
               className={styles.mobileHeroImage}
               loading="eager"
               initial={{ opacity: 0.72, scale: 1.03 }}
@@ -88,7 +91,7 @@ const HeroCoverMobile = ({
 
       <div className={styles.mobileHeroContent}>
         <p className={styles.mobileEyebrow}>EXPERIENCIA BRILLIPOINT</p>
-        <h1 className={styles.mobileHeroTitle}>Tu momento tu brillo</h1>
+        <h1 className={styles.mobileHeroTitle}>{heroTitle}</h1>
         <p className={styles.mobileHeroSubtitle}>{subtitle}</p>
         <div className={styles.mobileHeroActions}>
           <button

@@ -449,6 +449,7 @@ const PartyPublicPage = ({ token }: Props) => {
         <>
           {isMobileViewport ? (
             <MobileWowLanding
+              eventName={event?.name}
               eventSubtitle={eventDateLabel}
               heroCoverUrls={coverUrls}
               items={photos}
@@ -464,6 +465,7 @@ const PartyPublicPage = ({ token }: Props) => {
             />
           ) : (
             <DesktopTabletLanding
+              eventName={event?.name}
               eventSubtitle={eventDateLabel}
               photos={photos}
               selectedPhotoIndex={desktopSelectedPhotoIndex}
