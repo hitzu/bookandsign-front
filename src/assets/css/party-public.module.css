@@ -263,8 +263,7 @@
 
 .heroPrimary {
   position: relative;
-  display: flex;
-  align-items: flex-end;
+  display: block;
   width: min(100%, 680px);
   justify-self: center;
   aspect-ratio: 4 / 5;
@@ -272,6 +271,11 @@
   border-radius: 1.2rem;
   min-height: 0;
   box-shadow: 0 30px 70px rgba(8, 8, 21, 0.52);
+}
+
+.heroPrimary > .coverImage {
+  position: absolute;
+  inset: 0;
 }
 
 .heroRail {
@@ -396,7 +400,10 @@
 }
 
 .heroContent {
-  position: relative;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 4;
   width: 100%;
   max-width: 860px;
@@ -427,6 +434,18 @@
   margin: 0;
   color: rgba(240, 242, 255, 0.88);
   font-size: 0.9rem;
+}
+
+.desktopHeroDescription {
+  margin: 0;
+  max-width: 60ch;
+  color: rgba(232, 236, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .heroActions {
@@ -834,28 +853,6 @@
   }
 }
 
-.desktopLanding {
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 1rem 1rem 2rem;
-}
-
-.desktopGrid {
-  margin-top: 1.4rem;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.95rem;
-}
-
-.desktopGrid .card {
-  grid-column: auto;
-  aspect-ratio: 4 / 5;
-}
-
-.heroPrimary .coverImage {
-  object-fit: cover;
-}
-
 .mobileHero {
   position: relative;
   min-height: 82vh;
@@ -1179,7 +1176,7 @@
 .viewerActions {
   position: absolute;
   left: 50%;
-  top: 75%;
+  top: 90%;
   transform: translate(-50%, -50%);
   width: min(560px, calc(100% - 1.7rem));
   z-index: 95;
@@ -1225,10 +1222,6 @@
 }
 
 @media (max-width: 767px) {
-  .desktopLanding {
-    display: none;
-  }
-
   .socialSection {
     padding-top: 0.5rem;
   }
@@ -1242,10 +1235,6 @@
     display: none;
   }
 
-  .desktopGrid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
   .viewerOverlay {
     padding: 1.2rem;
   }
@@ -1253,7 +1242,7 @@
   .viewerActions {
     width: min(560px, calc(100% - 2.4rem));
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    top: 78%;
+    top: 90%;
     transform: translate(-50%, -50%);
   }
 }

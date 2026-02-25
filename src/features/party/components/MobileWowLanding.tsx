@@ -5,9 +5,7 @@ import InfiniteLoader from "./InfiniteLoader";
 import MasonryGridMobile from "./MasonryGridMobile";
 
 type MobileWowLandingProps = {
-  eventTitle: string;
   eventSubtitle: string;
-  eventDescription?: string;
   heroCoverUrls: string[];
   items: EventPhoto[];
   parallaxOffset: number;
@@ -22,9 +20,7 @@ type MobileWowLandingProps = {
 };
 
 const MobileWowLanding = ({
-  eventTitle,
   eventSubtitle,
-  eventDescription,
   heroCoverUrls,
   items,
   parallaxOffset,
@@ -40,9 +36,7 @@ const MobileWowLanding = ({
   return (
     <>
       <HeroCoverMobile
-        title={eventTitle}
         subtitle={eventSubtitle}
-        description={eventDescription}
         coverUrls={heroCoverUrls}
         parallaxOffset={parallaxOffset}
         onViewPhotos={onViewPhotos}

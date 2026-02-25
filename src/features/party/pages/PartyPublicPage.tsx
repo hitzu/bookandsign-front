@@ -18,7 +18,7 @@ type Props = {
   token?: string;
 };
 
-const MOBILE_BREAKPOINT_PX = 768;
+const MOBILE_BREAKPOINT_PX = 767;
 const INITIAL_PAGE_LIMIT = 60;
 
 const sortByNewest = (photos: EventPhoto[]) =>
@@ -274,10 +274,6 @@ const PartyPublicPage = ({ token }: Props) => {
   }, [event?.coverUrl, photos]);
   const isEmptyPhotos = !loading && !notFound && !initialError && photos.length === 0;
   const activePhoto = viewerIndex !== null ? photos[viewerIndex] || null : null;
-  const handleDesktopSelectPhoto = (index: number) => {
-    setDesktopSelectedPhotoIndex(index);
-    setViewerIndex(index);
-  };
 
   if (!token) {
     return <div className={styles.pageRoot}>Cargando experiencia...</div>;
@@ -306,9 +302,7 @@ const PartyPublicPage = ({ token }: Props) => {
         <>
           {isMobileViewport ? (
             <MobileWowLanding
-              eventTitle={eventTitle}
               eventSubtitle={eventDateLabel}
-              eventDescription={event?.description}
               heroCoverUrls={coverUrls}
               items={photos}
               parallaxOffset={parallaxOffset}
@@ -323,10 +317,10 @@ const PartyPublicPage = ({ token }: Props) => {
             />
           ) : (
             <DesktopTabletLanding
-              eventTitle={eventTitle}
+              eventSubtitle={eventDateLabel}
               photos={photos}
               selectedPhotoIndex={desktopSelectedPhotoIndex}
-              onSelectPhoto={handleDesktopSelectPhoto}
+              onSelectPhoto={setDesktopSelectedPhotoIndex}
               onDownload={handleDownload}
               onShare={handleShare}
             />
@@ -356,7 +350,7 @@ const PartyPublicPage = ({ token }: Props) => {
       )}
 
       <PhotoViewerModal
-        isOpen={viewerIndex !== null}
+        isOpen={isMobileViewport && viewerIndex !== null}
         photo={activePhoto}
         eventTitle={eventTitle}
         onClose={() => setViewerIndex(null)}

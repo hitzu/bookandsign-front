@@ -1,7 +1,7 @@
 import NonLayout from "@layout/NonLayout";
 import React, { ReactElement } from "react";
 import { useRouter } from "next/router";
-import PartyPublicPage from "../../../features/party/pages/PartyPublicPage";
+import PartyPublicPage from "../../features/party/pages/PartyPublicPage";
 
 const PartTokenPage = () => {
   const router = useRouter();
