@@ -207,7 +207,9 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .emptyStateShareBtn:hover {
@@ -462,7 +464,9 @@
   font-weight: 600;
   background: rgba(12, 14, 30, 0.5);
   backdrop-filter: blur(6px);
-  transition: transform 0.25s ease, background-color 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease;
 }
 
 .secondaryActionBtn:hover {
@@ -827,5 +831,429 @@
   .secondaryBtn {
     width: 100%;
     text-align: center;
+  }
+}
+
+.desktopLanding {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+}
+
+.desktopGrid {
+  margin-top: 1.4rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.95rem;
+}
+
+.desktopGrid .card {
+  grid-column: auto;
+  aspect-ratio: 4 / 5;
+}
+
+.heroPrimary .coverImage {
+  object-fit: cover;
+}
+
+.mobileHero {
+  position: relative;
+  min-height: 82vh;
+  background: #090913;
+  overflow: hidden;
+}
+
+.mobileHeroMedia {
+  position: absolute;
+  inset: 0;
+}
+
+.mobileHeroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobileHeroPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(72, 88, 255, 0.4), transparent 54%),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(51, 163, 255, 0.22),
+      transparent 50%
+    ),
+    linear-gradient(150deg, #0f1126 0%, #0a0b18 70%, #090913 100%);
+}
+
+.mobileHeroVignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to top,
+      rgba(5, 6, 14, 0.95) 8%,
+      rgba(5, 6, 14, 0.28) 48%,
+      rgba(5, 6, 14, 0) 80%
+    ),
+    radial-gradient(
+      circle at center,
+      rgba(0, 0, 0, 0) 32%,
+      rgba(0, 0, 0, 0.52) 100%
+    );
+}
+
+.mobileHeroContent {
+  position: relative;
+  z-index: 2;
+  min-height: 82vh;
+  display: grid;
+  align-content: end;
+  gap: 0.5rem;
+  padding: 1.2rem 1rem 1.35rem;
+}
+
+.mobileEyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.68rem;
+  color: rgba(228, 233, 255, 0.95);
+}
+
+.mobileHeroTitle {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.8rem, 10vw, 2.5rem);
+  line-height: 1.05;
+}
+
+.mobileHeroSubtitle {
+  margin: 0;
+  color: rgba(236, 241, 255, 0.9);
+  font-size: 0.92rem;
+}
+
+.mobileHeroDescription {
+  margin: 0.1rem 0 0;
+  color: rgba(232, 236, 255, 0.9);
+  font-size: 0.91rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.mobileHeroCta {
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  margin-top: 0.6rem;
+  justify-self: stretch;
+  padding: 0.8rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 600;
+  background: linear-gradient(120deg, #6b5cff, #1aa7ff);
+  box-shadow: 0 14px 30px rgba(67, 95, 255, 0.34);
+  width: 100%;
+}
+
+.mobileHeroActions {
+  margin-top: 0.55rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.52rem;
+}
+
+.mobileHeroSecondaryCta {
+  border: 1px solid rgba(220, 227, 255, 0.44);
+  cursor: pointer;
+  color: #fff;
+  width: 100%;
+  justify-self: stretch;
+  padding: 0.78rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  background: rgba(12, 15, 33, 0.65);
+  backdrop-filter: blur(8px);
+}
+
+.mobileGallerySection {
+  padding: 1.1rem 0.7rem 0;
+}
+
+.mobileGalleryHeader {
+  padding: 0 0.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.mobileGalleryHeader h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.mobileGalleryHeader p {
+  margin: 0.2rem 0 0;
+  color: rgba(217, 223, 255, 0.76);
+  font-size: 0.86rem;
+}
+
+.mobileMasonry {
+  column-count: 2;
+  column-gap: 0.55rem;
+}
+
+.mobileMasonryCard {
+  width: 100%;
+  display: block;
+  margin: 0 0 0.55rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  padding: 0;
+  break-inside: avoid;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mobileMasonryCard:nth-child(4n + 1) .mobileMasonryImage {
+  aspect-ratio: 4 / 5;
+}
+
+.mobileMasonryCard:nth-child(4n + 2) .mobileMasonryImage {
+  aspect-ratio: 4 / 6;
+}
+
+.mobileMasonryCard:nth-child(4n + 3) .mobileMasonryImage {
+  aspect-ratio: 1 / 1;
+}
+
+.mobileMasonryCard:nth-child(4n + 4) .mobileMasonryImage {
+  aspect-ratio: 3 / 4;
+}
+
+.mobileMasonryImage {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  transition: transform 0.24s ease;
+}
+
+.mobileMasonryCard:active .mobileMasonryImage {
+  transform: scale(0.98);
+}
+
+.infiniteWrap {
+  padding: 0.7rem 0.7rem 1.3rem;
+}
+
+.mobileSkeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.mobileSkeletonCard {
+  border-radius: 0.85rem;
+  min-height: 126px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.25s linear infinite;
+}
+
+.infiniteSentinel {
+  height: 2px;
+}
+
+.retryBtn {
+  border: 1px solid rgba(214, 220, 255, 0.42);
+  color: #fff;
+  background: rgba(28, 32, 58, 0.72);
+  border-radius: 999px;
+  padding: 0.55rem 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+
+.emptyNoPhotos {
+  padding: 0.9rem 0.7rem 1.2rem;
+}
+
+.emptyNoPhotosHero {
+  min-height: 54vh;
+  border-radius: 1rem;
+  background:
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(68, 84, 255, 0.45),
+      transparent 56%
+    ),
+    linear-gradient(165deg, #14162b 0%, #0d0f20 72%, #0a0b16 100%);
+  border: 1px solid rgba(181, 192, 255, 0.2);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  padding: 1rem;
+}
+
+.emptyNoPhotosLogo {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 26px rgba(127, 147, 255, 0.32);
+}
+
+.emptyNoPhotosHero h2 {
+  margin: 0;
+  font-size: 1.42rem;
+}
+
+.emptyNoPhotosHero p {
+  margin: 0;
+  color: rgba(224, 229, 255, 0.88);
+}
+
+.emptySkeletonGrid {
+  margin-top: 0.85rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.notFoundState {
+  min-height: 84vh;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 1rem;
+}
+
+.viewerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.95);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 0.85rem;
+}
+
+.viewerClose {
+  justify-self: end;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.viewerBody {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.viewerImage {
+  width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+}
+
+.viewerActions {
+  position: absolute;
+  left: 50%;
+  top: 75%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100% - 1.7rem));
+  z-index: 95;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  padding: 0.7rem;
+  padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
+}
+
+.viewerHint {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  color: rgba(228, 233, 255, 0.85);
+  font-size: 0.82rem;
+}
+
+.viewerActionBtn {
+  width: 100%;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewerPrimaryBtn,
+.viewerSecondaryBtn {
+  border-radius: 999px;
+  padding: 0.76rem 1rem;
+  font-weight: 600;
+  border: 1px solid rgba(214, 220, 255, 0.35);
+  color: #fff;
+}
+
+.viewerPrimaryBtn {
+  border: none;
+  background: linear-gradient(120deg, #6b5cff, #1aa7ff);
+}
+
+.viewerSecondaryBtn {
+  background: rgba(27, 30, 50, 0.84);
+}
+
+@media (max-width: 767px) {
+  .desktopLanding {
+    display: none;
+  }
+
+  .socialSection {
+    padding-top: 0.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobileHero,
+  .mobileGallerySection,
+  .infiniteWrap,
+  .emptyNoPhotos {
+    display: none;
+  }
+
+  .desktopGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .viewerOverlay {
+    padding: 1.2rem;
+  }
+
+  .viewerActions {
+    width: min(560px, calc(100% - 2.4rem));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    top: 78%;
+    transform: translate(-50%, -50%);
   }
 }

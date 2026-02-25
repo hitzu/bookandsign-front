@@ -1,54 +1,43 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
-import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/party-public.module.css";
 import {
+  getEventPhotosPage,
   getPublicEventByToken,
-  getPublicPhotosByEventToken,
 } from "../../../api/services/partyPublicService";
 import { EventPhoto, PublicEvent } from "../../../interfaces";
 import { SocialMediaPlugin } from "../../booking/components/SocialMediaPlugin";
+import { parseLocalDate } from "@common/dates";
+import EmptyStateNoPhotos from "../components/EmptyStateNoPhotos";
+import EmptyStateNotFound from "../components/EmptyStateNotFound";
+import MobileWowLanding from "../components/MobileWowLanding";
+import PhotoViewerModal from "../components/PhotoViewerModal";
+import DesktopTabletLanding from "../components/DesktopTabletLanding";
 
 type Props = {
   token?: string;
 };
 
-const POLLING_INTERVAL_MS = 8000;
-const SLIDESHOW_INTERVAL_MS = 4000;
-const INTRO_DURATION_MS = 2500;
 const MOBILE_BREAKPOINT_PX = 768;
-const MOBILE_PREVIEW_LIMIT = 2;
-
-const isOptimizedImageHost = (url: string): boolean => {
-  try {
-    const hostname = new URL(url).hostname;
-    return (
-      hostname.endsWith(".storage.supabase.co") ||
-      hostname === "uljzbxuxzknilubykrlw.storage.supabase.co"
-    );
-  } catch (_error) {
-    return false;
-  }
-};
+const INITIAL_PAGE_LIMIT = 60;
 
 const sortByNewest = (photos: EventPhoto[]) =>
   [...photos].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
-const buildDownloadFilename = (photo: EventPhoto) => {
-  const safeDate = new Date(photo.createdAt)
-    .toISOString()
-    .replace(/[:.]/g, "-");
-  return `brillipoint-${photo.id}-${safeDate}.jpg`;
+const sanitizeSegment = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+
+const buildDownloadFilename = (eventName: string, photoIndex: number) => {
+  const safeEventName = sanitizeSegment(eventName || "evento");
+  return `brillipoint-${safeEventName}-${photoIndex + 1}.jpg`;
 };
 
 const downloadPhoto = async (url: string, filename: string) => {
@@ -65,154 +54,69 @@ const downloadPhoto = async (url: string, filename: string) => {
   URL.revokeObjectURL(objectUrl);
 };
 
-const PartyPublicPage = ({ token }: Props) => {
-  const reduceMotion = useReducedMotion();
-  const pollAbortRef = useRef<AbortController | null>(null);
-  const pollInFlightRef = useRef(false);
-  const lastSeenRef = useRef<string | null>(null);
+const copyToClipboard = async (value: string): Promise<boolean> => {
+  if (typeof navigator === "undefined") return false;
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return true;
+  }
+  return false;
+};
 
+const PartyPublicPage = ({ token }: Props) => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [initialError, setInitialError] = useState<string | null>(null);
   const [photos, setPhotos] = useState<EventPhoto[]>([]);
   const [event, setEvent] = useState<PublicEvent | null>(null);
-  const [lastSeenCreatedAt, setLastSeenCreatedAt] = useState<string | null>(
-    null,
-  );
-  const [isPolling, setIsPolling] = useState(false);
-
-  const [showIntro, setShowIntro] = useState(true);
-  const [heroIndex, setHeroIndex] = useState(0);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [desktopSelectedPhotoIndex, setDesktopSelectedPhotoIndex] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
-  const [isPreviewRailExpanded, setIsPreviewRailExpanded] = useState(false);
+  const [parallaxOffset, setParallaxOffset] = useState(0);
 
-  useEffect(() => {
-    lastSeenRef.current = lastSeenCreatedAt;
-  }, [lastSeenCreatedAt]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(
-      () => setShowIntro(false),
-      INTRO_DURATION_MS,
-    );
-    return () => window.clearTimeout(timer);
+  const fetchEvent = useCallback(async (eventToken: string): Promise<PublicEvent> => {
+    return getPublicEventByToken(eventToken);
   }, []);
-
-  const fetchEvent = useCallback(
-    async (eventToken: string): Promise<PublicEvent> =>
-      getPublicEventByToken(eventToken),
-    [],
-  );
-
-  const fetchPhotos = useCallback(
-    async (eventToken: string, signal?: AbortSignal) => {
-      return getPublicPhotosByEventToken(eventToken, signal);
-    },
-    [],
-  );
 
   const handleInitialLoad = useCallback(async () => {
     if (!token) return;
+
     setLoading(true);
-    setError(null);
+    setInitialError(null);
+    setLoadMoreError(null);
     setNotFound(false);
 
     try {
-      const [eventResponse, photosResponse] = await Promise.all([
-        fetchEvent(token),
-        fetchPhotos(token),
-      ]);
-      const orderedPhotos = sortByNewest(photosResponse);
+      const page = await getEventPhotosPage(token, {
+        limit: INITIAL_PAGE_LIMIT,
+      });
+      const orderedPhotos = sortByNewest(page.items);
+      const eventResponse = page.event || (await fetchEvent(token));
+
       setEvent(eventResponse);
       setPhotos(orderedPhotos);
-      setHeroIndex(0);
-      setLastSeenCreatedAt(orderedPhotos[0]?.createdAt || null);
+      setDesktopSelectedPhotoIndex(0);
+      setNextCursor(page.nextCursor || null);
+      setHasMore(Boolean(page.hasMore || page.nextCursor));
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 404) {
         setNotFound(true);
       } else {
-        setError("No pudimos cargar las fotos del evento. Intenta de nuevo.");
+        setInitialError("No pudimos cargar las fotos del evento. Intenta de nuevo.");
       }
     } finally {
       setLoading(false);
     }
-  }, [fetchEvent, fetchPhotos, token]);
-
-  const pollForPhotos = useCallback(async () => {
-    if (!token || typeof document === "undefined" || document.hidden) return;
-    if (pollInFlightRef.current) return;
-
-    pollInFlightRef.current = true;
-    setIsPolling(true);
-    pollAbortRef.current?.abort();
-    const controller = new AbortController();
-    pollAbortRef.current = controller;
-
-    try {
-      const incoming = sortByNewest(
-        await fetchPhotos(token, controller.signal),
-      );
-      if (!incoming.length) return;
-
-      setPhotos((previous) => {
-        const previousIds = new Set(previous.map((photo) => photo.id));
-        const fresh = incoming.filter((photo) => !previousIds.has(photo.id));
-        if (!fresh.length) return previous;
-        const merged = [...fresh, ...previous];
-        const latest = merged[0]?.createdAt || lastSeenRef.current;
-        setLastSeenCreatedAt(latest || null);
-        return merged;
-      });
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
-      if (error instanceof AxiosError && error.response?.status === 404) {
-        setNotFound(true);
-        return;
-      }
-      setError("No pudimos actualizar las fotos en tiempo real.");
-    } finally {
-      pollInFlightRef.current = false;
-      setIsPolling(false);
-    }
-  }, [fetchPhotos, token]);
+  }, [fetchEvent, token]);
 
   useEffect(() => {
     handleInitialLoad();
   }, [handleInitialLoad]);
-
-  useEffect(() => {
-    if (!token) return;
-    const interval = window.setInterval(pollForPhotos, POLLING_INTERVAL_MS);
-
-    const handleVisibilityChange = () => {
-      if (!document.hidden) pollForPhotos();
-      if (document.hidden) pollAbortRef.current?.abort();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      window.clearInterval(interval);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      pollAbortRef.current?.abort();
-    };
-  }, [pollForPhotos, token]);
-
-  useEffect(() => {
-    if (!photos.length) return;
-    if (heroIndex > photos.length - 1) setHeroIndex(0);
-  }, [heroIndex, photos.length]);
-
-  useEffect(() => {
-    if (reduceMotion || showIntro || hasInteracted || photos.length <= 1)
-      return;
-    const interval = window.setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % photos.length);
-    }, SLIDESHOW_INTERVAL_MS);
-
-    return () => window.clearInterval(interval);
-  }, [hasInteracted, photos.length, reduceMotion, showIntro]);
 
   useEffect(() => {
     if (!toastMessage) return;
@@ -228,7 +132,6 @@ const PartyPublicPage = ({ token }: Props) => {
     );
     const applyViewportState = (matches: boolean) => {
       setIsMobileViewport(matches);
-      if (!matches) setIsPreviewRailExpanded(false);
     };
 
     applyViewportState(mediaQuery.matches);
@@ -241,75 +144,76 @@ const PartyPublicPage = ({ token }: Props) => {
     return () => mediaQuery.removeEventListener("change", handleMediaChange);
   }, []);
 
-  const heroPhoto = photos[heroIndex] || photos[0] || null;
-  const canUseNextImage = heroPhoto
-    ? isOptimizedImageHost(heroPhoto.publicUrl)
-    : false;
-  const eventTitle = event?.name || "Experiencia Brillipoint";
-  const isEmptyPhotos = !loading && !notFound && !error && photos.length === 0;
-  const canTogglePreviewRail =
-    isMobileViewport && photos.length > MOBILE_PREVIEW_LIMIT;
-  const visiblePhotos =
-    canTogglePreviewRail && !isPreviewRailExpanded
-      ? photos.slice(0, MOBILE_PREVIEW_LIMIT)
-      : photos;
+  useEffect(() => {
+    if (!isMobileViewport) return;
+    const onScroll = () => {
+      setParallaxOffset(window.scrollY * 0.08);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isMobileViewport]);
 
-  const setHeroFromPhoto = (photoId: number) => {
-    setHasInteracted(true);
-    const index = photos.findIndex((photo) => photo.id === photoId);
-    if (index >= 0) setHeroIndex(index);
-  };
+  const handleLoadMore = useCallback(async () => {
+    if (!token || !hasMore || isLoadingMore) return;
+    setIsLoadingMore(true);
+    setLoadMoreError(null);
+
+    try {
+      const page = await getEventPhotosPage(token, {
+        limit: INITIAL_PAGE_LIMIT,
+        cursor: nextCursor,
+      });
+      setPhotos((previous) => {
+        const previousIds = new Set(previous.map((photo) => photo.id));
+        const incoming = page.items.filter((photo) => !previousIds.has(photo.id));
+        return [...previous, ...incoming];
+      });
+      setHasMore(Boolean(page.hasMore || page.nextCursor));
+      setNextCursor(page.nextCursor || null);
+      if (page.event?.name || page.event?.description || page.event?.coverUrl) {
+        setEvent((previous) => ({ ...(previous || { token }), ...page.event }));
+      }
+    } catch (_error) {
+      setLoadMoreError("No pudimos cargar más fotos.");
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [hasMore, isLoadingMore, nextCursor, token]);
 
   const handleDownload = async (photo: EventPhoto) => {
+    const photoIndex = Math.max(
+      0,
+      photos.findIndex((item) => item.id === photo.id),
+    );
+
     try {
-      await downloadPhoto(photo.publicUrl, buildDownloadFilename(photo));
-      setToastMessage("Foto descargada con exito");
+      await downloadPhoto(photo.publicUrl, buildDownloadFilename(eventTitle, photoIndex));
+      setToastMessage("Descarga iniciada");
     } catch (_error) {
       setToastMessage("No se pudo descargar la foto");
     }
   };
 
   const handleShare = async (photo: EventPhoto) => {
-    const shareTitle = eventTitle;
-    const shareText = "Tu momento, tu brillo ✨";
     const shareUrl = photo.publicUrl;
+    const shareTitle = `Brillipoint - ${eventTitle || "Mi foto"}`;
 
     try {
       if (typeof navigator === "undefined") throw new Error("No navigator");
 
       if (navigator.share) {
-        try {
-          const response = await fetch(shareUrl);
-          const blob = await response.blob();
-          const file = new File([blob], buildDownloadFilename(photo), {
-            type: blob.type || "image/jpeg",
-          });
-
-          if (navigator.canShare?.({ files: [file] })) {
-            await navigator.share({
-              title: shareTitle,
-              text: shareText,
-              files: [file],
-            });
-            setToastMessage("Compartido");
-            return;
-          }
-        } catch (_error) {
-          // Fallback to URL share when file share is unavailable.
-        }
-
         await navigator.share({
           title: shareTitle,
-          text: shareText,
           url: shareUrl,
         });
         setToastMessage("Compartido");
         return;
       }
 
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-        setToastMessage("Link copiado");
+      const copied = await copyToClipboard(shareUrl);
+      if (copied) {
+        setToastMessage("Enlace copiado ✨");
         return;
       }
 
@@ -319,29 +223,21 @@ const PartyPublicPage = ({ token }: Props) => {
     }
   };
 
-  const handleSharePartyLink = async () => {
-    const shareUrl =
-      typeof window !== "undefined" ? window.location.href : `/party/${token}`;
-    const shareTitle = "Galeria del evento Brillipoint";
-    const shareText =
-      "Comparte este enlace con los demas invitados para que disfruten las fotos en vivo.";
+  const handleShareEventLink = async () => {
+    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+    const shareTitle = event?.name || "Brillipoint";
 
     try {
       if (typeof navigator === "undefined") throw new Error("No navigator");
-
       if (navigator.share) {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl,
-        });
+        await navigator.share({ title: shareTitle, url: shareUrl });
         setToastMessage("Enlace compartido");
         return;
       }
 
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-        setToastMessage("Enlace copiado");
+      const copied = await copyToClipboard(shareUrl);
+      if (copied) {
+        setToastMessage("Enlace copiado ✨");
         return;
       }
 
@@ -351,270 +247,122 @@ const PartyPublicPage = ({ token }: Props) => {
     }
   };
 
-  const floatingParticles = useMemo(
-    () =>
-      new Array(8)
-        .fill(0)
-        .map((_, index) => <div key={index} className={styles.particle} />),
-    [],
-  );
+  const handleScrollToGallery = () => {
+    const section = document.getElementById("galeria");
+    if (!section) return;
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const eventTitle = event?.name || "Experiencia Brillipoint";
+  const eventDateLabel = useMemo(() => {
+    const rawDate = event?.createdAt;
+    if (!rawDate) return "Momentos en vivo";
+    const date = /^\d{4}-\d{2}-\d{2}/.test(rawDate)
+      ? parseLocalDate(rawDate)
+      : new Date(rawDate);
+    if (Number.isNaN(date.getTime())) return "Momentos en vivo";
+    return new Intl.DateTimeFormat("es-MX", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(date);
+  }, [event?.createdAt]);
+
+  const coverUrls = useMemo(() => {
+    const candidates = [event?.coverUrl, ...photos.map((photo) => photo.publicUrl)];
+    return Array.from(new Set(candidates.filter(Boolean) as string[]));
+  }, [event?.coverUrl, photos]);
+  const isEmptyPhotos = !loading && !notFound && !initialError && photos.length === 0;
+  const activePhoto = viewerIndex !== null ? photos[viewerIndex] || null : null;
+  const handleDesktopSelectPhoto = (index: number) => {
+    setDesktopSelectedPhotoIndex(index);
+    setViewerIndex(index);
+  };
 
   if (!token) {
     return <div className={styles.pageRoot}>Cargando experiencia...</div>;
   }
 
   return (
-    <div
-      className={styles.pageRoot}
-      onPointerDown={() => setHasInteracted(true)}
-      onTouchStart={() => setHasInteracted(true)}
-    >
-      <AnimatePresence>
-        {showIntro ? (
-          <motion.section
-            className={styles.introScreen}
-            initial={{ opacity: 1 }}
-            exit={{
-              opacity: 0,
-              transition: { duration: reduceMotion ? 0 : 0.8 },
-            }}
-          >
-            <div className={styles.particleLayer}>{floatingParticles}</div>
-            <motion.div
-              className={styles.introLogo}
-              initial={{ scale: 0.96, opacity: 0.6 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: reduceMotion ? 0 : 1.2 }}
-            >
-              <Image
-                src={logoWhite}
-                alt="Brillipoint"
-                width={220}
-                height={220}
-                priority
-              />
-            </motion.div>
-            <motion.h1
-              className={styles.introTitle}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: reduceMotion ? 0 : 0.9,
-                delay: reduceMotion ? 0 : 0.3,
-              }}
-            >
-              Bienvenido a la experiencia Brillipoint ✨
-            </motion.h1>
-          </motion.section>
-        ) : null}
-      </AnimatePresence>
-
-      {!showIntro && (
+    <div className={styles.pageRoot}>
+      {loading ? (
+        <section className={styles.centerState}>
+          <div className={styles.loaderOrb} />
+          <p>Cargando momentos inolvidables...</p>
+        </section>
+      ) : notFound ? (
+        <EmptyStateNotFound />
+      ) : initialError ? (
+        <section className={styles.centerState}>
+          <h2>Algo salió mal</h2>
+          <p>{initialError}</p>
+          <button className={styles.primaryBtn} type="button" onClick={handleInitialLoad}>
+            Reintentar
+          </button>
+        </section>
+      ) : isEmptyPhotos ? (
+        <EmptyStateNoPhotos onRetry={handleInitialLoad} />
+      ) : (
         <>
-          {loading ? (
-            <section className={styles.centerState}>
-              <div className={styles.loaderOrb} />
-              <p>Cargando momentos inolvidables...</p>
-            </section>
-          ) : notFound ? (
-            <section className={styles.centerState}>
-              <h2>Evento no encontrado</h2>
-              <p>
-                Verifica el QR o solicita uno nuevo al equipo de Brillipoint.
-              </p>
-            </section>
-          ) : error ? (
-            <section className={styles.centerState}>
-              <h2>Algo salio mal</h2>
-              <p>{error}</p>
-              <button
-                className={styles.primaryBtn}
-                type="button"
-                onClick={handleInitialLoad}
-              >
-                Reintentar
-              </button>
-            </section>
+          {isMobileViewport ? (
+            <MobileWowLanding
+              eventTitle={eventTitle}
+              eventSubtitle={eventDateLabel}
+              eventDescription={event?.description}
+              heroCoverUrls={coverUrls}
+              items={photos}
+              parallaxOffset={parallaxOffset}
+              onViewPhotos={handleScrollToGallery}
+              onShareLink={handleShareEventLink}
+              onSelectPhoto={setViewerIndex}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
+              loadMoreError={loadMoreError}
+              onLoadMore={handleLoadMore}
+              onRetryLoadMore={handleLoadMore}
+            />
           ) : (
-            <>
-              {isEmptyPhotos ? (
-                <section className={styles.emptyStateSection}>
-                  <div className={styles.emptyStateCard}>
-                    <h2 className={styles.emptyStateTitle}>
-                      La magia de tu evento esta por comenzar
-                    </h2>
-                    <p className={styles.emptyStateText}>
-                      Este espacio se ira llenando con cada sonrisa, cada pose y
-                      cada momento especial que capturemos durante la
-                      experiencia Brillipoint. En cuanto empiecen a llegar las
-                      primeras tomas, las veras aparecer aqui para revivirlas,
-                      compartirlas y descargarlas al instante.
-                    </p>
-                    <p className={styles.emptyStateHint}>
-                      Comparte este enlace con los demas invitados para que
-                      entren y disfruten las fotos en cuanto vayan apareciendo.
-                    </p>
-                    <button
-                      type="button"
-                      className={styles.emptyStateShareBtn}
-                      onClick={handleSharePartyLink}
-                    >
-                      Compartir enlace con invitados
-                    </button>
-                  </div>
-                </section>
-              ) : heroPhoto ? (
-                <section className={styles.heroWrap}>
-                  <div className={styles.heroAmbient} />
-                  <div className={styles.heroShell}>
-                    <div className={styles.heroPrimary}>
-                      <AnimatePresence mode="wait">
-                        <motion.div
-                          key={heroPhoto.id}
-                          className={styles.heroMedia}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: reduceMotion ? 0 : 0.9 }}
-                        >
-                          {canUseNextImage ? (
-                            <motion.div
-                              className={styles.imageMotionWrap}
-                              initial={{ scale: 1.05 }}
-                              animate={{ scale: 1 }}
-                              transition={{
-                                duration: reduceMotion ? 0 : 8,
-                                ease: "easeOut",
-                              }}
-                            >
-                              <Image
-                                src={heroPhoto.publicUrl}
-                                alt={eventTitle}
-                                fill
-                                priority
-                                sizes="(max-width: 1024px) 100vw, 70vw"
-                                className={styles.coverImage}
-                              />
-                            </motion.div>
-                          ) : (
-                            <motion.img
-                              src={heroPhoto.publicUrl}
-                              alt={eventTitle}
-                              className={styles.coverImage}
-                              initial={{ scale: 1.05 }}
-                              animate={{ scale: 1 }}
-                              transition={{
-                                duration: reduceMotion ? 0 : 8,
-                                ease: "easeOut",
-                              }}
-                            />
-                          )}
-                        </motion.div>
-                      </AnimatePresence>
-                      <div className={styles.heroOverlay} />
-                      <div className={styles.heroContent}>
-                        <p className={styles.heroKicker}>{eventTitle}</p>
-                        <h2>Tu momento, tu brillo.</h2>
-                        <div className={styles.heroActions}>
-                          <button
-                            type="button"
-                            className={styles.primaryBtn}
-                            onClick={() => handleDownload(heroPhoto)}
-                          >
-                            Descargar
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.secondaryActionBtn}
-                            onClick={() => handleShare(heroPhoto)}
-                          >
-                            Compartir
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                    {canTogglePreviewRail ? (
-                      <button
-                        type="button"
-                        className={styles.previewToggleBtn}
-                        aria-controls="party-preview-rail"
-                        aria-expanded={isPreviewRailExpanded}
-                        onClick={() =>
-                          setIsPreviewRailExpanded((previous) => !previous)
-                        }
-                      >
-                        {isPreviewRailExpanded
-                          ? "Mostrar menos"
-                          : "Ver mas fotos"}
-                      </button>
-                    ) : null}
-                    <aside id="party-preview-rail" className={styles.heroRail}>
-                      {visiblePhotos.map((photo) => {
-                        const useNextImage = isOptimizedImageHost(
-                          photo.publicUrl,
-                        );
-                        return (
-                          <button
-                            key={photo.id}
-                            type="button"
-                            className={[
-                              styles.previewCard,
-                              photo.id === heroPhoto.id
-                                ? styles.previewCardActive
-                                : "",
-                            ].join(" ")}
-                            onClick={() => setHeroFromPhoto(photo.id)}
-                            aria-label={`Ver foto ${photo.id} en principal`}
-                          >
-                            {useNextImage ? (
-                              <Image
-                                src={photo.publicUrl}
-                                alt={`Preview ${photo.id}`}
-                                fill
-                                sizes="(max-width: 1024px) 28vw, 18vw"
-                                className={styles.previewImage}
-                              />
-                            ) : (
-                              <img
-                                src={photo.publicUrl}
-                                alt={`Preview ${photo.id}`}
-                                className={styles.previewImage}
-                                loading="lazy"
-                              />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </aside>
-                  </div>
-                </section>
-              ) : null}
-
-              <section className={styles.socialSection}>
-                <SocialMediaPlugin
-                  copy={{
-                    title: "¿Estás listo para tu propio evento Brillipoint?",
-                    subtitle:
-                      "Reserva tu fecha o solicita información personalizada por WhatsApp.",
-                    followLabel:
-                      "Sigue nuestras redes sociales para que no te pierdas nuestras promociones",
-                    thanksText: "✨ Nos encantara ser parte de tu evento ✨",
-                    ctas: [
-                      {
-                        label: "Reservar fecha",
-                        message:
-                          "Hola, quiero reservar la experiencia Brillipoint para mi evento.",
-                        variant: "primary",
-                      },
-                    ],
-                  }}
-                />
-              </section>
-            </>
+            <DesktopTabletLanding
+              eventTitle={eventTitle}
+              photos={photos}
+              selectedPhotoIndex={desktopSelectedPhotoIndex}
+              onSelectPhoto={handleDesktopSelectPhoto}
+              onDownload={handleDownload}
+              onShare={handleShare}
+            />
           )}
+
+          <section className={styles.socialSection}>
+            <SocialMediaPlugin
+              copy={{
+                title: "¿Estás listo para tu propio evento Brillipoint?",
+                subtitle:
+                  "Reserva tu fecha o solicita información personalizada por WhatsApp.",
+                followLabel:
+                  "Sigue nuestras redes sociales para que no te pierdas nuestras promociones",
+                thanksText: "✨ Nos encantara ser parte de tu evento ✨",
+                ctas: [
+                  {
+                    label: "Reservar fecha",
+                    message:
+                      "Hola, quiero reservar la experiencia Brillipoint para mi evento.",
+                    variant: "primary",
+                  },
+                ],
+              }}
+            />
+          </section>
         </>
       )}
 
+      <PhotoViewerModal
+        isOpen={viewerIndex !== null}
+        photo={activePhoto}
+        eventTitle={eventTitle}
+        onClose={() => setViewerIndex(null)}
+        onDownload={handleDownload}
+        onShare={handleShare}
+      />
       {toastMessage ? <div className={styles.toast}>{toastMessage}</div> : null}
     </div>
   );
