@@ -7,11 +7,13 @@ type MasonryGridMobileProps = {
   onSelectPhoto: (index: number) => void;
 };
 
-const MasonryGridMobile = ({ items, onSelectPhoto }: MasonryGridMobileProps) => {
+const MasonryGridMobile = ({
+  items,
+  onSelectPhoto,
+}: MasonryGridMobileProps) => {
   return (
     <section id="galeria" className={styles.mobileGallerySection}>
       <div className={styles.mobileGalleryHeader}>
-        <h2>Galería</h2>
         <p>{items.length} recuerdos capturados</p>
       </div>
 
