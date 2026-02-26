@@ -610,6 +610,173 @@
   padding: 1.2rem 1rem 3rem;
 }
 
+.crossLinkSection {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.crossLinkCard {
+  border-radius: 1.05rem;
+  border: 1px solid rgba(191, 198, 255, 0.24);
+  background: linear-gradient(
+    120deg,
+    rgba(32, 32, 66, 0.6),
+    rgba(20, 21, 40, 0.78)
+  );
+  box-shadow: 0 20px 48px rgba(9, 9, 29, 0.32);
+  padding: clamp(0.95rem, 2.6vw, 1.45rem);
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+
+.crossLinkKicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(203, 208, 255, 0.87);
+}
+
+.crossLinkCard h3 {
+  margin: 0;
+  font-size: clamp(1.15rem, 2.3vw, 1.45rem);
+  color: #fff;
+}
+
+.crossLinkCard p {
+  margin: 0;
+  color: rgba(226, 230, 255, 0.84);
+}
+
+.inspirationHeader {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 1.2rem 1rem 0.6rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.inspirationHeader h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 4.2vw, 2.55rem);
+  color: #fff;
+}
+
+.inspirationHeader p {
+  margin: 0;
+  max-width: 68ch;
+  color: rgba(225, 231, 255, 0.88);
+  line-height: 1.6;
+}
+
+.inspirationActionLead {
+  color: #fff !important;
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  font-weight: 600;
+  line-height: 1.58;
+}
+
+.inspirationHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.actionTextStrong {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.inspirationGridSection {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 0.9rem 1rem 1.8rem;
+}
+
+.inspirationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.inspirationGridCard {
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  border-radius: 0.9rem;
+  overflow: hidden;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 16px 36px rgba(8, 9, 26, 0.32);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.inspirationGridCard:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(188, 196, 255, 0.35),
+    0 20px 42px rgba(86, 98, 255, 0.27);
+}
+
+.inspirationGridImage {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.inspirationLoadingText {
+  margin: 0 0 0.75rem;
+  color: rgba(217, 223, 255, 0.86);
+  font-size: 0.9rem;
+}
+
+.inspirationSkeletonCard {
+  border-radius: 0.9rem;
+  min-height: 156px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.05) 75%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.25s linear infinite;
+}
+
+.inspirationEmptyCard {
+  border-radius: 1.05rem;
+  border: 1px solid rgba(190, 198, 255, 0.22);
+  background: linear-gradient(
+    145deg,
+    rgba(20, 21, 38, 0.72),
+    rgba(14, 15, 28, 0.86)
+  );
+  box-shadow: 0 24px 52px rgba(7, 8, 20, 0.4);
+  min-height: 220px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.7rem;
+  padding: clamp(1.2rem, 4vw, 2.2rem) 1rem;
+}
+
+.inspirationEmptyCard h3 {
+  margin: 0;
+  font-size: clamp(1.2rem, 3.4vw, 1.8rem);
+}
+
+.inspirationEmptyCard p {
+  margin: 0;
+  max-width: 54ch;
+  color: rgba(234, 237, 255, 0.9);
+}
+
 .reserveSection {
   max-width: 1220px;
   margin: 0 auto;
@@ -1301,6 +1468,32 @@
   object-fit: contain;
 }
 
+.viewerNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 220, 255, 0.35);
+  background: rgba(12, 15, 33, 0.72);
+  color: #fff;
+  font-size: 1.8rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.viewerNavLeft {
+  left: 0.6rem;
+}
+
+.viewerNavRight {
+  right: 0.6rem;
+}
+
 .viewerActions {
   position: absolute;
   left: 50%;
@@ -1353,6 +1546,26 @@
   .socialSection {
     padding-top: 0.5rem;
   }
+
+  .inspirationHeader {
+    padding-top: 0.8rem;
+  }
+
+  .inspirationHeader h1 {
+    font-size: clamp(1.3rem, 8vw, 1.9rem);
+  }
+
+  .crossLinkSection {
+    padding-top: 0.7rem;
+  }
+
+  .inspirationGridSection {
+    padding-top: 0.8rem;
+  }
+
+  .viewerNav {
+    display: none;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1372,6 +1585,11 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     top: 90%;
     transform: translate(-50%, -50%);
+  }
+
+  .inspirationGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
   }
 
   .eventEmptyWrap {
@@ -1395,5 +1613,11 @@
 
   .eventEmptyBullets {
     max-width: 54ch;
+  }
+}
+
+@media (min-width: 1100px) {
+  .inspirationGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

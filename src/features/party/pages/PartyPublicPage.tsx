@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import { AxiosError } from "axios";
-import logoWhite from "@assets/images/logo-white.png";
 import styles from "@assets/css/party-public.module.css";
 import {
   getEventPhotosPage,
@@ -16,6 +14,14 @@ import EmptyStateNotFound from "../components/EmptyStateNotFound";
 import MobileWowLanding from "../components/MobileWowLanding";
 import PhotoViewerModal from "../components/PhotoViewerModal";
 import DesktopTabletLanding from "../components/DesktopTabletLanding";
+import BrillipointShell from "../components/BrillipointShell";
+import IntroHero from "../components/IntroHero";
+import {
+  buildDownloadFilename,
+  copyToClipboard,
+  downloadPhoto,
+  shareUrl,
+} from "../utils/mediaActions";
 
 type Props = {
   token?: string;
@@ -30,66 +36,7 @@ const sortByNewest = (photos: EventPhoto[]) =>
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 
-const sanitizeSegment = (value: string) =>
-  value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
-
-const buildDownloadFilename = (eventName: string, photoIndex: number) => {
-  const safeEventName = sanitizeSegment(eventName || "evento");
-  return `brillipoint-${safeEventName}-${photoIndex + 1}.jpg`;
-};
-
-const downloadPhoto = async (url: string, filename: string) => {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("No se pudo descargar la foto");
-  const blob = await response.blob();
-  const objectUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = objectUrl;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(objectUrl);
-};
-
-const copyToClipboard = async (value: string): Promise<boolean> => {
-  if (typeof navigator === "undefined") return false;
-  if (navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(value);
-      return true;
-    } catch (_error) {
-      // Continue with fallback.
-    }
-  }
-  if (typeof document === "undefined") return false;
-
-  const textArea = document.createElement("textarea");
-  textArea.value = value;
-  textArea.setAttribute("readonly", "");
-  textArea.style.position = "absolute";
-  textArea.style.left = "-9999px";
-
-  try {
-    document.body.appendChild(textArea);
-    textArea.select();
-    textArea.setSelectionRange(0, textArea.value.length);
-    return document.execCommand("copy");
-  } catch (_error) {
-    return false;
-  } finally {
-    textArea.remove();
-  }
-};
-
 const PartyPublicPage = ({ token }: Props) => {
-  const reduceMotion = useReducedMotion();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [initialError, setInitialError] = useState<string | null>(null);
@@ -250,55 +197,37 @@ const PartyPublicPage = ({ token }: Props) => {
   };
 
   const handleShare = async (photo: EventPhoto) => {
-    const shareUrl = photo.publicUrl;
-    const shareTitle = `Brillipoint - ${eventTitle || "Mi foto"}`;
-
-    try {
-      if (typeof navigator === "undefined") throw new Error("No navigator");
-
-      if (navigator.share) {
-        await navigator.share({
-          title: shareTitle,
-          url: shareUrl,
-        });
-        setToastMessage("Compartido");
-        return;
-      }
-
-      const copied = await copyToClipboard(shareUrl);
-      if (copied) {
-        setToastMessage("Enlace copiado ✨");
-        return;
-      }
-
-      setToastMessage("No se pudo compartir en este dispositivo");
-    } catch (_error) {
-      setToastMessage("No se pudo compartir en este dispositivo");
+    const result = await shareUrl(
+      photo.publicUrl,
+      `Brillipoint - ${eventTitle || "Mi foto"}`,
+    );
+    if (result === "shared") {
+      setToastMessage("Compartido");
+      return;
     }
+    if (result === "copied") {
+      setToastMessage("Enlace copiado ✨");
+      return;
+    }
+    setToastMessage("No se pudo compartir en este dispositivo");
   };
 
   const handleShareEventLink = async () => {
-    const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-    const shareTitle = event?.name || "Brillipoint";
-
-    try {
-      if (typeof navigator === "undefined") throw new Error("No navigator");
-      if (navigator.share) {
-        await navigator.share({ title: shareTitle, url: shareUrl });
-        setToastMessage("Enlace compartido");
-        return;
-      }
-
-      const copied = await copyToClipboard(shareUrl);
-      if (copied) {
-        setToastMessage("Enlace copiado ✨");
-        return;
-      }
-
+    const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+    if (!currentUrl) {
       setToastMessage("No se pudo compartir en este dispositivo");
-    } catch (_error) {
-      setToastMessage("No se pudo compartir en este dispositivo");
+      return;
     }
+    const result = await shareUrl(currentUrl, event?.name || "Brillipoint");
+    if (result === "shared") {
+      setToastMessage("Enlace compartido");
+      return;
+    }
+    if (result === "copied") {
+      setToastMessage("Enlace copiado ✨");
+      return;
+    }
+    setToastMessage("No se pudo compartir en este dispositivo");
   };
 
   const handleScrollToGallery = () => {
@@ -341,60 +270,14 @@ const PartyPublicPage = ({ token }: Props) => {
     !initialError &&
     photos.length === 0;
   const hasPhotosLoaded = !loading && !notFound && !initialError && photos.length > 0;
-  const activePhoto = viewerIndex !== null ? photos[viewerIndex] || null : null;
-  const floatingParticles = useMemo(
-    () =>
-      new Array(8)
-        .fill(0)
-        .map((_, index) => <div key={index} className={styles.particle} />),
-    [],
-  );
 
   if (!token) {
-    return <div className={styles.pageRoot}>Cargando experiencia...</div>;
+    return <BrillipointShell>Cargando experiencia...</BrillipointShell>;
   }
 
   return (
-    <div className={styles.pageRoot}>
-      <AnimatePresence>
-        {showIntro ? (
-          <motion.section
-            className={styles.introScreen}
-            initial={{ opacity: 1 }}
-            exit={{
-              opacity: 0,
-              transition: { duration: reduceMotion ? 0 : 0.8 },
-            }}
-          >
-            <div className={styles.particleLayer}>{floatingParticles}</div>
-            <motion.div
-              className={styles.introLogo}
-              initial={{ scale: 0.96, opacity: 0.6 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: reduceMotion ? 0 : 1.2 }}
-            >
-              <Image
-                src={logoWhite}
-                alt="Brillipoint"
-                width={220}
-                height={220}
-                priority
-              />
-            </motion.div>
-            <motion.h1
-              className={styles.introTitle}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: reduceMotion ? 0 : 0.9,
-                delay: reduceMotion ? 0 : 0.3,
-              }}
-            >
-              Bienvenido a la experiencia Brillipoint ✨
-            </motion.h1>
-          </motion.section>
-        ) : null}
-      </AnimatePresence>
+    <BrillipointShell>
+      <IntroHero isVisible={showIntro} />
 
       {loading ? (
         <section className={styles.centerState}>
@@ -474,6 +357,19 @@ const PartyPublicPage = ({ token }: Props) => {
               onShare={handleShare}
             />
           )}
+          <section className={styles.crossLinkSection}>
+            <div className={styles.crossLinkCard}>
+              <p className={styles.crossLinkKicker}>EXTRA WOW</p>
+              <h3>Ideas para tu próxima foto</h3>
+              <p>Descubre poses + glitter y vuelve al álbum para capturar tu mejor momento.</p>
+              <Link
+                href={`/inspiracion/${token}`}
+                className={`${styles.secondaryBtn} ${styles.actionTextStrong}`}
+              >
+                ✨ Ver ideas de poses
+              </Link>
+            </div>
+          </section>
 
           <section className={styles.socialSection}>
             <SocialMediaPlugin
@@ -501,15 +397,17 @@ const PartyPublicPage = ({ token }: Props) => {
       {hasPhotosLoaded ? (
         <PhotoViewerModal
           isOpen={isMobileViewport && viewerIndex !== null}
-          photo={activePhoto}
+          photos={photos}
+          activeIndex={viewerIndex}
           eventTitle={eventTitle}
           onClose={() => setViewerIndex(null)}
+          onActiveIndexChange={setViewerIndex}
           onDownload={handleDownload}
           onShare={handleShare}
         />
       ) : null}
       {toastMessage ? <div className={styles.toast}>{toastMessage}</div> : null}
-    </div>
+    </BrillipointShell>
   );
 };
 
