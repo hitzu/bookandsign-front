@@ -6,7 +6,8 @@ import MasonryGridMobile from "./MasonryGridMobile";
 
 type MobileWowLandingProps = {
   eventName?: string;
-  eventSubtitle: string;
+  eventDescription?: string;
+  eventDateLabel?: string;
   heroCoverUrls: string[];
   items: EventPhoto[];
   parallaxOffset: number;
@@ -22,7 +23,8 @@ type MobileWowLandingProps = {
 
 const MobileWowLanding = ({
   eventName,
-  eventSubtitle,
+  eventDescription,
+  eventDateLabel,
   heroCoverUrls,
   items,
   parallaxOffset,
@@ -39,7 +41,8 @@ const MobileWowLanding = ({
     <>
       <HeroCoverMobile
         eventName={eventName}
-        subtitle={eventSubtitle}
+        eventDescription={eventDescription}
+        eventDateLabel={eventDateLabel}
         coverUrls={heroCoverUrls}
         parallaxOffset={parallaxOffset}
         onViewPhotos={onViewPhotos}

@@ -320,18 +320,16 @@ const PartyPublicPage = ({ token }: Props) => {
   const eventTitle = event?.name || "Experiencia Brillipoint";
   const eventDateLabel = useMemo(() => {
     const rawDate = event?.createdAt;
-    if (!rawDate) return "Momentos en vivo";
+    if (!rawDate) return "";
     const date = /^\d{4}-\d{2}-\d{2}/.test(rawDate)
       ? parseLocalDate(rawDate)
       : new Date(rawDate);
-    if (Number.isNaN(date.getTime())) return "Momentos en vivo";
-    return new Intl.DateTimeFormat("es-MX", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }).format(date);
+    if (Number.isNaN(date.getTime())) return "";
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
   }, [event?.createdAt]);
-
   const coverUrls = useMemo(() => {
     const candidates = [event?.coverUrl, ...photos.map((photo) => photo.publicUrl)];
     return Array.from(new Set(candidates.filter(Boolean) as string[]));
@@ -450,7 +448,8 @@ const PartyPublicPage = ({ token }: Props) => {
           {isMobileViewport ? (
             <MobileWowLanding
               eventName={event?.name}
-              eventSubtitle={eventDateLabel}
+              eventDescription={event?.description}
+              eventDateLabel={eventDateLabel}
               heroCoverUrls={coverUrls}
               items={photos}
               parallaxOffset={parallaxOffset}
@@ -466,7 +465,8 @@ const PartyPublicPage = ({ token }: Props) => {
           ) : (
             <DesktopTabletLanding
               eventName={event?.name}
-              eventSubtitle={eventDateLabel}
+              eventDescription={event?.description}
+              eventDateLabel={eventDateLabel}
               photos={photos}
               selectedPhotoIndex={desktopSelectedPhotoIndex}
               onSelectPhoto={setDesktopSelectedPhotoIndex}

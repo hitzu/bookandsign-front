@@ -416,10 +416,10 @@
 
 .heroKicker {
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.76rem;
-  color: #fff;
+  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  font-family: "Times New Roman", Georgia, serif;
+  color: rgba(228, 233, 255, 0.95);
   text-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
 }
 
@@ -431,10 +431,28 @@
   text-shadow: 0 14px 30px rgba(0, 0, 0, 0.62);
 }
 
+.heroDescriptionTitle {
+  font-size: clamp(1rem, 2.5vw, 1.45rem) !important;
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(238, 242, 255, 0.96);
+}
+
 .pollingHint {
   margin: 0;
-  color: rgba(240, 242, 255, 0.88);
-  font-size: 0.9rem;
+  color: #fff;
+  font-family:
+    "Snell Roundhand",
+    "Segoe Script",
+    "Brush Script MT",
+    "Lucida Handwriting",
+    cursive;
+  font-size: clamp(2rem, 5.2vw, 3.7rem);
+  font-weight: 500;
+  line-height: 0.96;
+  letter-spacing: 0.01em;
+  text-shadow: 0 14px 30px rgba(0, 0, 0, 0.62);
 }
 
 .desktopHeroDescription {
@@ -761,8 +779,8 @@
   }
 
   .heroKicker {
-    font-size: 0.7rem;
-    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
   }
 
   .heroContent h2 {
@@ -916,9 +934,9 @@
 
 .mobileEyebrow {
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  font-size: 0.72rem;
+  font-family: "Times New Roman", Georgia, serif;
   color: rgba(228, 233, 255, 0.95);
 }
 
@@ -929,10 +947,28 @@
   line-height: 1.05;
 }
 
+.mobileHeroTitleAsDescription {
+  font-size: clamp(1.05rem, 5.6vw, 1.42rem);
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(236, 241, 255, 0.96);
+}
+
 .mobileHeroSubtitle {
   margin: 0;
-  color: rgba(236, 241, 255, 0.9);
-  font-size: 0.92rem;
+  color: #fff;
+  font-family:
+    "Snell Roundhand",
+    "Segoe Script",
+    "Brush Script MT",
+    "Lucida Handwriting",
+    cursive;
+  font-size: clamp(2.2rem, 13vw, 4rem);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  text-shadow: 0 14px 32px rgba(0, 0, 0, 0.62);
 }
 
 .mobileHeroDescription {

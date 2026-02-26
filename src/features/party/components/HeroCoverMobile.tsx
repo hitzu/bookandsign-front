@@ -6,7 +6,8 @@ import styles from "@assets/css/party-public.module.css";
 
 type HeroCoverMobileProps = {
   eventName?: string;
-  subtitle: string;
+  eventDescription?: string;
+  eventDateLabel?: string;
   coverUrls: string[];
   parallaxOffset?: number;
   onViewPhotos: () => void;
@@ -15,14 +16,20 @@ type HeroCoverMobileProps = {
 
 const HeroCoverMobile = ({
   eventName,
-  subtitle,
+  eventDescription,
+  eventDateLabel,
   coverUrls,
   parallaxOffset = 0,
   onViewPhotos,
   onShareLink,
 }: HeroCoverMobileProps) => {
   const reduceMotion = useReducedMotion();
-  const heroTitle = eventName?.trim() || "Tu momento tu brillo";
+  const normalizedDescription = eventDescription?.trim() || "";
+  const normalizedEventName = eventName?.trim() || "";
+  const shouldShowDescriptionAndName = Boolean(normalizedDescription);
+  const heroTitle = shouldShowDescriptionAndName
+    ? normalizedDescription
+    : "Tu momento tu brillo";
   const [activeCoverIndex, setActiveCoverIndex] = useState(0);
   const availableCovers = useMemo(
     () => coverUrls.filter(Boolean),
@@ -90,9 +97,18 @@ const HeroCoverMobile = ({
       </motion.div>
 
       <div className={styles.mobileHeroContent}>
-        <p className={styles.mobileEyebrow}>EXPERIENCIA BRILLIPOINT</p>
-        <h1 className={styles.mobileHeroTitle}>{heroTitle}</h1>
-        <p className={styles.mobileHeroSubtitle}>{subtitle}</p>
+        {eventDateLabel ? <p className={styles.mobileEyebrow}>{eventDateLabel}</p> : null}
+        <h1
+          className={[
+            styles.mobileHeroTitle,
+            shouldShowDescriptionAndName ? styles.mobileHeroTitleAsDescription : "",
+          ].join(" ")}
+        >
+          {heroTitle}
+        </h1>
+        {shouldShowDescriptionAndName && normalizedEventName ? (
+          <p className={styles.mobileHeroSubtitle}>{normalizedEventName}</p>
+        ) : null}
         <div className={styles.mobileHeroActions}>
           <button
             type="button"

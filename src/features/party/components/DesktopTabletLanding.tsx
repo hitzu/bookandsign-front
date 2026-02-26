@@ -4,7 +4,8 @@ import styles from "@assets/css/party-public.module.css";
 
 type DesktopTabletLandingProps = {
   eventName?: string;
-  eventSubtitle?: string;
+  eventDescription?: string;
+  eventDateLabel?: string;
   photos: EventPhoto[];
   selectedPhotoIndex: number;
   onSelectPhoto: (index: number) => void;
@@ -14,7 +15,8 @@ type DesktopTabletLandingProps = {
 
 const DesktopTabletLanding = ({
   eventName,
-  eventSubtitle,
+  eventDescription,
+  eventDateLabel,
   photos,
   selectedPhotoIndex,
   onSelectPhoto,
@@ -22,7 +24,12 @@ const DesktopTabletLanding = ({
   onShare,
 }: DesktopTabletLandingProps) => {
   const heroPhoto = photos[selectedPhotoIndex] || photos[0] || null;
-  const heroTitle = eventName?.trim() || "Tu momento tu brillo";
+  const normalizedDescription = eventDescription?.trim() || "";
+  const normalizedEventName = eventName?.trim() || "";
+  const shouldShowDescriptionAndName = Boolean(normalizedDescription);
+  const heroTitle = shouldShowDescriptionAndName
+    ? normalizedDescription
+    : "Tu momento tu brillo";
   if (!heroPhoto) return null;
 
   return (
@@ -38,9 +45,12 @@ const DesktopTabletLanding = ({
             />
             <div className={styles.heroOverlay} />
             <div className={styles.heroContent}>
-              <h2>{heroTitle}</h2>
-              {eventSubtitle ? (
-                <p className={styles.pollingHint}>{eventSubtitle}</p>
+              {eventDateLabel ? <p className={styles.heroKicker}>{eventDateLabel}</p> : null}
+              <h2 className={shouldShowDescriptionAndName ? styles.heroDescriptionTitle : ""}>
+                {heroTitle}
+              </h2>
+              {shouldShowDescriptionAndName && normalizedEventName ? (
+                <p className={styles.pollingHint}>{normalizedEventName}</p>
               ) : null}
               <div className={styles.heroActions}>
                 <button
