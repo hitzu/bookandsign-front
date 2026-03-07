@@ -161,6 +161,22 @@ const menuItems = [
       },
     ],
   },
+  {
+    type: "HASHMENU",
+    id: 6,
+    label: "Fotos",
+    icon: "ph-duotone ph-images",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "photos-list",
+        label: "Listado de fotos",
+        link: "/photos-list",
+        dataPage: "photos-list",
+      },
+    ],
+  },
 ];
 
 export { menuItems };
