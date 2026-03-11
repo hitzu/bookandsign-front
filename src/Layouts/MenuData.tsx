@@ -31,6 +31,12 @@ const menuItems = [
         link: "/contracts",
         dataPage: "contracts-list",
       },
+      {
+        id: "contracts-add",
+        label: "Agregar contrato",
+        link: "/contracts-add",
+        dataPage: "contracts-add",
+      },
     ],
   },
   {
