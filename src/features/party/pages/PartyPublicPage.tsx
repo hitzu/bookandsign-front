@@ -12,7 +12,7 @@ import { parseLocalDate } from "@common/dates";
 import EventEmptyState from "../components/EventEmptyState";
 import EmptyStateNotFound from "../components/EmptyStateNotFound";
 import MobileWowLanding from "../components/MobileWowLanding";
-import PhotoViewerModal from "../components/PhotoViewerModal";
+import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
 import DesktopTabletLanding from "../components/DesktopTabletLanding";
 import BrillipointShell from "../components/BrillipointShell";
 import IntroHero from "../components/IntroHero";
@@ -395,7 +395,7 @@ const PartyPublicPage = ({ token }: Props) => {
       )}
 
       {hasPhotosLoaded ? (
-        <PhotoViewerModal
+        <PhotoViewerLightbox
           isOpen={isMobileViewport && viewerIndex !== null}
           photos={photos}
           activeIndex={viewerIndex}

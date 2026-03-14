@@ -7,7 +7,7 @@ import { SocialMediaPlugin } from "../../booking/components/SocialMediaPlugin";
 import BrillipointShell from "../components/BrillipointShell";
 import IntroHero from "../components/IntroHero";
 import PhotoGrid from "../components/PhotoGrid";
-import PhotoViewerModal from "../components/PhotoViewerModal";
+import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
 
 const INTRO_DURATION_MS = 2500;
 
@@ -104,7 +104,7 @@ const InspirationPublicPage = () => {
         />
       </section>
 
-      <PhotoViewerModal
+      <PhotoViewerLightbox
         isOpen={viewerIndex !== null}
         photos={inspirationPhotos}
         activeIndex={viewerIndex}
