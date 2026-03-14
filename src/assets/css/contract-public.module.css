@@ -134,6 +134,19 @@
   text-align: center;
 }
 
+.headerTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding-top: 0.5rem;
+}
+
+.headerLogo {
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
 .logoWrap {
   display: flex;
   justify-content: center;
@@ -147,7 +160,16 @@
   font-weight: 600;
   letter-spacing: -0.02em;
   margin: 0;
+  padding-top: 0.35rem;
   line-height: 1.15;
+  font-family: "Cormorant Garamond", Georgia, serif;
+}
+
+.brandB {
+  font-family: "Great Vibes", cursive;
+  font-weight: 400;
+  font-size: 1.35em;
+  vertical-align: baseline;
 }
 
 .badgesRow {

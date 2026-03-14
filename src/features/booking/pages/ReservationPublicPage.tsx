@@ -65,10 +65,9 @@ const ReservationPublicPage = ({ token }: Props) => {
         const firstSlot = res.contractSlots[0];
         const eventDateRaw =
           firstSlot?.slot?.eventDate ?? res.contract.createdAt;
-        const eventDate =
-          /^\d{4}-\d{2}-\d{2}$/.test(String(eventDateRaw ?? ""))
-            ? parseLocalDate(eventDateRaw!)
-            : new Date(eventDateRaw);
+        const eventDate = /^\d{4}-\d{2}-\d{2}$/.test(String(eventDateRaw ?? ""))
+          ? parseLocalDate(eventDateRaw!)
+          : new Date(eventDateRaw);
 
         const slotsToShow: ContractSlot[] = [
           {
@@ -358,16 +357,18 @@ const ReservationPublicPage = ({ token }: Props) => {
               </button>
             ) : null}
 
-            <div className={styles.logoWrap}>
+            <div className={styles.headerTitleRow}>
               <Image
                 src={logoWhite}
                 alt="Brillipoint"
-                width={104}
-                height={104}
+                width={36}
+                height={36}
+                className={styles.headerLogo}
               />
+              <h1 className={styles.title}>
+                Tu reserva <span className={styles.brandB}>B</span>rillipoint ✨
+              </h1>
             </div>
-
-            <h1 className={styles.title}>Tu reserva Brillipoint ✨</h1>
 
             {showNav ? (
               <div className={[styles.tabsWrap, "d-none d-md-flex"].join(" ")}>
