@@ -47,9 +47,22 @@ export const getContractById = async (
   }
 };
 
-export const getContracts = async (): Promise<Contract[]> => {
+export interface GetContractsParams {
+  includeFinalized?: boolean;
+}
+
+export const getContracts = async (
+  params?: GetContractsParams
+): Promise<Contract[]> => {
   try {
-    const response = await axiosInstanceWithToken.get<Contract[]>("/contracts");
+    const queryParams = new URLSearchParams();
+    if (params?.includeFinalized) {
+      queryParams.append("includeFinalized", "true");
+    }
+    const url = queryParams.toString()
+      ? `/contracts?${queryParams.toString()}`
+      : "/contracts";
+    const response = await axiosInstanceWithToken.get<Contract[]>(url);
     return response.data;
   } catch (error) {
     console.error("Error fetching contracts:", error);
@@ -74,6 +87,15 @@ export const deleteContractById = async (id: number): Promise<void> => {
     await axiosInstanceWithToken.delete(`/contracts/${id}`);
   } catch (error) {
     console.error("Error deleting contract:", error);
+    throw error;
+  }
+};
+
+export const finalizeContract = async (id: number): Promise<void> => {
+  try {
+    await axiosInstanceWithToken.post(`/contracts/${id}/finalize`);
+  } catch (error) {
+    console.error("Error finalizing contract:", error);
     throw error;
   }
 };

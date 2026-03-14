@@ -91,6 +91,7 @@ interface TableContainerProps {
   thColumn?: string;
   buttonName?: string;
   SearchPlaceholder?: string;
+  topRightContent?: React.ReactNode;
 }
 
 const TableContainer = ({
@@ -105,7 +106,8 @@ const TableContainer = ({
   isPagination,
   customPageSize,
   isGlobalFilter,
-  SearchPlaceholder
+  SearchPlaceholder,
+  topRightContent
 }: TableContainerProps) => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -178,13 +180,16 @@ const TableContainer = ({
                 entries per page
               </label>
             </div>
-            <div className="datatable-search">
-              <DebouncedInput
-                value={globalFilter ?? ""}
-                onChange={(value) => setGlobalFilter(String(value))}
-                className="form-control search"
-                placeholder={SearchPlaceholder}
-              />
+            <div className="d-flex align-items-center gap-3">
+              {topRightContent}
+              <div className="datatable-search">
+                <DebouncedInput
+                  value={globalFilter ?? ""}
+                  onChange={(value) => setGlobalFilter(String(value))}
+                  className="form-control search"
+                  placeholder={SearchPlaceholder}
+                />
+              </div>
             </div>
           </div>
         </React.Fragment>

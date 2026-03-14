@@ -9,10 +9,12 @@ import Layout from "@layout/index";
 import TableContainer from "@common/TableContainer";
 import Link from "next/link";
 import BreadcrumbItem from "@common/BreadcrumbItem";
-import { Card, Col, Row } from "react-bootstrap";
+import { Card, Col, Row, Form } from "react-bootstrap";
 import DeleteModal from "@common/DeleteModal";
+import FinalizeModal from "@common/FinalizeModal";
 import {
   deleteContractById,
+  finalizeContract,
   getContracts,
 } from "../../api/services/contractService";
 import { Contract } from "../../interfaces";
@@ -21,14 +23,20 @@ const ContractsListPage = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<number>(0);
+  const [showFinalizeModal, setShowFinalizeModal] = useState<boolean>(false);
+  const [finalizeId, setFinalizeId] = useState<number>(0);
+  const [includeFinalized, setIncludeFinalized] = useState<boolean>(false);
+
+  const fetchContracts = useCallback(async () => {
+    const response = (await getContracts({
+      includeFinalized,
+    })) as Contract[];
+    setContracts(response);
+  }, [includeFinalized]);
 
   useEffect(() => {
-    const fetchContracts = async () => {
-      const response = (await getContracts()) as Contract[];
-      setContracts(response);
-    };
     fetchContracts();
-  }, []);
+  }, [fetchContracts]);
 
   const handleClose = () => {
     setShowDeleteModal(false);
@@ -50,6 +58,28 @@ const ContractsListPage = () => {
   const handleDelete = useCallback((id: number) => {
     setShowDeleteModal(true);
     setDeleteId(id);
+  }, []);
+
+  const handleFinalizeClose = () => {
+    setShowFinalizeModal(false);
+    setFinalizeId(0);
+  };
+
+  const handleFinalizeConfirm = async () => {
+    if (finalizeId) {
+      try {
+        await finalizeContract(finalizeId);
+        await fetchContracts();
+      } catch (error) {
+        console.error("Error finalizing contract:", error);
+      }
+    }
+    handleFinalizeClose();
+  };
+
+  const handleFinalize = useCallback((id: number) => {
+    setShowFinalizeModal(true);
+    setFinalizeId(id);
   }, []);
 
   const columns = useMemo(
@@ -111,6 +141,20 @@ const ContractsListPage = () => {
                 <li
                   className="list-inline-item align-bottom"
                   data-bs-toggle="tooltip"
+                  title="Finalizar"
+                >
+                  <Link
+                    href="#!"
+                    className="avtar avtar-xs btn-link-success btn-pc-default"
+                    onClick={() => handleFinalize(cellProps.row.original.id)}
+                    aria-label="Finalizar contrato"
+                  >
+                    <i className="ti ti-check f-18"></i>
+                  </Link>
+                </li>
+                <li
+                  className="list-inline-item align-bottom"
+                  data-bs-toggle="tooltip"
                   title="Delete"
                 >
                   <Link
@@ -128,7 +172,7 @@ const ContractsListPage = () => {
         },
       },
     ],
-    [handleDelete],
+    [handleDelete, handleFinalize],
   );
 
   return (
@@ -137,6 +181,11 @@ const ContractsListPage = () => {
         show={showDeleteModal}
         handleClose={handleClose}
         handleDeleteId={handleDeleteId}
+      />
+      <FinalizeModal
+        show={showFinalizeModal}
+        handleClose={handleFinalizeClose}
+        handleConfirm={handleFinalizeConfirm}
       />
 
       <BreadcrumbItem mainTitle="Contratos" subTitle="Lista de contratos" />
@@ -153,6 +202,16 @@ const ContractsListPage = () => {
                 tableClass="table table-hover tbl-product datatable-table"
                 theadClass="table-light"
                 isPagination={true}
+                topRightContent={
+                  <Form.Check
+                    type="checkbox"
+                    id="includeFinalized"
+                    label="Incluir finalizados"
+                    checked={includeFinalized}
+                    onChange={(e) => setIncludeFinalized(e.target.checked)}
+                    className="mb-0 ps-3"
+                  />
+                }
               />
             </Card.Body>
           </Card>
