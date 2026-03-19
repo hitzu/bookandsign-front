@@ -365,9 +365,7 @@ const ReservationPublicPage = ({ token }: Props) => {
                 height={36}
                 className={styles.headerLogo}
               />
-              <h1 className={styles.title}>
-                Tu reserva <span className={styles.brandB}>B</span>rillipoint ✨
-              </h1>
+              <h1 className={styles.title}>Tu reserva</h1>
             </div>
 
             {showNav ? (
