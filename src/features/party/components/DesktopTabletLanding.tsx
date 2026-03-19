@@ -45,13 +45,21 @@ const DesktopTabletLanding = ({
             />
             <div className={styles.heroOverlay} />
             <div className={styles.heroContent}>
-              {eventDateLabel ? <p className={styles.heroKicker}>{eventDateLabel}</p> : null}
-              <h2 className={shouldShowDescriptionAndName ? styles.heroDescriptionTitle : ""}>
-                {heroTitle}
-              </h2>
+              {eventDateLabel ? (
+                <p className={styles.heroKicker}>{eventDateLabel}</p>
+              ) : null}
               {shouldShowDescriptionAndName && normalizedEventName ? (
                 <p className={styles.pollingHint}>{normalizedEventName}</p>
               ) : null}
+              <h2
+                className={
+                  shouldShowDescriptionAndName
+                    ? styles.heroDescriptionTitle
+                    : ""
+                }
+              >
+                {heroTitle}
+              </h2>
               <div className={styles.heroActions}>
                 <button
                   type="button"
@@ -94,7 +102,6 @@ const DesktopTabletLanding = ({
           </aside>
         </div>
       </section>
-
     </>
   );
 };

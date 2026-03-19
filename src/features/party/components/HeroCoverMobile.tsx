@@ -25,16 +25,22 @@ const HeroCoverMobile = ({
 }: HeroCoverMobileProps) => {
   const reduceMotion = useReducedMotion();
   const normalizedDescription = eventDescription?.trim() || "";
-  const normalizedEventName = eventName?.trim() || "";
-  const shouldShowDescriptionAndName = Boolean(normalizedDescription);
-  const heroTitle = shouldShowDescriptionAndName
-    ? normalizedDescription
-    : "Tu momento tu brillo";
+  const rawEventName = eventName?.trim() || "";
+  const kickerText = normalizedDescription || "Tu momento tu brillo";
+
+  const nameParts = useMemo(() => {
+    const parts = rawEventName
+      ?.split(/\s*&\s*/)
+      .map((s) => s.trim())
+      .filter(Boolean) ?? [];
+    return parts;
+  }, [rawEventName]);
+  const nombre1 = nameParts[0] ?? "";
+  const nombre2 = nameParts[1] ?? "";
+  const hasTwoNames = Boolean(nombre1 && nombre2);
+
   const [activeCoverIndex, setActiveCoverIndex] = useState(0);
-  const availableCovers = useMemo(
-    () => coverUrls.filter(Boolean),
-    [coverUrls],
-  );
+  const availableCovers = useMemo(() => coverUrls.filter(Boolean), [coverUrls]);
 
   useEffect(() => {
     setActiveCoverIndex(0);
@@ -79,7 +85,7 @@ const HeroCoverMobile = ({
             <motion.img
               key={activeCoverUrl}
               src={activeCoverUrl}
-              alt={heroTitle}
+              alt={kickerText}
               className={styles.mobileHeroImage}
               loading="eager"
               initial={{ opacity: 0.72, scale: 1.03 }}
@@ -90,24 +96,35 @@ const HeroCoverMobile = ({
           </AnimatePresence>
         ) : (
           <div className={styles.mobileHeroPlaceholder}>
-            <Image src={logoWhite} alt="Brillipoint" width={84} height={84} priority />
+            <Image
+              src={logoWhite}
+              alt="Brillipoint"
+              width={84}
+              height={84}
+              priority
+            />
           </div>
         )}
         <div className={styles.mobileHeroVignette} />
       </motion.div>
 
       <div className={styles.mobileHeroContent}>
-        {eventDateLabel ? <p className={styles.mobileEyebrow}>{eventDateLabel}</p> : null}
-        <h1
-          className={[
-            styles.mobileHeroTitle,
-            shouldShowDescriptionAndName ? styles.mobileHeroTitleAsDescription : "",
-          ].join(" ")}
-        >
-          {heroTitle}
-        </h1>
-        {shouldShowDescriptionAndName && normalizedEventName ? (
-          <p className={styles.mobileHeroSubtitle}>{normalizedEventName}</p>
+        <p className={styles.mobileHeroMirrorKicker}>{kickerText}</p>
+        {(hasTwoNames || rawEventName) ? (
+          <div className={styles.mobileHeroMirrorNames}>
+            {hasTwoNames ? (
+              <>
+                <span>{nombre1}</span>
+                <span className={styles.mobileHeroMirrorAmp}>&</span>
+                <span>{nombre2}</span>
+              </>
+            ) : (
+              <span>{rawEventName}</span>
+            )}
+          </div>
+        ) : null}
+        {eventDateLabel ? (
+          <p className={styles.mobileEyebrow}>{eventDateLabel}</p>
         ) : null}
         <div className={styles.mobileHeroActions}>
           <button
