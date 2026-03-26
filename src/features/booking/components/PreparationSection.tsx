@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { AxiosError } from "axios";
 import styles from "@assets/css/contract-public.module.css";
 import FormDropzone from "@shared/forms/file-upload/FormDropzone";
 import {
@@ -29,8 +30,138 @@ type Props = {
 };
 
 const AUTO_CLEAR_TOAST_MS = 2000;
+const ERROR_TOAST_MS = 5500;
 const SALON_MAPS_URL = "https://maps.app.goo.gl/NAWTWWHmgCgWFd5e8";
 const SALON_NAME = "Sucursal Brillipoint / Aletvia Hair & Glow";
+
+function getPrepAtSalonChoice(
+  currentAnswers: PrepProfileAnswers,
+): "sucursal" | "otra_ubicacion" | "" {
+  const v = currentAnswers["prep_at_salon"];
+  if (v === true) return "sucursal";
+  if (v === false) return "otra_ubicacion";
+  if (typeof v === "string" && (v === "sucursal" || v === "otra_ubicacion"))
+    return v;
+  return "";
+}
+
+function isSalonPrepSelected(answers: PrepProfileAnswers): boolean {
+  return getPrepAtSalonChoice(answers) === "sucursal";
+}
+
+function isExternalPrepSelected(answers: PrepProfileAnswers): boolean {
+  return getPrepAtSalonChoice(answers) === "otra_ubicacion";
+}
+
+function normalizePrepAtSalonForCompare(v: unknown): string {
+  if (v === true || v === "sucursal") return "sucursal";
+  if (v === false || v === "otra_ubicacion") return "otra_ubicacion";
+  return "";
+}
+
+function prepValuesEqualForBaseline(
+  questionId: string,
+  value: PrepProfileAnswers[string],
+  baseline: PrepProfileAnswers,
+): boolean {
+  if (questionId === "prep_at_salon") {
+    return (
+      normalizePrepAtSalonForCompare(value) ===
+      normalizePrepAtSalonForCompare(baseline[questionId])
+    );
+  }
+  const b = baseline[questionId];
+  const valueEmpty =
+    value === undefined ||
+    value === null ||
+    (typeof value === "string" && value.trim() === "");
+  const baselineEmpty =
+    b === undefined ||
+    b === null ||
+    (typeof b === "string" && b.trim() === "");
+  if (valueEmpty && baselineEmpty) return true;
+  if (typeof value === "string" && typeof b === "string") {
+    return value.trim() === b.trim();
+  }
+  if (value === b) return true;
+  try {
+    return JSON.stringify(value) === JSON.stringify(b);
+  } catch {
+    return false;
+  }
+}
+
+function getPrepPatchValidationError(
+  q: PrepProfileQuestionDefinition,
+  value: PrepProfileAnswerPatchItem["value"],
+  answers: PrepProfileAnswers,
+): string | null {
+  if (q.id === "prep_location_maps_url") {
+    if (isSalonPrepSelected(answers)) return null;
+    if (typeof value !== "string" || value.trim() === "") {
+      return "Indica el enlace de Google Maps.";
+    }
+    return null;
+  }
+  if (q.type === "string" || q.type === "textarea") {
+    if (typeof value !== "string" || value.trim() === "") {
+      return "Este campo es obligatorio.";
+    }
+    return null;
+  }
+  if (q.type === "date") {
+    if (typeof value !== "string" || value.trim() === "") {
+      return "Selecciona una fecha.";
+    }
+    return null;
+  }
+  if (q.type === "time") {
+    if (typeof value !== "string" || value.trim() === "") {
+      return "Indica una hora.";
+    }
+    const t = value.trim();
+    if (!/^\d{2}:\d{2}$/.test(t)) {
+      return "Usa formato de 24 horas (ej. 17:00).";
+    }
+    return null;
+  }
+  return null;
+}
+
+function messageFromAxiosError(error: unknown): string | null {
+  if (!(error instanceof AxiosError)) return null;
+  const data = error.response?.data;
+  if (data == null || typeof data !== "object") return null;
+  const o = data as Record<string, unknown>;
+  const msg = o.message;
+  if (typeof msg === "string" && msg.trim()) return msg;
+  if (
+    Array.isArray(msg) &&
+    msg.every((x) => typeof x === "string") &&
+    msg.length
+  ) {
+    return msg.join(" ");
+  }
+  if (typeof o.error === "string" && o.error.trim()) return o.error;
+  if (typeof o.detail === "string" && o.detail.trim()) return o.detail;
+  const errors = o.errors;
+  if (Array.isArray(errors)) {
+    const parts = errors
+      .map((e) => {
+        if (typeof e === "string") return e;
+        if (e && typeof e === "object") {
+          const row = e as Record<string, unknown>;
+          if (typeof row.message === "string") return row.message;
+        }
+        return null;
+      })
+      .filter(Boolean) as string[];
+    if (parts.length) return parts.join(" ");
+  }
+  return null;
+}
+
+type ToastState = { message: string; variant: "success" | "error" };
 
 export function PreparationSection({
   contractToken,
@@ -63,7 +194,8 @@ export function PreparationSection({
     PrepProfileAnswerPatchItem[]
   >([]);
   const [activeTab, setActiveTab] = useState<"bride" | "social">("bride");
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthorizing, setIsAuthorizing] = useState(false);
@@ -77,30 +209,11 @@ export function PreparationSection({
   const toastTimeoutRef = useRef<number | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const getPrepAtSalonChoice = (
-    currentAnswers: PrepProfileAnswers,
-  ): "sucursal" | "otra_ubicacion" | "" => {
-    const v = currentAnswers["prep_at_salon"];
-    if (v === true) return "sucursal";
-    if (v === false) return "otra_ubicacion";
-    if (typeof v === "string" && (v === "sucursal" || v === "otra_ubicacion"))
-      return v;
-    return "";
-  };
-
-  const isSalonPrepSelected = (currentAnswers: PrepProfileAnswers): boolean => {
-    return getPrepAtSalonChoice(currentAnswers) === "sucursal";
-  };
-
-  const isExternalPrepSelected = (
-    currentAnswers: PrepProfileAnswers,
-  ): boolean => {
-    return getPrepAtSalonChoice(currentAnswers) === "otra_ubicacion";
-  };
-
   const isSocialQuestionId = (questionId: string): boolean => {
     return /^social-n-\d+-/.test(questionId);
   };
+
+  const lastSyncedAnswersRef = useRef<PrepProfileAnswers>({});
 
   const GROUP_META: Record<
     string,
@@ -202,6 +315,11 @@ export function PreparationSection({
       return Boolean(locked["prep_at_salon"]);
     }
 
+    if (q.id === "prep_location_maps_url") {
+      const str = typeof v === "string" ? v.trim() : "";
+      return Boolean(locked[q.id]) && str.length > 0;
+    }
+
     if (q.type === "asset_array") {
       return isAssetArrayComplete(q.id, v);
     }
@@ -211,21 +329,31 @@ export function PreparationSection({
       return Boolean(a?.path);
     }
 
-    // Default: backend lock is source of truth for "guardado".
+    if (
+      q.type === "string" ||
+      q.type === "textarea" ||
+      q.type === "date" ||
+      q.type === "time"
+    ) {
+      const str = typeof v === "string" ? v.trim() : "";
+      return Boolean(locked[q.id]) && str.length > 0;
+    }
+
     return Boolean(locked[q.id]);
   };
 
   const isComplete = useMemo(() => {
     return questionsInView.every((q) => isSavedForQuestion(q));
-  }, [questionsInView, isSavedForQuestion]);
+  }, [questionsInView, answers, locked]);
 
-  const showToast = (message: string) => {
-    setToast(message);
+  const showToast = (
+    message: string,
+    variant: ToastState["variant"] = "success",
+  ) => {
+    setToast({ message, variant });
     if (toastTimeoutRef.current) window.clearTimeout(toastTimeoutRef.current);
-    toastTimeoutRef.current = window.setTimeout(
-      () => setToast(null),
-      AUTO_CLEAR_TOAST_MS,
-    );
+    const ms = variant === "error" ? ERROR_TOAST_MS : AUTO_CLEAR_TOAST_MS;
+    toastTimeoutRef.current = window.setTimeout(() => setToast(null), ms);
   };
 
   const storageKey = useMemo(() => {
@@ -243,9 +371,11 @@ export function PreparationSection({
   } = usePublicContractPhoneGate({
     storageKey,
     onReset: () => {
+      lastSyncedAnswersRef.current = {};
       setAnswers({});
       setLocked({});
       setPendingChanges([]);
+      setFieldErrors({});
       setActiveTab(view === "social" ? "social" : "bride");
     },
   });
@@ -272,7 +402,9 @@ export function PreparationSection({
       contractToken: contractToken as string,
       phone: verifiedPhone as string,
     });
-    setAnswers(profile.answers ?? {});
+    const nextAnswers = profile.answers ?? {};
+    lastSyncedAnswersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
     setLocked(profile.locked ?? {});
     setPendingChanges([]);
   };
@@ -327,7 +459,9 @@ export function PreparationSection({
       }
 
       setVerifiedPhone(normalized);
-      setAnswers(profile.answers ?? {});
+      const nextAnswers = profile.answers ?? {};
+      lastSyncedAnswersRef.current = nextAnswers;
+      setAnswers(nextAnswers);
       setLocked(profile.locked ?? {});
       setPendingChanges([]);
     } catch (_e: unknown) {
@@ -343,6 +477,15 @@ export function PreparationSection({
     value: PrepProfileAnswerPatchItem["value"],
   ) => {
     setPendingChanges((prev) => {
+      if (
+        prepValuesEqualForBaseline(
+          questionId,
+          value as PrepProfileAnswers[string],
+          lastSyncedAnswersRef.current,
+        )
+      ) {
+        return prev.filter((c) => c.questionId !== questionId);
+      }
       const idx = prev.findIndex((c) => c.questionId === questionId);
       if (idx === -1) return [...prev, { questionId, value }];
       const next = prev.slice();
@@ -356,6 +499,12 @@ export function PreparationSection({
     value: PrepProfileAnswers[string],
   ) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
+    setFieldErrors((prev) => {
+      if (!prev[questionId]) return prev;
+      const next = { ...prev };
+      delete next[questionId];
+      return next;
+    });
     upsertPendingChange(questionId, value);
   };
 
@@ -364,9 +513,34 @@ export function PreparationSection({
     try {
       setIsSaving(true);
       if (!canUsePublicApi) {
-        showToast("Falta el token o el teléfono para guardar.");
+        showToast("Falta el token o el teléfono para guardar.", "error");
         return;
       }
+
+      const validationErrors: Record<string, string> = {};
+      for (const c of pendingChanges) {
+        const q = QUESTIONS.find((item) => item.id === c.questionId);
+        if (!q) continue;
+        const err = getPrepPatchValidationError(q, c.value, answers);
+        if (err) validationErrors[c.questionId] = err;
+      }
+      if (Object.keys(validationErrors).length > 0) {
+        setFieldErrors(validationErrors);
+        showToast("Revisa los campos marcados.", "error");
+        const firstId =
+          pendingChanges.find((c) => validationErrors[c.questionId])
+            ?.questionId ?? Object.keys(validationErrors)[0];
+        if (firstId && typeof window !== "undefined") {
+          window.requestAnimationFrame(() => {
+            cardRefs.current[firstId]?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          });
+        }
+        return;
+      }
+      setFieldErrors({});
 
       await patchPublicPrepProfileAnswers({
         contractToken: contractToken as string,
@@ -381,7 +555,7 @@ export function PreparationSection({
         return next;
       });
       setPendingChanges([]);
-      showToast("Guardado");
+      showToast("Guardado", "success");
 
       // Fuente de verdad: recargamos el perfil para traer valores/locks reales.
       try {
@@ -389,8 +563,9 @@ export function PreparationSection({
       } catch (_e: unknown) {
         // Si falla el refresh, nos quedamos con el estado optimista.
       }
-    } catch (_e: unknown) {
-      showToast("No se pudo guardar.");
+    } catch (e: unknown) {
+      const serverMsg = messageFromAxiosError(e);
+      showToast(serverMsg ?? "No se pudo guardar.", "error");
     } finally {
       setIsSaving(false);
     }
@@ -408,7 +583,7 @@ export function PreparationSection({
     ) => PrepProfileAnswers[string];
   }) => {
     if (!canUsePublicApi) {
-      showToast("Falta el token o el teléfono para subir archivos.");
+      showToast("Falta el token o el teléfono para subir archivos.", "error");
       return;
     }
 
@@ -458,10 +633,14 @@ export function PreparationSection({
 
       // Optimista: asumimos lock tras guardar.
       setLocked((prev) => ({ ...prev, [qid]: true }));
+      lastSyncedAnswersRef.current = {
+        ...lastSyncedAnswersRef.current,
+        [qid]: nextValue,
+      };
 
       showToast("Archivo(s) subido(s)");
     } catch (_e: unknown) {
-      showToast("No se pudo subir el archivo.");
+      showToast("No se pudo subir el archivo.", "error");
     } finally {
       setUploading(qid, false);
     }
@@ -1466,6 +1645,18 @@ export function PreparationSection({
 
             <div className={styles.sectionBody}>
               {renderInput(q, isDisabled)}
+              {fieldErrors[q.id] ? (
+                <div
+                  style={{
+                    marginTop: "0.5rem",
+                    color: "rgba(248, 113, 113, 0.96)",
+                    fontSize: 13,
+                    fontWeight: 700,
+                  }}
+                >
+                  {fieldErrors[q.id]}
+                </div>
+              ) : null}
             </div>
           </section>
         </div>,
@@ -1559,13 +1750,22 @@ export function PreparationSection({
                 className={styles.badge}
                 style={{
                   width: "fit-content",
-                  background: "rgba(16, 185, 129, 0.14)",
-                  borderColor: "rgba(16, 185, 129, 0.3)",
-                  color: "rgba(209, 250, 229, 0.95)",
+                  background:
+                    toast.variant === "error"
+                      ? "rgba(248, 113, 113, 0.14)"
+                      : "rgba(16, 185, 129, 0.14)",
+                  borderColor:
+                    toast.variant === "error"
+                      ? "rgba(248, 113, 113, 0.35)"
+                      : "rgba(16, 185, 129, 0.3)",
+                  color:
+                    toast.variant === "error"
+                      ? "rgba(254, 226, 226, 0.96)"
+                      : "rgba(209, 250, 229, 0.95)",
                   fontWeight: 900,
                 }}
               >
-                {toast}
+                {toast.message}
               </div>
             </div>
           ) : null}
