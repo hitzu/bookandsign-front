@@ -27,7 +27,9 @@ const PersonalizeCanvas = ({
 }: PersonalizeCanvasProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<Canvas | null>(null);
+  const deleteZoneRef = useRef<HTMLButtonElement>(null);
   const [hasSelection, setHasSelection] = useState(false);
+  const [isOverDelete, setIsOverDelete] = useState(false);
   const [canvasSize, setCanvasSize] = useState<{
     width: number;
     height: number;
@@ -104,9 +106,7 @@ const PersonalizeCanvas = ({
             ? Math.min(window.innerWidth * 0.95, 420)
             : 400;
         const maxH =
-          typeof window !== "undefined"
-            ? window.innerHeight * 0.75
-            : 500;
+          typeof window !== "undefined" ? window.innerHeight * 0.75 : 500;
         const scale = Math.min(maxW / imgW, maxH / imgH);
         const displayW = Math.round(imgW * scale);
         const displayH = Math.round(imgH * scale);
@@ -152,7 +152,71 @@ const PersonalizeCanvas = ({
 
         fabricCanvas.on("selection:created", handleSelection);
         fabricCanvas.on("selection:updated", handleSelection);
-        fabricCanvas.on("selection:cleared", () => setHasSelection(false));
+        fabricCanvas.on("selection:cleared", () => {
+          setHasSelection(false);
+          setIsOverDelete(false);
+        });
+
+        fabricCanvas.on("object:moving", () => {
+          const obj = fabricCanvas.getActiveObject();
+          const deleteBtn = deleteZoneRef.current;
+          if (!obj || !deleteBtn) return;
+
+          const canvasEl = fabricCanvas.getElement();
+          const canvasRect = canvasEl.getBoundingClientRect();
+          const btnRect = deleteBtn.getBoundingClientRect();
+
+          const center = obj.getCenterPoint();
+          const scaleX = canvasRect.width / (fabricCanvas.width ?? 1);
+          const scaleY = canvasRect.height / (fabricCanvas.height ?? 1);
+          const objScreenX = canvasRect.left + center.x * scaleX;
+          const objScreenY = canvasRect.top + center.y * scaleY;
+
+          const over =
+            objScreenX >= btnRect.left &&
+            objScreenX <= btnRect.right &&
+            objScreenY >= btnRect.top &&
+            objScreenY <= btnRect.bottom;
+
+          setIsOverDelete(over);
+
+          // Dim the sticker while it's over the delete zone
+          obj.set({ opacity: over ? 0.5 : 1 });
+          fabricCanvas.requestRenderAll();
+        });
+
+        fabricCanvas.on("mouse:up", () => {
+          const obj = fabricCanvas.getActiveObject();
+          const deleteBtn = deleteZoneRef.current;
+          if (!obj || !deleteBtn) return;
+
+          const canvasEl = fabricCanvas.getElement();
+          const canvasRect = canvasEl.getBoundingClientRect();
+          const btnRect = deleteBtn.getBoundingClientRect();
+
+          const center = obj.getCenterPoint();
+          const scaleX = canvasRect.width / (fabricCanvas.width ?? 1);
+          const scaleY = canvasRect.height / (fabricCanvas.height ?? 1);
+          const objScreenX = canvasRect.left + center.x * scaleX;
+          const objScreenY = canvasRect.top + center.y * scaleY;
+
+          const over =
+            objScreenX >= btnRect.left &&
+            objScreenX <= btnRect.right &&
+            objScreenY >= btnRect.top &&
+            objScreenY <= btnRect.bottom;
+
+          if (over) {
+            fabricCanvas.remove(obj);
+            fabricCanvas.discardActiveObject();
+            fabricCanvas.requestRenderAll();
+            setHasSelection(false);
+          } else {
+            obj.set({ opacity: 1 });
+            fabricCanvas.requestRenderAll();
+          }
+          setIsOverDelete(false);
+        });
 
         onCanvasReady({
           exportToBlob: () =>
@@ -176,6 +240,8 @@ const PersonalizeCanvas = ({
         fc.off("selection:created");
         fc.off("selection:updated");
         fc.off("selection:cleared");
+        fc.off("object:moving");
+        fc.off("mouse:up");
         try {
           fc.dispose();
         } catch {
@@ -212,12 +278,22 @@ const PersonalizeCanvas = ({
       <div ref={containerRef} className={styles.personalizeCanvasContainer} />
       {hasSelection && (
         <button
+          ref={deleteZoneRef}
           type="button"
-          className={styles.stickerDeleteBtn}
+          className={`${styles.stickerDeleteBtn}${isOverDelete ? ` ${styles.stickerDeleteBtnActive}` : ""}`}
           onClick={handleDeleteSelected}
           aria-label="Eliminar sticker"
         >
-          Eliminar 🗑
+          <span className={styles.stickerDeleteLabel}>Arrastra para eliminar</span>
+          <span className={styles.stickerDeleteCircle}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 6h18" />
+              <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+              <path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2L19 6" />
+              <line x1="10" y1="11" x2="10" y2="17" />
+              <line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+          </span>
         </button>
       )}
     </div>
