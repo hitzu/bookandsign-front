@@ -1,4 +1,5 @@
 export interface PublicEvent {
+  id?: number;
   token: string;
   name?: string;
   description?: string;
@@ -19,3 +20,18 @@ export interface PublicEventResponse {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type PublicPersonalizedPhotoUploadUrlPayload = {
+  fileName: string;
+  mime: string;
+  storageEnv?: string;
+};
+
+export type PublicPersonalizedPhotoUploadUrlResponse = {
+  eventId?: number;
+  bucket?: string;
+  path: string;
+  signedUrl: string;
+  token?: string;
+  publicUrl: string;
+};

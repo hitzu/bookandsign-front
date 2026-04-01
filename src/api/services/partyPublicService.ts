@@ -12,6 +12,7 @@ const normalizePublicEvent = (
   token: string,
   payload?: PublicEventResponse,
 ): PublicEvent => ({
+  id: payload?.id,
   token: payload?.token || token,
   name:
     payload?.name ||

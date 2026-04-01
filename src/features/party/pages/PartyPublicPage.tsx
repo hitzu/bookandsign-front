@@ -13,6 +13,7 @@ import EventEmptyState from "../components/EventEmptyState";
 import EmptyStateNotFound from "../components/EmptyStateNotFound";
 import MobileWowLanding from "../components/MobileWowLanding";
 import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
+import PersonalizePhotoModal from "../components/PersonalizePhotoModal";
 import DesktopTabletLanding from "../components/DesktopTabletLanding";
 import BrillipointShell from "../components/BrillipointShell";
 import IntroHero from "../components/IntroHero";
@@ -47,6 +48,7 @@ const PartyPublicPage = ({ token }: Props) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [personalizePhoto, setPersonalizePhoto] = useState<EventPhoto | null>(null);
   const [desktopSelectedPhotoIndex, setDesktopSelectedPhotoIndex] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -236,6 +238,15 @@ const PartyPublicPage = ({ token }: Props) => {
     section.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const handlePersonalize = useCallback((photo: EventPhoto) => {
+    setViewerIndex(null);
+    setPersonalizePhoto(photo);
+  }, []);
+
+  const handlePersonalizeClose = useCallback(() => {
+    setPersonalizePhoto(null);
+  }, []);
+
   const handleCopyCurrentLink = useCallback(async () => {
     const currentUrl = typeof window !== "undefined" ? window.location.href : "";
     if (!currentUrl) return;
@@ -404,8 +415,19 @@ const PartyPublicPage = ({ token }: Props) => {
           onActiveIndexChange={setViewerIndex}
           onDownload={handleDownload}
           onShare={handleShare}
+          onPersonalize={handlePersonalize}
+          personalizeIsBeta
+          showNavigationHints
+          showExplicitClose
         />
       ) : null}
+      <PersonalizePhotoModal
+        isOpen={personalizePhoto !== null}
+        photo={personalizePhoto}
+        eventToken={token}
+        onClose={handlePersonalizeClose}
+        onToast={setToastMessage}
+      />
       {toastMessage ? <div className={styles.toast}>{toastMessage}</div> : null}
     </BrillipointShell>
   );

@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from "react";
-import Lightbox from "yet-another-react-lightbox";
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import Lightbox, { type ControllerRef } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { EventPhoto } from "../../../interfaces";
 import styles from "@assets/css/party-public.module.css";
@@ -14,8 +14,12 @@ type PhotoViewerLightboxProps = {
   onDownload?: (photo: EventPhoto) => Promise<void>;
   onShare?: (photo: EventPhoto) => Promise<void>;
   onPersonalize?: (photo: EventPhoto) => void;
+  /** Muestra marca “Beta” en el botón de personalizar (p. ej. hasta estabilizar stickers). */
+  personalizeIsBeta?: boolean;
   onDedicate?: (photo: EventPhoto) => void;
   showMediaActions?: boolean;
+  showNavigationHints?: boolean;
+  showExplicitClose?: boolean;
 };
 
 const PhotoViewerLightbox = ({
@@ -28,10 +32,14 @@ const PhotoViewerLightbox = ({
   onDownload,
   onShare,
   onPersonalize,
+  personalizeIsBeta = false,
   onDedicate,
   showMediaActions = true,
+  showNavigationHints = false,
+  showExplicitClose = false,
 }: PhotoViewerLightboxProps) => {
   const [currentIndex, setCurrentIndex] = useState(activeIndex ?? 0);
+  const controllerRef = useRef<ControllerRef | null>(null);
 
   useEffect(() => {
     if (isOpen && activeIndex !== null) {
@@ -45,7 +53,9 @@ const PhotoViewerLightbox = ({
   }));
 
   const activePhoto =
-    activeIndex !== null && activeIndex >= 0 ? photos[activeIndex] ?? null : null;
+    activeIndex !== null && activeIndex >= 0
+      ? (photos[activeIndex] ?? null)
+      : null;
   const canNavigate = photos.length > 1;
 
   const handleView = useCallback(
@@ -57,6 +67,17 @@ const PhotoViewerLightbox = ({
   );
 
   const currentPhoto = photos[currentIndex] ?? activePhoto;
+  const showNavigationUi = showNavigationHints && canNavigate;
+  const showActions = showMediaActions && currentPhoto;
+  const showControls = showExplicitClose || showNavigationUi || showActions;
+
+  const handlePrev = useCallback(() => {
+    controllerRef.current?.prev();
+  }, []);
+
+  const handleNext = useCallback(() => {
+    controllerRef.current?.next();
+  }, []);
 
   if (!isOpen || photos.length === 0) return null;
 
@@ -71,53 +92,103 @@ const PhotoViewerLightbox = ({
         finite: !canNavigate,
         preload: 2,
       }}
-      controller={{ closeOnBackdropClick: true }}
+      controller={{ closeOnBackdropClick: true, ref: controllerRef }}
       className={styles.yarlDarkOverlay}
       render={{
+        buttonClose: showExplicitClose ? () => null : undefined,
+        buttonPrev: showNavigationUi ? () => null : undefined,
+        buttonNext: showNavigationUi ? () => null : undefined,
         controls: () =>
-          showMediaActions && currentPhoto ? (
-            <div className={styles.viewerActionsFixed}>
-              <button
-                type="button"
-                className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
-                onClick={() => onDownload?.(currentPhoto)}
-                aria-label="Descargar foto"
-              >
-                <span className={styles.viewerActionIcon}>⬇</span>
-                Descargar
-              </button>
-              <button
-                type="button"
-                className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
-                onClick={() => onShare?.(currentPhoto)}
-                aria-label="Compartir foto"
-              >
-                <span className={styles.viewerActionIcon}>↗</span>
-                Compartir
-              </button>
-              {onPersonalize ? (
+          showControls ? (
+            <>
+              {showExplicitClose ? (
                 <button
                   type="button"
-                  className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
-                  onClick={() => onPersonalize(currentPhoto)}
-                  aria-label="Personalizar foto"
+                  className={styles.viewerClose}
+                  onClick={onClose}
+                  aria-label="Cerrar visor"
                 >
-                  <span className={styles.viewerActionIcon}>✨</span>
-                  Personalizar
+                  ← Cerrar
                 </button>
               ) : null}
-              {onDedicate ? (
-                <button
-                  type="button"
-                  className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
-                  onClick={() => onDedicate(currentPhoto)}
-                  aria-label="Dedicar esta foto"
-                >
-                  <span className={styles.viewerActionIcon}>💌</span>
-                  Dedicar
-                </button>
+              {showNavigationUi ? (
+                <>
+                  <button
+                    type="button"
+                    className={`${styles.viewerNav} ${styles.viewerNavLeft}`}
+                    onClick={handlePrev}
+                    aria-label="Foto anterior"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.viewerNav} ${styles.viewerNavRight}`}
+                    onClick={handleNext}
+                    aria-label="Foto siguiente"
+                  >
+                    ›
+                  </button>
+                </>
               ) : null}
-            </div>
+              <div className={styles.viewerActionsFixed}>
+                {showNavigationUi ? (
+                  <div className={styles.viewerNavigationMeta}>
+                    <p className={styles.viewerHint}>
+                      Desliza o usa las flechas para ver mas fotos
+                    </p>
+                    <p
+                      className={styles.viewerCounter}
+                      aria-label="Posicion de la foto actual"
+                    >
+                      {currentIndex + 1} / {photos.length}
+                    </p>
+                  </div>
+                ) : null}
+                {showActions ? (
+                  <>
+                    <button
+                      type="button"
+                      className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
+                      onClick={() => onDownload?.(currentPhoto)}
+                      aria-label="Descargar foto"
+                    >
+                      <span className={styles.viewerActionIcon}>⬇</span>
+                      Descargar
+                    </button>
+                    {onPersonalize ? (
+                      <div className={styles.viewerPersonalizeBtnWrap}>
+                        <button
+                          type="button"
+                          className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
+                          onClick={() => onPersonalize(currentPhoto)}
+                          aria-label="Personalizar foto (beta)"
+                        >
+                          <span className={styles.viewerActionIcon}>✨</span>
+                          Personalizar
+                        </button>
+                        {personalizeIsBeta ? (
+                          <span className={styles.viewerBetaBadge} aria-hidden="true">
+                            Beta
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
+                    {onDedicate ? (
+                      <button
+                        type="button"
+                        className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
+                        onClick={() => onDedicate(currentPhoto)}
+                        aria-label="Dedicar esta foto"
+                      >
+                        <span className={styles.viewerActionIcon}>💌</span>
+                        Dedicar
+                      </button>
+                    ) : null}
+                  </>
+                ) : null}
+              </div>
+            </>
           ) : null,
       }}
     />
