@@ -6,26 +6,35 @@ import styles from "@assets/css/party-public.module.css";
 type TopEditorBarProps = {
   onBack: () => void;
   onStickers: () => void;
+  backLabel?: string;
+  actionLabel?: string;
+  actionEmoji?: string;
 };
 
-const TopEditorBar = ({ onBack, onStickers }: TopEditorBarProps) => {
+const TopEditorBar = ({
+  onBack,
+  onStickers,
+  backLabel = "Cerrar",
+  actionLabel = "Stickers",
+  actionEmoji = "😊",
+}: TopEditorBarProps) => {
   return (
     <header className={styles.topEditorBar}>
       <button
         type="button"
         className={styles.topEditorBackBtn}
         onClick={onBack}
-        aria-label="Cerrar editor"
+        aria-label={backLabel}
       >
-        ← Cerrar
+        ← {backLabel}
       </button>
       <button
         type="button"
         className={styles.topEditorStickerBtn}
         onClick={onStickers}
-        aria-label="Añadir stickers"
+        aria-label={actionLabel}
       >
-        Stickers <span>😊</span>
+        {actionLabel} <span>{actionEmoji}</span>
       </button>
     </header>
   );

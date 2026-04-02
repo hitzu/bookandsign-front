@@ -1623,10 +1623,22 @@
   transform: translateX(-50%);
   width: min(560px, calc(100% - 1.7rem));
   z-index: 95;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 0.65rem;
   padding: 0.75rem;
+}
+
+.viewerPrimaryActions {
+  display: flex;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.viewerPrimaryActions > *,
+.viewerPrimaryActions > .viewerPersonalizeBtnWrap {
+  flex: 1;
 }
 
 .viewerActionIcon {
@@ -2177,4 +2189,513 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+/* ───────────────────────────────────────────
+   Dedicate Photo Feature
+   ─────────────────────────────────────────── */
+
+.dedicateOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: #0a0a12;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: max(0.75rem, env(safe-area-inset-top)) 1rem
+    max(2rem, env(safe-area-inset-bottom));
+}
+
+.dedicateRoot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;
+  gap: 1rem;
+}
+
+.dedicateStepIndicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dedicateStepDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s;
+}
+
+.dedicateStepDotActive {
+  background: #8b84ff;
+  box-shadow: 0 0 8px rgba(139, 132, 255, 0.5);
+}
+
+.dedicateStepLabel {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+/* Polaroid frame wrapper */
+.polaroidFrame {
+  position: relative;
+  background: #fff;
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+  width: 100%;
+}
+
+.polaroidPhotoArea {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #1a1a1a;
+  touch-action: none;
+  cursor: grab;
+}
+
+.polaroidPhotoArea:active {
+  cursor: grabbing;
+}
+
+.polaroidPhotoImg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.polaroidCropHint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.4s;
+}
+
+/* Dedication white area */
+.polaroidWhiteArea {
+  min-height: 90px;
+  padding: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.polaroidWhiteAreaEditable {
+  cursor: text;
+}
+
+.polaroidPlaceholder {
+  color: #bbb;
+  font-size: 0.85rem;
+  font-style: italic;
+  pointer-events: none;
+  user-select: none;
+  text-align: center;
+}
+
+/* Dedication text input — native textarea inside the white area */
+.dedicationTextArea {
+  width: 100%;
+  min-height: 60px;
+  max-height: 120px;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #333;
+  font-size: 1rem;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  text-align: center;
+  line-height: 1.4;
+  padding: 0;
+}
+
+.dedicationTextArea::placeholder {
+  color: #ccc;
+  font-style: italic;
+}
+
+/* Sticker inside dedication area */
+.dedicationStickerWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.dedicationSticker {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.dedicationStickerRemove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.65rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Dedicate step toolbar */
+.dedicateToolbar {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.dedicateToolBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.dedicateToolBtn:hover {
+  background: rgba(139, 132, 255, 0.25);
+}
+
+.dedicateToolBtn:active {
+  transform: scale(0.97);
+}
+
+/* Top bar for dedicate — sits inside polaroidFrame */
+.dedicateTopBar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.dedicateTopBar button {
+  pointer-events: auto;
+}
+
+/* Dedicate footer buttons */
+.dedicateFooter {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dedicateNextBtn {
+  width: 100%;
+  padding: 0.9rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6b5cff 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.dedicateNextBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.dedicateNextBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dedicateBackLink {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.dedicateBackLink:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Confirm dedication dialog */
+.confirmDialogBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.7);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  animation: trayFadeIn 0.2s ease-out;
+}
+
+.confirmDialogCard {
+  background: #1a1a2e;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+}
+
+.confirmDialogTitle {
+  color: #ef4444;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+}
+
+.confirmDialogBody {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+}
+
+.confirmDialogActions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.confirmDialogCancel {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirmDialogCancel:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.confirmDialogConfirm {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6b5cff 100%);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.confirmDialogConfirm:hover {
+  transform: translateY(-1px);
+}
+
+.confirmDialogConfirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success state after dedication sent */
+.dedicateSuccessCard {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+}
+
+.dedicateSuccessTitle {
+  color: #22c55e;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.dedicateSuccessBody {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1.25rem;
+}
+
+.dedicateSuccessCloseBtn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dedicateSuccessCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ── Step 2: Customize wrapper ── */
+
+.customizeStepWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.safeAreaOverlay {
+  position: relative;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(190, 198, 255, 0.15);
+  overflow: hidden;
+  line-height: 0;
+}
+
+/* ── Step 3: Dedicate wrapper ── */
+
+.dedicateStepWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Polaroid photo area — static (non-interactive) for Paso 3 */
+.polaroidPhotoAreaStatic {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #1a1a1a;
+  line-height: 0;
+}
+
+.polaroidPhotoStatic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Phrase grid ── */
+
+.phraseGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.phraseGridItem {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.phraseGridItem:hover {
+  background: rgba(139, 132, 255, 0.15);
+  border-color: rgba(139, 132, 255, 0.35);
+}
+
+.phraseGridItem:active {
+  transform: scale(0.97);
+}
+
+/* ── Back step alert ── */
+
+.backStepAlertCard {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 1.5rem;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+}
+
+.backStepAlertBody {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 0 0 1.25rem;
+}
+
+.backStepAlertConfirm {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.backStepAlertConfirm:hover {
+  background: rgba(255, 255, 255, 0.18);
 }

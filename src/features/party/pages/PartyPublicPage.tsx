@@ -14,6 +14,7 @@ import EmptyStateNotFound from "../components/EmptyStateNotFound";
 import MobileWowLanding from "../components/MobileWowLanding";
 import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
 import PersonalizePhotoModal from "../components/PersonalizePhotoModal";
+import DedicatePhotoModal from "../components/DedicatePhotoModal";
 import DesktopTabletLanding from "../components/DesktopTabletLanding";
 import BrillipointShell from "../components/BrillipointShell";
 import IntroHero from "../components/IntroHero";
@@ -49,6 +50,7 @@ const PartyPublicPage = ({ token }: Props) => {
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [personalizePhoto, setPersonalizePhoto] = useState<EventPhoto | null>(null);
+  const [dedicatePhoto, setDedicatePhoto] = useState<EventPhoto | null>(null);
   const [desktopSelectedPhotoIndex, setDesktopSelectedPhotoIndex] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
@@ -247,6 +249,15 @@ const PartyPublicPage = ({ token }: Props) => {
     setPersonalizePhoto(null);
   }, []);
 
+  const handleDedicate = useCallback((photo: EventPhoto) => {
+    setViewerIndex(null);
+    setDedicatePhoto(photo);
+  }, []);
+
+  const handleDedicateClose = useCallback(() => {
+    setDedicatePhoto(null);
+  }, []);
+
   const handleCopyCurrentLink = useCallback(async () => {
     const currentUrl = typeof window !== "undefined" ? window.location.href : "";
     if (!currentUrl) return;
@@ -416,6 +427,7 @@ const PartyPublicPage = ({ token }: Props) => {
           onDownload={handleDownload}
           onShare={handleShare}
           onPersonalize={handlePersonalize}
+          onDedicate={handleDedicate}
           personalizeIsBeta
           showNavigationHints
           showExplicitClose
@@ -426,6 +438,14 @@ const PartyPublicPage = ({ token }: Props) => {
         photo={personalizePhoto}
         eventToken={token}
         onClose={handlePersonalizeClose}
+        onToast={setToastMessage}
+      />
+      <DedicatePhotoModal
+        isOpen={dedicatePhoto !== null}
+        photo={dedicatePhoto}
+        eventToken={token}
+        eventType="xv"
+        onClose={handleDedicateClose}
         onToast={setToastMessage}
       />
       {toastMessage ? <div className={styles.toast}>{toastMessage}</div> : null}

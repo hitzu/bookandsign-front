@@ -147,44 +147,46 @@ const PhotoViewerLightbox = ({
                 ) : null}
                 {showActions ? (
                   <>
+                    <div className={styles.viewerPrimaryActions}>
+                      {onPersonalize ? (
+                        <div className={styles.viewerPersonalizeBtnWrap}>
+                          <button
+                            type="button"
+                            className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
+                            onClick={() => onPersonalize(currentPhoto)}
+                            aria-label="Personalizar foto (beta)"
+                          >
+                            <span className={styles.viewerActionIcon}>✨</span>
+                            Personalizar
+                          </button>
+                          {personalizeIsBeta ? (
+                            <span className={styles.viewerBetaBadge} aria-hidden="true">
+                              Beta
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {onDedicate ? (
+                        <button
+                          type="button"
+                          className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
+                          onClick={() => onDedicate(currentPhoto)}
+                          aria-label="Dedicar esta foto"
+                        >
+                          <span className={styles.viewerActionIcon}>💌</span>
+                          Dedicar
+                        </button>
+                      ) : null}
+                    </div>
                     <button
                       type="button"
-                      className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
+                      className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
                       onClick={() => onDownload?.(currentPhoto)}
                       aria-label="Descargar foto"
                     >
                       <span className={styles.viewerActionIcon}>⬇</span>
                       Descargar
                     </button>
-                    {onPersonalize ? (
-                      <div className={styles.viewerPersonalizeBtnWrap}>
-                        <button
-                          type="button"
-                          className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
-                          onClick={() => onPersonalize(currentPhoto)}
-                          aria-label="Personalizar foto (beta)"
-                        >
-                          <span className={styles.viewerActionIcon}>✨</span>
-                          Personalizar
-                        </button>
-                        {personalizeIsBeta ? (
-                          <span className={styles.viewerBetaBadge} aria-hidden="true">
-                            Beta
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : null}
-                    {onDedicate ? (
-                      <button
-                        type="button"
-                        className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
-                        onClick={() => onDedicate(currentPhoto)}
-                        aria-label="Dedicar esta foto"
-                      >
-                        <span className={styles.viewerActionIcon}>💌</span>
-                        Dedicar
-                      </button>
-                    ) : null}
                   </>
                 ) : null}
               </div>
