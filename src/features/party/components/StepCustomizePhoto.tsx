@@ -3,14 +3,11 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 import { Canvas, FabricImage, util } from "fabric";
 import type { CropData } from "./PolaroidCanvas";
-import {
-  exportFabricCanvasToBlob,
-  PERSONALIZED_PHOTO_EXPORT_MIME,
-  PERSONALIZED_PHOTO_EXPORT_QUALITY,
-} from "../utils/personalizeExport";
+import { PERSONALIZED_PHOTO_EXPORT_QUALITY } from "../utils/personalizeExport";
 import styles from "@assets/css/party-public.module.css";
 
 const STICKER_SIZE = 72;
+const EXPORT_MAX_DIM = 2048;
 const CANVAS_IMAGE_LOAD_OPTIONS = { crossOrigin: "anonymous" } as const;
 
 export type StepCustomizeHandle = {
@@ -202,12 +199,33 @@ const StepCustomizePhoto = ({
 
         // Notify parent that the API is ready
         onReady({
-          exportToBlob: () =>
-            exportFabricCanvasToBlob(
-              fabricCanvas,
-              PERSONALIZED_PHOTO_EXPORT_MIME,
-              PERSONALIZED_PHOTO_EXPORT_QUALITY,
-            ),
+          exportToBlob: async () => {
+            // Export only the visible square viewport (not the full bg bounds)
+            // This is critical for the dedicate flow where the bg image
+            // overflows vertically due to the cover-fit crop.
+            fabricCanvas.discardActiveObject();
+            fabricCanvas.requestRenderAll();
+            await new Promise<void>((r) => requestAnimationFrame(() => r()));
+
+            const cw = fabricCanvas.getWidth();
+            const ch = fabricCanvas.getHeight();
+            const multiplier = Math.min(
+              EXPORT_MAX_DIM / Math.max(cw, ch, 1),
+              ((fabricCanvas.backgroundImage?.width ?? cw) / cw) || 1,
+            );
+
+            const blob = await fabricCanvas.toBlob({
+              left: 0,
+              top: 0,
+              width: cw,
+              height: ch,
+              format: "jpeg",
+              quality: PERSONALIZED_PHOTO_EXPORT_QUALITY,
+              multiplier: Math.max(1, multiplier),
+            });
+            if (blob) return blob;
+            throw new Error("Export failed");
+          },
           addSticker,
         });
       })
