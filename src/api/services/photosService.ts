@@ -14,11 +14,8 @@ const normalizePublicEvent = (
   token: payload?.token || token,
   name:
     payload?.name ||
-    payload?.title ||
-    payload?.eventName ||
     "Experiencia Brillipoint",
   description: payload?.description,
-  coverUrl: payload?.coverUrl || payload?.cover_url,
   createdAt: payload?.createdAt,
   updatedAt: payload?.updatedAt,
 });

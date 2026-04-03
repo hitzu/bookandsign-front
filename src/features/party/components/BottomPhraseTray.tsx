@@ -2,19 +2,19 @@
 
 import React, { useEffect } from "react";
 import PhraseGrid from "./PhraseGrid";
-import type { DedicationEventType, DedicationPhrase } from "../utils/dedicationPhrases";
+import type { DedicationPhrase } from "../utils/dedicationPhrases";
 import styles from "@assets/css/party-public.module.css";
 
 type BottomPhraseTrayProps = {
   isOpen: boolean;
-  eventType: DedicationEventType;
+  eventToken: string;
   onClose: () => void;
   onSelectPhrase: (phrase: DedicationPhrase) => void;
 };
 
 const BottomPhraseTray = ({
   isOpen,
-  eventType,
+  eventToken,
   onClose,
   onSelectPhrase,
 }: BottomPhraseTrayProps) => {
@@ -45,7 +45,7 @@ const BottomPhraseTray = ({
       <div className={styles.stickerTraySheet}>
         <div className={styles.stickerTrayHandle} />
         <div className={styles.stickerTrayContent}>
-          <PhraseGrid eventType={eventType} onSelectPhrase={handleSelect} />
+          <PhraseGrid eventToken={eventToken} onSelectPhrase={handleSelect} />
         </div>
       </div>
     </>

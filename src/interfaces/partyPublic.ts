@@ -1,3 +1,5 @@
+import { Event } from '../interfaces'
+
 export interface PublicEvent {
   id?: number;
   token: string;
@@ -8,18 +10,7 @@ export interface PublicEvent {
   updatedAt?: string;
 }
 
-export interface PublicEventResponse {
-  id?: number;
-  token?: string;
-  name?: string;
-  title?: string;
-  eventName?: string;
-  description?: string;
-  cover_url?: string;
-  coverUrl?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+export interface PublicEventResponse extends Event { }
 
 export type PublicPersonalizedPhotoUploadUrlPayload = {
   fileName: string;

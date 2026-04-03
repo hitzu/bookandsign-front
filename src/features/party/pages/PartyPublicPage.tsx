@@ -444,7 +444,6 @@ const PartyPublicPage = ({ token }: Props) => {
         isOpen={dedicatePhoto !== null}
         photo={dedicatePhoto}
         eventToken={token}
-        eventType="xv"
         onClose={handleDedicateClose}
         onToast={setToastMessage}
       />

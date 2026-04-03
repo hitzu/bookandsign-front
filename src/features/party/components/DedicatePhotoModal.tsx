@@ -11,7 +11,7 @@ import BottomStickerTray from "./BottomStickerTray";
 import BottomPhraseTray from "./BottomPhraseTray";
 import ConfirmDedicateDialog from "./ConfirmDedicateDialog";
 import BackStepAlert from "./BackStepAlert";
-import type { DedicationEventType, DedicationPhrase } from "../utils/dedicationPhrases";
+import type { DedicationPhrase } from "../utils/dedicationPhrases";
 import styles from "@assets/css/party-public.module.css";
 
 const StepCustomizePhoto = dynamic(
@@ -31,7 +31,6 @@ type DedicatePhotoModalProps = {
   isOpen: boolean;
   photo: EventPhoto | null;
   eventToken?: string;
-  eventType?: DedicationEventType;
   onClose: () => void;
   onToast?: (message: string) => void;
 };
@@ -53,7 +52,6 @@ const DedicatePhotoModal = ({
   isOpen,
   photo,
   eventToken,
-  eventType = "xv",
   onClose,
   onToast,
 }: DedicatePhotoModalProps) => {
@@ -319,7 +317,6 @@ const DedicatePhotoModal = ({
                 composedPhotoUrl={composedPhotoUrl}
                 dedicationText={dedicationText}
                 onDedicationTextChange={setDedicationText}
-                eventType={eventType}
                 onReady={setDedicateApi}
               />
               <TopEditorBar
@@ -356,7 +353,7 @@ const DedicatePhotoModal = ({
       {step === 3 && (
         <BottomPhraseTray
           isOpen={isPhraseTrayOpen}
-          eventType={eventType}
+          eventToken={eventToken || ""}
           onClose={() => setIsPhraseTrayOpen(false)}
           onSelectPhrase={handleSelectPhrase}
         />

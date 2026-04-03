@@ -160,22 +160,33 @@ const PhotoViewerLightbox = ({
                             Personalizar
                           </button>
                           {personalizeIsBeta ? (
-                            <span className={styles.viewerBetaBadge} aria-hidden="true">
+                            <span
+                              className={styles.viewerBetaBadge}
+                              aria-hidden="true"
+                            >
                               Beta
                             </span>
                           ) : null}
                         </div>
                       ) : null}
                       {onDedicate ? (
-                        <button
-                          type="button"
-                          className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
-                          onClick={() => onDedicate(currentPhoto)}
-                          aria-label="Dedicar esta foto"
-                        >
-                          <span className={styles.viewerActionIcon}>💌</span>
-                          Dedicar
-                        </button>
+                        <div className={styles.viewerPersonalizeBtnWrap}>
+                          <button
+                            type="button"
+                            className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
+                            onClick={() => onDedicate(currentPhoto)}
+                            aria-label="Dedicar esta foto"
+                          >
+                            <span className={styles.viewerActionIcon}>💌</span>
+                            Dedicar
+                          </button>
+                          <span
+                            className={styles.viewerBetaBadge}
+                            aria-hidden="true"
+                          >
+                            Beta
+                          </span>
+                        </div>
                       ) : null}
                     </div>
                     <button

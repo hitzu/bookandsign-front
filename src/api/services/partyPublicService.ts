@@ -5,6 +5,7 @@ import {
   EventPhotoResponse,
   PublicEvent,
   PublicEventResponse,
+  EventPhraseResponse,
 } from "../../interfaces";
 import { axiosInstanceWithoutToken } from "../config/axiosConfig";
 
@@ -14,13 +15,8 @@ const normalizePublicEvent = (
 ): PublicEvent => ({
   id: payload?.id,
   token: payload?.token || token,
-  name:
-    payload?.name ||
-    payload?.title ||
-    payload?.eventName ||
-    "Experiencia Brillipoint",
-  description: payload?.description,
-  coverUrl: payload?.coverUrl || payload?.cover_url,
+  name: payload?.honoreesNames,
+  description: payload?.albumPhrase,
   createdAt: payload?.createdAt,
   updatedAt: payload?.updatedAt,
 });
@@ -94,6 +90,20 @@ export const getEventPhotosPage = async (
     hasMore: Boolean(normalizedPayload.hasMore),
     nextCursor: normalizedPayload.nextCursor || null,
   };
+};
+
+
+
+export const getEventPhrases = async (
+  token: string,
+  signal?: AbortSignal,
+): Promise<EventPhraseResponse[]> => {
+  const normalizedToken = encodeURIComponent(token);
+  const response = await axiosInstanceWithoutToken.get<EventPhraseResponse[]>(
+    `/events/phrases/${normalizedToken}`,
+    { signal },
+  );
+  return response.data;
 };
 
 export const getPublicPhotosByEventToken = async (

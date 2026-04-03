@@ -170,6 +170,34 @@ const menuItems = [
   {
     type: "HASHMENU",
     id: 6,
+    label: "Eventos",
+    icon: "ph-duotone ph-confetti",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "event-list",
+        label: "Listado de eventos",
+        link: "/event-list",
+        dataPage: "event-list",
+      },
+      {
+        id: "event-edit",
+        label: "Editar evento",
+        link: "/event-edit",
+        dataPage: "event-edit",
+      },
+      {
+        id: "event-add",
+        label: "Agregar evento",
+        link: "/event-add",
+        dataPage: "event-add",
+      },
+    ],
+  },
+  {
+    type: "HASHMENU",
+    id: 7,
     label: "Fotos",
     icon: "ph-duotone ph-images",
     dataPage: null,

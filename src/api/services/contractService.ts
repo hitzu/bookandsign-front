@@ -49,6 +49,7 @@ export const getContractById = async (
 
 export interface GetContractsParams {
   includeFinalized?: boolean;
+  excludeWithEvents?: boolean;
 }
 
 export const getContracts = async (
@@ -58,6 +59,9 @@ export const getContracts = async (
     const queryParams = new URLSearchParams();
     if (params?.includeFinalized) {
       queryParams.append("includeFinalized", "true");
+    }
+    if (params?.excludeWithEvents) {
+      queryParams.append("excludeWithEvents", "true");
     }
     const url = queryParams.toString()
       ? `/contracts?${queryParams.toString()}`

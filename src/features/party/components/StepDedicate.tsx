@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useCallback, useEffect } from "react";
-import type { DedicationEventType } from "../utils/dedicationPhrases";
 import styles from "@assets/css/party-public.module.css";
 
 /* ── Constants ── */
@@ -21,7 +20,6 @@ type StepDedicateProps = {
   composedPhotoUrl: string;
   dedicationText: string;
   onDedicationTextChange: (text: string) => void;
-  eventType: DedicationEventType;
   onReady: (api: StepDedicateHandle) => void;
 };
 
@@ -31,7 +29,6 @@ const StepDedicate = ({
   composedPhotoUrl,
   dedicationText,
   onDedicationTextChange,
-  eventType,
   onReady,
 }: StepDedicateProps) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
