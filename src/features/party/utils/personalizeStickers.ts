@@ -12,7 +12,7 @@ const stickerBaseUrl = (
   process.env.NEXT_PUBLIC_STICKER_BASE_URL ?? DEFAULT_STICKER_BASE
 ).replace(/\/$/, "");
 
-const STICKER_RANGE_END = 124;
+const STICKER_RANGE_END = 88;
 
 function parseStickerBlacklist(): Set<number> {
   return new Set([6]);

@@ -76,6 +76,11 @@ const EventList = () => {
         enableColumnFilter: false,
       },
       {
+        header: "Token",
+        accessorKey: "token",
+        enableColumnFilter: false,
+      },
+      {
         header: "Festejados",
         accessorKey: "honoreesNames",
         enableColumnFilter: false,
@@ -132,6 +137,18 @@ const EventList = () => {
                     onClick={() => handleDelete(cellProps.row.original.id)}
                   >
                     <i className="ti ti-trash f-18"></i>
+                  </Link>
+                </li>
+                <li
+                  className="list-inline-item align-bottom"
+                  data-bs-toggle="tooltip"
+                  title="Ver Fotos"
+                >
+                  <Link
+                    href={`/photos-list/${cellProps.row.original.token}`}
+                    className="avtar avtar-xs btn-link-success btn-pc-default"
+                  >
+                    <i className="ph-duotone ph-images"></i>
                   </Link>
                 </li>
               </ul>
