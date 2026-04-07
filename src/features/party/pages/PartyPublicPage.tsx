@@ -22,6 +22,7 @@ import {
   buildDownloadFilename,
   copyToClipboard,
   downloadPhoto,
+  sharePhoto,
   shareUrl,
 } from "../utils/mediaActions";
 
@@ -201,7 +202,7 @@ const PartyPublicPage = ({ token }: Props) => {
   };
 
   const handleShare = async (photo: EventPhoto) => {
-    const result = await shareUrl(
+    const result = await sharePhoto(
       photo.publicUrl,
       `Brillipoint - ${eventTitle || "Mi foto"}`,
     );
@@ -428,7 +429,7 @@ const PartyPublicPage = ({ token }: Props) => {
           onShare={handleShare}
           onPersonalize={handlePersonalize}
           onDedicate={handleDedicate}
-          personalizeIsBeta
+          nombreFestejado={eventTitle}
           showNavigationHints
           showExplicitClose
         />
@@ -439,6 +440,7 @@ const PartyPublicPage = ({ token }: Props) => {
         eventToken={token}
         onClose={handlePersonalizeClose}
         onToast={setToastMessage}
+        nombreFestejado={eventTitle}
       />
       <DedicatePhotoModal
         isOpen={dedicatePhoto !== null}
@@ -446,6 +448,7 @@ const PartyPublicPage = ({ token }: Props) => {
         eventToken={token}
         onClose={handleDedicateClose}
         onToast={setToastMessage}
+        nombreFestejado={eventTitle}
       />
       {toastMessage ? <div className={styles.toast}>{toastMessage}</div> : null}
     </BrillipointShell>

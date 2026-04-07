@@ -12,6 +12,7 @@ import BottomPhraseTray from "./BottomPhraseTray";
 import ConfirmDedicateDialog from "./ConfirmDedicateDialog";
 import BackStepAlert from "./BackStepAlert";
 import type { DedicationPhrase } from "../utils/dedicationPhrases";
+import { SocialMediaCTA } from "./SocialMediaCTA";
 import styles from "@assets/css/party-public.module.css";
 
 const StepCustomizePhoto = dynamic(
@@ -33,6 +34,7 @@ type DedicatePhotoModalProps = {
   eventToken?: string;
   onClose: () => void;
   onToast?: (message: string) => void;
+  nombreFestejado?: string;
 };
 
 const STEP_LABELS: Record<WizardStep, string> = {
@@ -54,6 +56,7 @@ const DedicatePhotoModal = ({
   eventToken,
   onClose,
   onToast,
+  nombreFestejado = "",
 }: DedicatePhotoModalProps) => {
   const [step, setStep] = useState<WizardStep>(1);
   const [isTrayOpen, setIsTrayOpen] = useState(false);
@@ -216,7 +219,15 @@ const DedicatePhotoModal = ({
   if (isSuccess) {
     return (
       <div className={styles.dedicateOverlay} role="dialog" aria-modal="true">
-        <div className={styles.dedicateRoot}>
+        <div className={styles.postDescargaOverlayContent}>
+          <button
+            type="button"
+            className={styles.postDescargaClose}
+            onClick={onClose}
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
           <div className={styles.dedicateSuccessCard}>
             <h3 className={styles.dedicateSuccessTitle}>Enviada!</h3>
             <p className={styles.dedicateSuccessBody}>
@@ -224,13 +235,20 @@ const DedicatePhotoModal = ({
               <br />
               Ya no es editable.
             </p>
-            <button
-              type="button"
-              className={styles.dedicateSuccessCloseBtn}
-              onClick={onClose}
-            >
-              Ver galeria
-            </button>
+          </div>
+          <div className={styles.postDescargaCard}>
+            <div className={styles.postDescargaGlow} />
+            <p className={styles.postDescargaScript}>Increíble ✨</p>
+            <p className={styles.postDescargaTitulo}>
+              Imagina esto en tu evento
+            </p>
+            <p className={styles.postDescargaSubtitulo}>
+              Te cotizamos en minutos. Sin compromiso.
+            </p>
+            <SocialMediaCTA
+              variant="modal-end-state"
+              nombreFestejado={nombreFestejado}
+            />
           </div>
         </div>
       </div>

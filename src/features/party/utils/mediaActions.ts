@@ -61,6 +61,28 @@ export const copyToClipboard = async (value: string): Promise<boolean> => {
   }
 };
 
+export const sharePhoto = async (
+  imageUrl: string,
+  title: string,
+): Promise<ShareResult> => {
+  if (typeof navigator === "undefined") return "unsupported";
+
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const file = new File([blob], "brillipoint.jpg", { type: blob.type });
+
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({ files: [file], title });
+      return "shared";
+    }
+  } catch (_error) {
+    // fall through to URL-based share
+  }
+
+  return shareUrl(imageUrl, title);
+};
+
 export const shareUrl = async (url: string, title: string): Promise<ShareResult> => {
   if (typeof navigator === "undefined") return "unsupported";
 

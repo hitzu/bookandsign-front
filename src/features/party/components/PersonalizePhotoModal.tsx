@@ -6,6 +6,7 @@ import { EventPhoto } from "../../../interfaces";
 import TopEditorBar from "./TopEditorBar";
 import BottomStickerTray from "./BottomStickerTray";
 import DownloadCTA from "./DownloadCTA";
+import { SocialMediaCTA } from "./SocialMediaCTA";
 import styles from "@assets/css/party-public.module.css";
 
 const PersonalizeCanvas = dynamic(
@@ -20,6 +21,7 @@ type PersonalizePhotoModalProps = {
   onClose: () => void;
   onDownload?: (blob: Blob) => void;
   onToast?: (message: string) => void;
+  nombreFestejado?: string;
 };
 
 const PersonalizePhotoModal = ({
@@ -29,6 +31,7 @@ const PersonalizePhotoModal = ({
   onClose,
   onDownload,
   onToast,
+  nombreFestejado = "",
 }: PersonalizePhotoModalProps) => {
   const [exportToBlob, setExportToBlob] = useState<
     (() => Promise<Blob>) | null
@@ -39,6 +42,7 @@ const PersonalizePhotoModal = ({
   const [isTrayOpen, setIsTrayOpen] = useState(false);
   const [hintSubdued, setHintSubdued] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPostDescarga, setShowPostDescarga] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -69,6 +73,7 @@ const PersonalizePhotoModal = ({
       setIsTrayOpen(false);
       setHintSubdued(false);
       setIsProcessing(false);
+      setShowPostDescarga(false);
     }
   }, [isOpen]);
 
@@ -134,6 +139,8 @@ const PersonalizePhotoModal = ({
       } else {
         onToast?.("Foto descargada ✨");
       }
+
+      setShowPostDescarga(true);
     } catch (err) {
       console.error("Download failed:", err);
       onToast?.("No se pudo descargar");
@@ -143,6 +150,37 @@ const PersonalizePhotoModal = ({
   }, [eventToken, exportToBlob, isProcessing, onDownload, onToast]);
 
   if (!isOpen) return null;
+
+  if (showPostDescarga) {
+    return (
+      <div className={styles.personalizeOverlay} role="dialog" aria-modal="true">
+        <div className={styles.postDescargaOverlayContent}>
+          <button
+            type="button"
+            className={styles.postDescargaClose}
+            onClick={onClose}
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+          <div className={styles.postDescargaCard}>
+            <div className={styles.postDescargaGlow} />
+            <p className={styles.postDescargaScript}>Increíble ✨</p>
+            <p className={styles.postDescargaTitulo}>
+              Imagina esto en tu evento
+            </p>
+            <p className={styles.postDescargaSubtitulo}>
+              Te cotizamos en minutos. Sin compromiso.
+            </p>
+            <SocialMediaCTA
+              variant="modal-end-state"
+              nombreFestejado={nombreFestejado}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.personalizeOverlay} role="dialog" aria-modal="true">

@@ -3,6 +3,10 @@ import Lightbox, { type ControllerRef } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { EventPhoto } from "../../../interfaces";
 import styles from "@assets/css/party-public.module.css";
+import { sharePhoto } from "../utils/mediaActions";
+import { SocialMediaCTA } from "./SocialMediaCTA";
+
+type ModalState = "foto" | "share-confirm" | "post-descarga";
 
 type PhotoViewerLightboxProps = {
   isOpen: boolean;
@@ -14,9 +18,8 @@ type PhotoViewerLightboxProps = {
   onDownload?: (photo: EventPhoto) => Promise<void>;
   onShare?: (photo: EventPhoto) => Promise<void>;
   onPersonalize?: (photo: EventPhoto) => void;
-  /** Muestra marca “Beta” en el botón de personalizar (p. ej. hasta estabilizar stickers). */
-  personalizeIsBeta?: boolean;
   onDedicate?: (photo: EventPhoto) => void;
+  nombreFestejado?: string;
   showMediaActions?: boolean;
   showNavigationHints?: boolean;
   showExplicitClose?: boolean;
@@ -32,13 +35,14 @@ const PhotoViewerLightbox = ({
   onDownload,
   onShare,
   onPersonalize,
-  personalizeIsBeta = false,
   onDedicate,
+  nombreFestejado = "",
   showMediaActions = true,
   showNavigationHints = false,
   showExplicitClose = false,
 }: PhotoViewerLightboxProps) => {
   const [currentIndex, setCurrentIndex] = useState(activeIndex ?? 0);
+  const [modalState, setModalState] = useState<ModalState>("foto");
   const controllerRef = useRef<ControllerRef | null>(null);
 
   useEffect(() => {
@@ -46,6 +50,19 @@ const PhotoViewerLightbox = ({
       setCurrentIndex(activeIndex);
     }
   }, [isOpen, activeIndex]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.history.pushState({ modal: true }, "");
+
+    const handlePopState = () => {
+      onClose();
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [isOpen, onClose]);
 
   const slides = photos.map((p) => ({
     src: p.publicUrl,
@@ -61,6 +78,7 @@ const PhotoViewerLightbox = ({
   const handleView = useCallback(
     ({ index }: { index: number }) => {
       setCurrentIndex(index);
+      setModalState("foto");
       onActiveIndexChange(index);
     },
     [onActiveIndexChange],
@@ -70,6 +88,14 @@ const PhotoViewerLightbox = ({
   const showNavigationUi = showNavigationHints && canNavigate;
   const showActions = showMediaActions && currentPhoto;
   const showControls = showExplicitClose || showNavigationUi || showActions;
+
+  const handleClose = useCallback(() => {
+    if (window.history.state?.modal) {
+      window.history.back();
+    } else {
+      onClose();
+    }
+  }, [onClose]);
 
   const handlePrev = useCallback(() => {
     controllerRef.current?.prev();
@@ -85,7 +111,7 @@ const PhotoViewerLightbox = ({
     <Lightbox
       open={isOpen}
       index={activeIndex ?? 0}
-      close={onClose}
+      close={handleClose}
       slides={slides}
       on={{ view: handleView }}
       carousel={{
@@ -105,7 +131,7 @@ const PhotoViewerLightbox = ({
                 <button
                   type="button"
                   className={styles.viewerClose}
-                  onClick={onClose}
+                  onClick={handleClose}
                   aria-label="Cerrar visor"
                 >
                   ← Cerrar
@@ -147,57 +173,153 @@ const PhotoViewerLightbox = ({
                 ) : null}
                 {showActions ? (
                   <>
-                    <div className={styles.viewerPrimaryActions}>
-                      {onPersonalize ? (
-                        <div className={styles.viewerPersonalizeBtnWrap}>
-                          <button
-                            type="button"
-                            className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
-                            onClick={() => onPersonalize(currentPhoto)}
-                            aria-label="Personalizar foto (beta)"
-                          >
-                            <span className={styles.viewerActionIcon}>✨</span>
-                            Personalizar
-                          </button>
-                          {personalizeIsBeta ? (
-                            <span
-                              className={styles.viewerBetaBadge}
-                              aria-hidden="true"
+                    {modalState === "foto" && (
+                      <>
+                        {/* Fila 1 — experiencia, peso visual dominante */}
+                        <div className={styles.viewerPrimaryActions}>
+                          {onPersonalize ? (
+                            <button
+                              type="button"
+                              className={`${styles.btnExperience} ${styles.btnPersonalizar}`}
+                              onClick={() => onPersonalize(currentPhoto)}
+                              aria-label="Personalizar foto"
                             >
-                              Beta
-                            </span>
+                              <span className={styles.viewerActionIcon}>
+                                ✨
+                              </span>
+                              Personalizar
+                            </button>
+                          ) : null}
+                          {onDedicate ? (
+                            <div className={styles.viewerDedicarBtnWrap}>
+                              <button
+                                type="button"
+                                className={`${styles.btnExperience} ${styles.btnDedicar}`}
+                                onClick={() => onDedicate(currentPhoto)}
+                                aria-label="Dedicar esta foto"
+                              >
+                                <span className={styles.viewerActionIcon}>
+                                  ❤️
+                                </span>
+                                Dedicar
+                              </button>
+                              <span
+                                className={styles.viewerNewBadge}
+                                aria-hidden="true"
+                              >
+                                Nuevo
+                              </span>
+                            </div>
                           ) : null}
                         </div>
-                      ) : null}
-                      {onDedicate ? (
-                        <div className={styles.viewerPersonalizeBtnWrap}>
+
+                        {/* Fila 2 — utilitarios, íconos sin texto */}
+                        <div className={styles.viewerSecondaryActions}>
                           <button
                             type="button"
-                            className={`${styles.viewerPrimaryBtn} ${styles.viewerActionBtn}`}
-                            onClick={() => onDedicate(currentPhoto)}
-                            aria-label="Dedicar esta foto"
+                            className={styles.btnIcon}
+                            aria-label="Descargar foto"
+                            onClick={async () => {
+                              await onDownload?.(currentPhoto);
+                              setModalState("post-descarga");
+                            }}
                           >
-                            <span className={styles.viewerActionIcon}>💌</span>
-                            Dedicar
+                            ⬇
                           </button>
-                          <span
-                            className={styles.viewerBetaBadge}
-                            aria-hidden="true"
-                          >
-                            Beta
-                          </span>
+                          {onShare ? (
+                            <button
+                              type="button"
+                              className={styles.btnIcon}
+                              aria-label="Compartir foto"
+                              onClick={() => setModalState("share-confirm")}
+                            >
+                              ↗
+                            </button>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
-                    <button
-                      type="button"
-                      className={`${styles.viewerSecondaryBtn} ${styles.viewerActionBtn}`}
-                      onClick={() => onDownload?.(currentPhoto)}
-                      aria-label="Descargar foto"
-                    >
-                      <span className={styles.viewerActionIcon}>⬇</span>
-                      Descargar
-                    </button>
+
+                        <button
+                          type="button"
+                          className={styles.btnTextEscape}
+                          onClick={handleClose}
+                        >
+                          Ver galería
+                        </button>
+                      </>
+                    )}
+
+                    {modalState === "post-descarga" && (
+                      <div className={styles.modalEndState}>
+                        <button
+                          type="button"
+                          className={styles.postDescargaClose}
+                          onClick={() => setModalState("foto")}
+                          aria-label="Cerrar"
+                        >
+                          ✕
+                        </button>
+                        <div className={styles.postDescargaCard}>
+                          <div className={styles.postDescargaGlow} />
+                          <p className={styles.postDescargaScript}>
+                            Increíble ✨
+                          </p>
+                          <p className={styles.postDescargaTitulo}>
+                            Imagina esto en tu evento
+                          </p>
+                          <p className={styles.postDescargaSubtitulo}>
+                            Te cotizamos en minutos. Sin compromiso.
+                          </p>
+                          <SocialMediaCTA
+                            variant="modal-end-state"
+                            nombreFestejado={nombreFestejado}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {modalState === "share-confirm" && (
+                      <div className={styles.modalEndState}>
+                        <div className={styles.shareConfirmCard}>
+                          <p className={styles.shareConfirmKicker}>
+                            Comparte tu foto
+                          </p>
+                          <p className={styles.endStateTitulo}>
+                            Etiquétanos como{" "}
+                            <span className={styles.shareHighlight}>
+                              @brillipoint
+                            </span>{" "}
+                            y obtén un descuento en tu próximo servicio
+                          </p>
+                          <p className={styles.endStateSubtitulo}>
+                            Se abrirá el selector de tu dispositivo para elegir
+                            dónde compartir
+                          </p>
+                          <button
+                            type="button"
+                            className={styles.shareConfirmBtn}
+                            onClick={() => {
+                              sharePhoto(
+                                currentPhoto.publicUrl,
+                                `Brillipoint - ${eventTitle}`,
+                              );
+                              setModalState("foto");
+                            }}
+                          >
+                            <span className={styles.shareConfirmBtnIcon}>
+                              ↗
+                            </span>
+                            Compartir foto
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          className={styles.btnTextEscape}
+                          onClick={() => setModalState("foto")}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    )}
                   </>
                 ) : null}
               </div>

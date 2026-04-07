@@ -1632,12 +1632,12 @@
 
 .viewerPrimaryActions {
   display: flex;
-  gap: 0.65rem;
+  gap: 6px;
   width: 100%;
+  margin-bottom: 8px;
 }
 
-.viewerPrimaryActions > *,
-.viewerPrimaryActions > .viewerPersonalizeBtnWrap {
+.viewerPrimaryActions > * {
   flex: 1;
 }
 
@@ -1646,49 +1646,272 @@
   font-size: 1.1em;
 }
 
-.viewerPrimaryBtn {
+.btnExperience {
+  flex: 1;
+  border-radius: 20px;
+  padding: 12px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
   border: none;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btnPersonalizar {
+  background: linear-gradient(135deg, #6b5cff 0%, #1aa7ff 100%);
+  box-shadow: 0 4px 18px rgba(92, 100, 255, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+.btnDedicar {
+  background: linear-gradient(135deg, #e04590 0%, #c23ddb 100%);
+  box-shadow: 0 4px 18px rgba(224, 69, 144, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+.btnExperience:active {
+  transform: scale(0.97);
+}
+
+.viewerDedicarBtnWrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.viewerDedicarBtnWrap .btnExperience {
+  width: 100%;
+}
+
+.viewerNewBadge {
+  position: absolute;
+  top: -0.35rem;
+  right: 0.5rem;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #ffd96b 0%, #ffb347 100%);
+  color: #2a1a0e;
+  padding: 0.14rem 0.38rem;
+  border-radius: 999px;
+  line-height: 1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
+.viewerSecondaryActions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.btnIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.modalEndState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.postDescargaOverlayContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+  padding: 24px 20px;
+}
+
+.postDescargaClose {
+  align-self: flex-end;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.postDescargaClose:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.postDescargaCard {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 24px 18px 20px;
+  border-radius: 18px;
+  background: rgba(20, 21, 38, 0.82);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(190, 198, 255, 0.12);
+  box-shadow: 0 12px 36px rgba(9, 8, 26, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.postDescargaGlow {
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160%;
+  height: 80%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(107, 92, 255, 0.15) 0%,
+    rgba(26, 167, 255, 0.08) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.postDescargaScript {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.postDescargaTitulo {
+  margin: 0;
+  text-align: center;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.3;
+}
+
+.postDescargaSubtitulo {
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.4;
+}
+
+.shareConfirmCard {
+  width: 100%;
+  padding: 20px 18px 18px;
+  border-radius: 18px;
+  background: rgba(20, 21, 38, 0.82);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(190, 198, 255, 0.12);
+  box-shadow: 0 12px 36px rgba(9, 8, 26, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.shareConfirmKicker {
+  margin: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(190, 198, 255, 0.6);
+}
+
+.endStateTitulo {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.45;
+}
+
+.shareHighlight {
+  background: linear-gradient(120deg, #6b5cff, #1aa7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.endStateSubtitulo {
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.38);
+  line-height: 1.4;
+}
+
+.shareConfirmBtn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 4px;
+  padding: 13px 0;
+  border: none;
+  border-radius: 999px;
   background: linear-gradient(135deg, #6b5cff 0%, #1aa7ff 100%);
   color: #fff;
-  font-weight: 600;
-  border-radius: 999px;
-  padding: 0.8rem 1rem;
-  box-shadow: 0 4px 14px rgba(107, 92, 255, 0.4);
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(92, 100, 255, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
 }
 
-.viewerPrimaryBtn:hover {
-  box-shadow: 0 6px 20px rgba(107, 92, 255, 0.5);
+.shareConfirmBtn:active {
+  transform: scale(0.97);
 }
 
-.viewerSecondaryBtn {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(214, 220, 255, 0.4);
-  color: #fff;
-  font-weight: 600;
-  border-radius: 999px;
-  padding: 0.8rem 1rem;
+.shareConfirmBtnIcon {
+  font-size: 15px;
 }
 
-.viewerSecondaryBtn:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.viewerActions {
-  position: absolute;
-  left: 50%;
-  top: 90%;
-  transform: translate(-50%, -50%);
-  width: min(560px, calc(100% - 1.7rem));
-  z-index: 95;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-  padding: 0.7rem;
-  padding-bottom: max(0.85rem, env(safe-area-inset-bottom));
+.btnTextEscape {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  background: none;
+  border: none;
+  padding: 8px 0;
+  cursor: pointer;
 }
 
 .viewerHint {
-  grid-column: 1 / -1;
   margin: 0;
   text-align: center;
   color: rgba(242, 245, 255, 0.98);
@@ -1697,14 +1920,12 @@
 }
 
 .viewerNavigationMeta {
-  grid-column: 1 / -1;
   display: grid;
   gap: 0.3rem;
   padding: 0.1rem 0 0.35rem;
 }
 
 .viewerCounter {
-  grid-column: 1 / -1;
   margin: 0;
   justify-self: center;
   min-width: 78px;
@@ -1717,36 +1938,6 @@
   font-weight: 700;
   text-align: center;
   letter-spacing: 0.03em;
-}
-
-.viewerActionBtn {
-  width: 100%;
-  min-height: 52px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.viewerPersonalizeBtnWrap {
-  position: relative;
-  width: 100%;
-}
-
-.viewerBetaBadge {
-  position: absolute;
-  top: -0.35rem;
-  right: 0.5rem;
-  font-size: 0.55rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: linear-gradient(135deg, #ffc46b 0%, #ff8f4a 100%);
-  color: #1f1428;
-  padding: 0.14rem 0.38rem;
-  border-radius: 999px;
-  line-height: 1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
-  pointer-events: none;
 }
 
 @media (max-width: 767px) {
