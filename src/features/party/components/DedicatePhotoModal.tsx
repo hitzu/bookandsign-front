@@ -13,6 +13,7 @@ import ConfirmDedicateDialog from "./ConfirmDedicateDialog";
 import BackStepAlert from "./BackStepAlert";
 import type { DedicationPhrase } from "../utils/dedicationPhrases";
 import { SocialMediaCTA } from "./SocialMediaCTA";
+import { useModalStateMachine } from "../hooks/useModalStateMachine";
 import styles from "@assets/css/party-public.module.css";
 
 const StepCustomizePhoto = dynamic(
@@ -58,13 +59,14 @@ const DedicatePhotoModal = ({
   onToast,
   nombreFestejado = "",
 }: DedicatePhotoModalProps) => {
+  const { state: modalState, dispatch } = useModalStateMachine("dedicate-step-1");
+
   const [step, setStep] = useState<WizardStep>(1);
   const [isTrayOpen, setIsTrayOpen] = useState(false);
   const [isPhraseTrayOpen, setIsPhraseTrayOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showBackAlert, setShowBackAlert] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   // Data flowing between steps
   const [cropData, setCropData] = useState<CropData | null>(null);
@@ -97,7 +99,6 @@ const DedicatePhotoModal = ({
       setShowConfirm(false);
       setShowBackAlert(false);
       setIsProcessing(false);
-      setIsSuccess(false);
       setCropData(null);
       setDedicationText("");
       setCustomizeApi(null);
@@ -202,54 +203,66 @@ const DedicatePhotoModal = ({
       });
 
       setShowConfirm(false);
-      setIsSuccess(true);
+      dispatch({ type: "DEDICATE_UPLOAD_SUCCESS" });
       onToast?.("Tu dedicatoria fue enviada");
     } catch (err) {
       console.error("Dedicate failed:", err);
-      onToast?.("Ocurrio un error al enviar tu dedicatoria. Intentalo de nuevo.");
-      // Keep confirm dialog open for retry
+      setShowConfirm(false);
       setIsProcessing(false);
+      dispatch({ type: "DEDICATE_UPLOAD_ERROR" });
     }
-  }, [dedicateApi, eventToken, isProcessing, onToast]);
+  }, [dedicateApi, dispatch, eventToken, isProcessing, onToast]);
 
   /* ── Render ── */
 
   if (!isOpen || !photo) return null;
 
-  if (isSuccess) {
+  if (modalState === "dedicate-error") {
     return (
       <div className={styles.dedicateOverlay} role="dialog" aria-modal="true">
         <div className={styles.postDescargaOverlayContent}>
+          <p className={styles.endStateTitulo}>
+            Ocurrió un error al enviar tu dedicatoria
+          </p>
+          <div className={styles.dedicateErrorActions}>
+            <button
+              type="button"
+              className={styles.dedicateNextBtn}
+              onClick={() => {
+                dispatch({ type: "DEDICATE_RETRY" });
+                handleConfirmDedicate();
+              }}
+            >
+              Reintentar
+            </button>
+            <button
+              type="button"
+              className={styles.dedicateBackLink}
+              onClick={() => dispatch({ type: "DEDICATE_BACK_TO_EDIT" })}
+            >
+              Volver a editar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (modalState === "dedicate-success") {
+    return (
+      <div className={styles.dedicateOverlay} role="dialog" aria-modal="true">
+        <div className={styles.postDescargaOverlayContent}>
+          <SocialMediaCTA
+            context="dedicated"
+            nombreFestejado={nombreFestejado}
+          />
           <button
             type="button"
-            className={styles.postDescargaClose}
+            className={styles.returnToGalleryBtn}
             onClick={onClose}
-            aria-label="Cerrar"
           >
-            ✕
+            Regresar a la galería
           </button>
-          <div className={styles.dedicateSuccessCard}>
-            <h3 className={styles.dedicateSuccessTitle}>Enviada!</h3>
-            <p className={styles.dedicateSuccessBody}>
-              Tu dedicatoria fue enviada a los festejados.
-              <br />
-              Ya no es editable.
-            </p>
-          </div>
-          <div className={styles.postDescargaCard}>
-            <div className={styles.postDescargaGlow} />
-            <p className={styles.postDescargaScript}>Increíble ✨</p>
-            <p className={styles.postDescargaTitulo}>
-              Imagina esto en tu evento
-            </p>
-            <p className={styles.postDescargaSubtitulo}>
-              Te cotizamos en minutos. Sin compromiso.
-            </p>
-            <SocialMediaCTA
-              variant="modal-end-state"
-              nombreFestejado={nombreFestejado}
-            />
-          </div>
         </div>
       </div>
     );

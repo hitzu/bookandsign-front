@@ -63,7 +63,7 @@ export const copyToClipboard = async (value: string): Promise<boolean> => {
 
 export const sharePhoto = async (
   imageUrl: string,
-  title: string,
+  nombreEvento: string,
 ): Promise<ShareResult> => {
   if (typeof navigator === "undefined") return "unsupported";
 
@@ -73,14 +73,18 @@ export const sharePhoto = async (
     const file = new File([blob], "brillipoint.jpg", { type: blob.type });
 
     if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title });
+      await navigator.share({
+        files: [file],
+        title: `Recuerdo de ${nombreEvento}`,
+      });
       return "shared";
     }
   } catch (_error) {
-    // fall through to URL-based share
+    // fall through to fallback
   }
 
-  return shareUrl(imageUrl, title);
+  window.open(imageUrl, "_blank");
+  return "unsupported";
 };
 
 export const shareUrl = async (url: string, title: string): Promise<ShareResult> => {

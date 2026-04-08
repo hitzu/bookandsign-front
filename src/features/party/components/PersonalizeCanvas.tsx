@@ -101,15 +101,10 @@ const PersonalizeCanvas = ({
         if (cancelled) return;
         const imgW = img.width ?? 1;
         const imgH = img.height ?? 1;
-        const maxW =
-          typeof window !== "undefined"
-            ? Math.min(window.innerWidth * 0.95, 420)
-            : 400;
-        const maxH =
-          typeof window !== "undefined" ? window.innerHeight * 0.75 : 500;
-        const scale = Math.min(maxW / imgW, maxH / imgH);
-        const displayW = Math.round(imgW * scale);
-        const displayH = Math.round(imgH * scale);
+
+        // Fullscreen canvas — cover the entire viewport
+        const displayW = window.innerWidth;
+        const displayH = window.innerHeight;
 
         setCanvasSize({ width: displayW, height: displayH });
 
@@ -129,13 +124,30 @@ const PersonalizeCanvas = ({
         });
         canvasRef.current = fabricCanvas;
 
+        // object-fit: cover — scale to fill, crop overflow
+        const imgRatio = imgW / imgH;
+        const canvasRatio = displayW / displayH;
+        let coverScale: number;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        if (imgRatio > canvasRatio) {
+          // image wider than canvas — fit by height
+          coverScale = displayH / imgH;
+          offsetX = (displayW - imgW * coverScale) / 2;
+        } else {
+          // image taller than canvas — fit by width
+          coverScale = displayW / imgW;
+          offsetY = (displayH - imgH * coverScale) / 2;
+        }
+
         img.set({
-          scaleX: scale,
-          scaleY: scale,
+          scaleX: coverScale,
+          scaleY: coverScale,
           originX: "left",
           originY: "top",
-          left: 0,
-          top: 0,
+          left: offsetX,
+          top: offsetY,
           selectable: false,
           evented: false,
           hasControls: false,
@@ -269,11 +281,7 @@ const PersonalizeCanvas = ({
   return (
     <div
       className={styles.personalizeCanvasWrap}
-      style={
-        canvasSize
-          ? { width: canvasSize.width, height: canvasSize.height }
-          : undefined
-      }
+      style={{ width: "100vw", height: "100dvh", overflow: "hidden", background: "#000" }}
     >
       <div ref={containerRef} className={styles.personalizeCanvasContainer} />
       {hasSelection && (

@@ -430,8 +430,8 @@ const PartyPublicPage = ({ token }: Props) => {
           onPersonalize={handlePersonalize}
           onDedicate={handleDedicate}
           nombreFestejado={eventTitle}
+          eventToken={token}
           showNavigationHints
-          showExplicitClose
         />
       ) : null}
       <PersonalizePhotoModal

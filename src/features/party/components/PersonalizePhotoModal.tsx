@@ -7,6 +7,7 @@ import TopEditorBar from "./TopEditorBar";
 import BottomStickerTray from "./BottomStickerTray";
 import DownloadCTA from "./DownloadCTA";
 import { SocialMediaCTA } from "./SocialMediaCTA";
+import { useModalStateMachine } from "../hooks/useModalStateMachine";
 import styles from "@assets/css/party-public.module.css";
 
 const PersonalizeCanvas = dynamic(
@@ -33,6 +34,8 @@ const PersonalizePhotoModal = ({
   onToast,
   nombreFestejado = "",
 }: PersonalizePhotoModalProps) => {
+  const { state: modalState, dispatch, reset } = useModalStateMachine("personalize-editor");
+
   const [exportToBlob, setExportToBlob] = useState<
     (() => Promise<Blob>) | null
   >(null);
@@ -42,7 +45,6 @@ const PersonalizePhotoModal = ({
   const [isTrayOpen, setIsTrayOpen] = useState(false);
   const [hintSubdued, setHintSubdued] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showPostDescarga, setShowPostDescarga] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -67,15 +69,18 @@ const PersonalizePhotoModal = ({
   );
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      // Reset state machine to personalize-editor when modal opens
+      reset();
+      dispatch({ type: "OPEN_PERSONALIZE" });
+    } else {
       setExportToBlob(null);
       setEditApi(null);
       setIsTrayOpen(false);
       setHintSubdued(false);
       setIsProcessing(false);
-      setShowPostDescarga(false);
     }
-  }, [isOpen]);
+  }, [isOpen, reset, dispatch]);
 
   useEffect(() => {
     if (!isOpen || !photo) return;
@@ -134,49 +139,38 @@ const PersonalizePhotoModal = ({
         onToast?.(
           uploadFailed
             ? "Foto descargada. No pudimos guardar la copia en la nube."
-            : "Foto descargada y guardada ✨",
+            : "Foto descargada y guardada \u2728",
         );
       } else {
-        onToast?.("Foto descargada ✨");
+        onToast?.("Foto descargada \u2728");
       }
 
-      setShowPostDescarga(true);
+      dispatch({ type: "DOWNLOAD_PERSONALIZED_SUCCESS" });
     } catch (err) {
       console.error("Download failed:", err);
       onToast?.("No se pudo descargar");
     } finally {
       setIsProcessing(false);
     }
-  }, [eventToken, exportToBlob, isProcessing, onDownload, onToast]);
+  }, [eventToken, exportToBlob, isProcessing, onDownload, onToast, dispatch]);
 
   if (!isOpen) return null;
 
-  if (showPostDescarga) {
+  if (modalState === "personalize-final") {
     return (
       <div className={styles.personalizeOverlay} role="dialog" aria-modal="true">
         <div className={styles.postDescargaOverlayContent}>
+          <SocialMediaCTA
+            context="personalized"
+            nombreFestejado={nombreFestejado}
+          />
           <button
             type="button"
-            className={styles.postDescargaClose}
+            className={styles.returnToGalleryBtn}
             onClick={onClose}
-            aria-label="Cerrar"
           >
-            ✕
+            Regresar a la galería
           </button>
-          <div className={styles.postDescargaCard}>
-            <div className={styles.postDescargaGlow} />
-            <p className={styles.postDescargaScript}>Increíble ✨</p>
-            <p className={styles.postDescargaTitulo}>
-              Imagina esto en tu evento
-            </p>
-            <p className={styles.postDescargaSubtitulo}>
-              Te cotizamos en minutos. Sin compromiso.
-            </p>
-            <SocialMediaCTA
-              variant="modal-end-state"
-              nombreFestejado={nombreFestejado}
-            />
-          </div>
         </div>
       </div>
     );

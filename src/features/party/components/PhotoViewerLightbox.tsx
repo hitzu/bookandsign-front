@@ -1,12 +1,12 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Lightbox, { type ControllerRef } from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-import { EventPhoto } from "../../../interfaces";
+import { EventPhoto, AnalyticsAction } from "../../../interfaces";
 import styles from "@assets/css/party-public.module.css";
 import { sharePhoto } from "../utils/mediaActions";
+import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import { SocialMediaCTA } from "./SocialMediaCTA";
-
-type ModalState = "foto" | "share-confirm" | "post-descarga";
+import { useModalStateMachine } from "../hooks/useModalStateMachine";
 
 type PhotoViewerLightboxProps = {
   isOpen: boolean;
@@ -20,9 +20,9 @@ type PhotoViewerLightboxProps = {
   onPersonalize?: (photo: EventPhoto) => void;
   onDedicate?: (photo: EventPhoto) => void;
   nombreFestejado?: string;
+  eventToken?: string;
   showMediaActions?: boolean;
   showNavigationHints?: boolean;
-  showExplicitClose?: boolean;
 };
 
 const PhotoViewerLightbox = ({
@@ -37,12 +37,13 @@ const PhotoViewerLightbox = ({
   onPersonalize,
   onDedicate,
   nombreFestejado = "",
+  eventToken,
   showMediaActions = true,
   showNavigationHints = false,
-  showExplicitClose = false,
 }: PhotoViewerLightboxProps) => {
-  const [currentIndex, setCurrentIndex] = useState(activeIndex ?? 0);
-  const [modalState, setModalState] = useState<ModalState>("foto");
+  const [currentIndex, setCurrentIndex] = React.useState(activeIndex ?? 0);
+  const [hintVisible, setHintVisible] = useState(false);
+  const { state: modalState, dispatch, reset } = useModalStateMachine();
   const controllerRef = useRef<ControllerRef | null>(null);
 
   useEffect(() => {
@@ -52,17 +53,37 @@ const PhotoViewerLightbox = ({
   }, [isOpen, activeIndex]);
 
   useEffect(() => {
+    if (!showNavigationHints || typeof window === "undefined") return;
+
+    const hasSeenHint = window.localStorage.getItem("gallery_hint_seen");
+    setHintVisible(!hasSeenHint);
+  }, [showNavigationHints]);
+
+  const modalStateRef = useRef(modalState);
+  modalStateRef.current = modalState;
+
+  useEffect(() => {
     if (!isOpen) return;
 
     window.history.pushState({ modal: true }, "");
 
     const handlePopState = () => {
-      onClose();
+      const current = modalStateRef.current;
+      if (current === "gallery-photo") {
+        onClose();
+      } else {
+        if (current === "share-confirm") {
+          dispatch({ type: "CLOSE_SHARE_CONFIRM" });
+        } else {
+          dispatch({ type: "RETURN_TO_GALLERY" });
+        }
+        window.history.pushState({ modal: true }, "");
+      }
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, dispatch]);
 
   const slides = photos.map((p) => ({
     src: p.publicUrl,
@@ -77,25 +98,35 @@ const PhotoViewerLightbox = ({
 
   const handleView = useCallback(
     ({ index }: { index: number }) => {
+      setHintVisible(false);
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("gallery_hint_seen", "true");
+      }
       setCurrentIndex(index);
-      setModalState("foto");
+      reset();
       onActiveIndexChange(index);
     },
-    [onActiveIndexChange],
+    [onActiveIndexChange, reset],
   );
 
   const currentPhoto = photos[currentIndex] ?? activePhoto;
   const showNavigationUi = showNavigationHints && canNavigate;
   const showActions = showMediaActions && currentPhoto;
-  const showControls = showExplicitClose || showNavigationUi || showActions;
+  const showControls = showNavigationUi || showActions;
 
   const handleClose = useCallback(() => {
-    if (window.history.state?.modal) {
+    if (modalStateRef.current !== "gallery-photo") {
+      if (modalStateRef.current === "share-confirm") {
+        dispatch({ type: "CLOSE_SHARE_CONFIRM" });
+      } else {
+        dispatch({ type: "RETURN_TO_GALLERY" });
+      }
+    } else if (window.history.state?.modal) {
       window.history.back();
     } else {
       onClose();
     }
-  }, [onClose]);
+  }, [onClose, dispatch]);
 
   const handlePrev = useCallback(() => {
     controllerRef.current?.prev();
@@ -121,22 +152,12 @@ const PhotoViewerLightbox = ({
       controller={{ closeOnBackdropClick: true, ref: controllerRef }}
       className={styles.yarlDarkOverlay}
       render={{
-        buttonClose: showExplicitClose ? () => null : undefined,
+        buttonClose: () => null,
         buttonPrev: showNavigationUi ? () => null : undefined,
         buttonNext: showNavigationUi ? () => null : undefined,
         controls: () =>
           showControls ? (
             <>
-              {showExplicitClose ? (
-                <button
-                  type="button"
-                  className={styles.viewerClose}
-                  onClick={handleClose}
-                  aria-label="Cerrar visor"
-                >
-                  ← Cerrar
-                </button>
-              ) : null}
               {showNavigationUi ? (
                 <>
                   <button
@@ -158,24 +179,18 @@ const PhotoViewerLightbox = ({
                 </>
               ) : null}
               <div className={styles.viewerActionsFixed}>
-                {showNavigationUi ? (
+                {showNavigationUi && hintVisible ? (
                   <div className={styles.viewerNavigationMeta}>
                     <p className={styles.viewerHint}>
                       Desliza o usa las flechas para ver mas fotos
-                    </p>
-                    <p
-                      className={styles.viewerCounter}
-                      aria-label="Posicion de la foto actual"
-                    >
-                      {currentIndex + 1} / {photos.length}
                     </p>
                   </div>
                 ) : null}
                 {showActions ? (
                   <>
-                    {modalState === "foto" && (
+                    {modalState === "gallery-photo" && (
                       <>
-                        {/* Fila 1 — experiencia, peso visual dominante */}
+                        {/* Fila 1 — primarios, color sólido, sin emojis */}
                         <div className={styles.viewerPrimaryActions}>
                           {onPersonalize ? (
                             <button
@@ -184,36 +199,22 @@ const PhotoViewerLightbox = ({
                               onClick={() => onPersonalize(currentPhoto)}
                               aria-label="Personalizar foto"
                             >
-                              <span className={styles.viewerActionIcon}>
-                                ✨
-                              </span>
                               Personalizar
                             </button>
                           ) : null}
                           {onDedicate ? (
-                            <div className={styles.viewerDedicarBtnWrap}>
-                              <button
-                                type="button"
-                                className={`${styles.btnExperience} ${styles.btnDedicar}`}
-                                onClick={() => onDedicate(currentPhoto)}
-                                aria-label="Dedicar esta foto"
-                              >
-                                <span className={styles.viewerActionIcon}>
-                                  ❤️
-                                </span>
-                                Dedicar
-                              </button>
-                              <span
-                                className={styles.viewerNewBadge}
-                                aria-hidden="true"
-                              >
-                                Nuevo
-                              </span>
-                            </div>
+                            <button
+                              type="button"
+                              className={`${styles.btnExperience} ${styles.btnDedicar}`}
+                              onClick={() => onDedicate(currentPhoto)}
+                              aria-label="Dedicar esta foto"
+                            >
+                              Dedicar
+                            </button>
                           ) : null}
                         </div>
 
-                        {/* Fila 2 — utilitarios, íconos sin texto */}
+                        {/* Fila 2 — SVG estilo Instagram, sin texto */}
                         <div className={styles.viewerSecondaryActions}>
                           <button
                             type="button"
@@ -221,103 +222,122 @@ const PhotoViewerLightbox = ({
                             aria-label="Descargar foto"
                             onClick={async () => {
                               await onDownload?.(currentPhoto);
-                              setModalState("post-descarga");
+                              dispatch({ type: "DOWNLOAD_ORIGINAL_SUCCESS" });
                             }}
                           >
-                            ⬇
+                            <svg
+                              width="22"
+                              height="22"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                              <polyline points="7 10 12 15 17 10" />
+                              <line x1="12" y1="15" x2="12" y2="3" />
+                            </svg>
                           </button>
                           {onShare ? (
                             <button
                               type="button"
                               className={styles.btnIcon}
                               aria-label="Compartir foto"
-                              onClick={() => setModalState("share-confirm")}
+                              onClick={() =>
+                                dispatch({ type: "OPEN_SHARE_CONFIRM" })
+                              }
                             >
-                              ↗
+                              <svg
+                                width="22"
+                                height="22"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                              </svg>
                             </button>
                           ) : null}
                         </div>
-
-                        <button
-                          type="button"
-                          className={styles.btnTextEscape}
-                          onClick={handleClose}
-                        >
-                          Ver galería
-                        </button>
                       </>
                     )}
 
-                    {modalState === "post-descarga" && (
+                    {modalState === "post-download" && (
                       <div className={styles.modalEndState}>
-                        <button
-                          type="button"
-                          className={styles.postDescargaClose}
-                          onClick={() => setModalState("foto")}
-                          aria-label="Cerrar"
-                        >
-                          ✕
-                        </button>
-                        <div className={styles.postDescargaCard}>
-                          <div className={styles.postDescargaGlow} />
-                          <p className={styles.postDescargaScript}>
-                            Increíble ✨
-                          </p>
-                          <p className={styles.postDescargaTitulo}>
-                            Imagina esto en tu evento
-                          </p>
-                          <p className={styles.postDescargaSubtitulo}>
-                            Te cotizamos en minutos. Sin compromiso.
-                          </p>
-                          <SocialMediaCTA
-                            variant="modal-end-state"
-                            nombreFestejado={nombreFestejado}
-                          />
-                        </div>
+                        <SocialMediaCTA
+                          context="download"
+                          nombreFestejado={nombreFestejado}
+                          onClose={() =>
+                            dispatch({ type: "RETURN_TO_GALLERY" })
+                          }
+                        />
                       </div>
                     )}
 
                     {modalState === "share-confirm" && (
                       <div className={styles.modalEndState}>
                         <div className={styles.shareConfirmCard}>
-                          <p className={styles.shareConfirmKicker}>
-                            Comparte tu foto
-                          </p>
+                          <button
+                            type="button"
+                            className={styles.shareConfirmClose}
+                            onClick={() =>
+                              dispatch({ type: "CLOSE_SHARE_CONFIRM" })
+                            }
+                            aria-label="Cerrar"
+                          >
+                            ✕
+                          </button>
                           <p className={styles.endStateTitulo}>
-                            Etiquétanos como{" "}
+                            Comparte tu foto ✨ Etiquétanos como{" "}
                             <span className={styles.shareHighlight}>
                               @brillipoint
                             </span>{" "}
-                            y obtén un descuento en tu próximo servicio
-                          </p>
-                          <p className={styles.endStateSubtitulo}>
-                            Se abrirá el selector de tu dispositivo para elegir
-                            dónde compartir
+                            en Instagram, Facebook o{" "}
+                            <span className={styles.shareHighlight}>
+                              @brillipoint.glitterbar
+                            </span>{" "}
+                            en TikTok para recibir un regalo en tu próximo
+                            evento 🎁
                           </p>
                           <button
                             type="button"
                             className={styles.shareConfirmBtn}
-                            onClick={() => {
-                              sharePhoto(
+                            onClick={async () => {
+                              if (eventToken) {
+                                trackEvent(
+                                  AnalyticsAction.SHARE_CONFIRM_EJECUTADO,
+                                  eventToken,
+                                );
+                              }
+                              await sharePhoto(
                                 currentPhoto.publicUrl,
-                                `Brillipoint - ${eventTitle}`,
+                                eventTitle,
                               );
-                              setModalState("foto");
+                              dispatch({ type: "SHARE_SUCCESS" });
                             }}
                           >
-                            <span className={styles.shareConfirmBtnIcon}>
-                              ↗
-                            </span>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <line x1="22" y1="2" x2="11" y2="13" />
+                              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
                             Compartir foto
                           </button>
                         </div>
-                        <button
-                          type="button"
-                          className={styles.btnTextEscape}
-                          onClick={() => setModalState("foto")}
-                        >
-                          Cancelar
-                        </button>
                       </div>
                     )}
                   </>

@@ -1,18 +1,35 @@
 import { useMemo } from "react";
 import styles from "@assets/css/social-media-cta.module.css";
 
-type Variant = "modal-end-state" | "galeria-sticky";
+type Context = "download" | "personalized" | "dedicated";
 
 interface SocialMediaCTAProps {
-  variant: Variant;
-  nombreFestejado: string;
+  context: Context;
+  nombreFestejado?: string;
   onWAClick?: () => void;
+  onClose?: () => void;
 }
 
+const COPY: Record<Context, { titulo: string; subtitulo: string }> = {
+  download: {
+    titulo: "Imagina esto en tu evento ✨",
+    subtitulo: "Haz que tus invitados vivan una experiencia inolvidable 💫",
+  },
+  personalized: {
+    titulo: "Tu foto personalizada se descargó ✨",
+    subtitulo: "Haz que tus invitados vivan una experiencia inolvidable 💫",
+  },
+  dedicated: {
+    titulo: "Tu dedicatoria fue enviada 💖",
+    subtitulo: "Haz que tus invitados vivan una experiencia inolvidable 💫",
+  },
+};
+
 export const SocialMediaCTA = ({
-  variant,
-  nombreFestejado,
+  context,
+  nombreFestejado = "",
   onWAClick,
+  onClose,
 }: SocialMediaCTAProps) => {
   const phone = useMemo(() => {
     const raw = (
@@ -22,15 +39,34 @@ export const SocialMediaCTA = ({
   }, []);
 
   const waLink = useMemo(() => {
-    const mensaje = `Hola, acabo de ver las fotos en el evento de ${nombreFestejado} y me encantó la experiencia. ¿Me pueden cotizar para mi evento?`;
+    const mensaje = `Hola, acabo de ver las fotos en el evento de ${nombreFestejado} y me encantó la experiencia. Me gustaría conocer más.`;
     return `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`;
   }, [phone, nombreFestejado]);
 
-  const variantClass =
-    variant === "modal-end-state" ? styles.modalEndState : styles.galeriaSticky;
+  const { titulo, subtitulo } = COPY[context];
 
   return (
-    <div className={`${styles.root} ${variantClass}`}>
+    <div
+      className={
+        context === "download"
+          ? styles.modalEndStateDownload
+          : styles.modalEndState
+      }
+    >
+      {context === "download" && onClose && (
+        <button
+          type="button"
+          className={styles.closeBtn}
+          onClick={onClose}
+          aria-label="Cerrar"
+        >
+          ✕
+        </button>
+      )}
+
+      <p className={styles.titulo}>{titulo}</p>
+      <p className={styles.subtitulo}>{subtitulo}</p>
+
       <a
         href={waLink}
         target="_blank"
@@ -61,7 +97,7 @@ export const SocialMediaCTA = ({
 
       <div className={styles.redes}>
         <a
-          href="https://www.instagram.com/brillipoint/"
+          href="https://www.instagram.com/brillipoint"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Instagram"
@@ -90,7 +126,7 @@ export const SocialMediaCTA = ({
           </svg>
         </a>
         <a
-          href="https://www.tiktok.com/@brillipoint"
+          href="https://www.tiktok.com/@brillipoint.glitterbar"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="TikTok"
@@ -110,7 +146,7 @@ export const SocialMediaCTA = ({
           </svg>
         </a>
         <a
-          href="https://www.facebook.com/profile.php?id=61579380963496"
+          href="https://www.facebook.com/brillipoint"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Facebook"
