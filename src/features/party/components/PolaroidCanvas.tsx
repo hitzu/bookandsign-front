@@ -155,6 +155,16 @@ const PolaroidCanvas = forwardRef<PolaroidCropHandle, PolaroidCanvasProps>(
       photoAreaRef.current != null &&
       naturalSize.current.h * scale > photoAreaRef.current.clientWidth;
 
+    /* ── Arrow nudge (40px per tap) ── */
+
+    const nudgePhoto = useCallback(
+      (direction: "up" | "down") => {
+        const step = direction === "up" ? -40 : 40;
+        setOffsetY((prev) => clampY(prev + step, scale));
+      },
+      [clampY, scale],
+    );
+
     /* ── Render ── */
 
     const displayW = imgLoaded ? naturalSize.current.w * scale : 0;
@@ -190,7 +200,32 @@ const PolaroidCanvas = forwardRef<PolaroidCropHandle, PolaroidCanvasProps>(
               Arrastra para encuadrar
             </span>
           )}
+          {imgLoaded && canPan && (
+            <>
+              <button
+                type="button"
+                className={`${styles.adjustArrow} ${styles.adjustArrowUp}`}
+                onClick={() => nudgePhoto("up")}
+                aria-label="Mover foto hacia arriba"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className={`${styles.adjustArrow} ${styles.adjustArrowDown}`}
+                onClick={() => nudgePhoto("down")}
+                aria-label="Mover foto hacia abajo"
+              >
+                ↓
+              </button>
+            </>
+          )}
         </div>
+        {imgLoaded && canPan && (
+          <p className={styles.adjustArrowHint}>
+            Toca las flechas para ajustar el encuadre
+          </p>
+        )}
         <div className={styles.polaroidWhiteArea}>
           <span className={styles.polaroidPlaceholder}>
             Aqui ira tu dedicatoria

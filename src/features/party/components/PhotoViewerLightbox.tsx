@@ -210,6 +210,7 @@ const PhotoViewerLightbox = ({
                               aria-label="Dedicar esta foto"
                             >
                               Dedicar
+                              <span className={styles.badgeNew}>Nueva</span>
                             </button>
                           ) : null}
                         </div>

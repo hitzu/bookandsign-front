@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useCallback, useEffect } from "react";
+import React, { useRef, useCallback, useEffect, useMemo } from "react";
 import styles from "@assets/css/party-public.module.css";
 
 /* ── Constants ── */
@@ -39,6 +39,15 @@ const StepDedicate = ({
     const handleTextAreaClick = useCallback(() => {
       textareaRef.current?.focus();
     }, []);
+
+    const dynamicFontSize = useMemo(() => {
+      const len = dedicationText.length;
+      if (len <= 60) return 16;
+      if (len <= 120) return 14;
+      if (len <= 200) return 12;
+      if (len <= 300) return 11;
+      return 10;
+    }, [dedicationText.length]);
 
     /* ── Expose export API via onReady ── */
 
@@ -145,9 +154,14 @@ const StepDedicate = ({
               placeholder="Escribe tu dedicatoria..."
               value={dedicationText}
               onChange={(e) => onDedicationTextChange(e.target.value)}
-              maxLength={120}
               rows={2}
+              style={{ fontSize: `${dynamicFontSize}px` }}
             />
+            {dedicationText.length > 400 && (
+              <p className={styles.charWarning}>
+                El texto está quedando muy largo, considera acortarlo
+              </p>
+            )}
           </div>
         </div>
       </div>

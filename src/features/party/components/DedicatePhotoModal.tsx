@@ -3,7 +3,11 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { EventPhoto } from "../../../interfaces";
-import PolaroidCanvas, { type PolaroidCropHandle, type CropData } from "./PolaroidCanvas";
+import PolaroidCanvas, {
+  type PolaroidCropHandle,
+  type CropData,
+} from "./PolaroidCanvas";
+import PolaroidFrame from "./PolaroidFrame";
 import type { StepCustomizeHandle } from "./StepCustomizePhoto";
 import type { StepDedicateHandle } from "./StepDedicate";
 import TopEditorBar from "./TopEditorBar";
@@ -59,7 +63,8 @@ const DedicatePhotoModal = ({
   onToast,
   nombreFestejado = "",
 }: DedicatePhotoModalProps) => {
-  const { state: modalState, dispatch } = useModalStateMachine("dedicate-step-1");
+  const { state: modalState, dispatch } =
+    useModalStateMachine("dedicate-step-1");
 
   const [step, setStep] = useState<WizardStep>(1);
   const [isTrayOpen, setIsTrayOpen] = useState(false);
@@ -75,8 +80,12 @@ const DedicatePhotoModal = ({
 
   // Child API handles (via onReady callbacks, not refs — dynamic() breaks ref forwarding)
   const cropRef = useRef<PolaroidCropHandle>(null);
-  const [customizeApi, setCustomizeApi] = useState<StepCustomizeHandle | null>(null);
-  const [dedicateApi, setDedicateApi] = useState<StepDedicateHandle | null>(null);
+  const [customizeApi, setCustomizeApi] = useState<StepCustomizeHandle | null>(
+    null,
+  );
+  const [dedicateApi, setDedicateApi] = useState<StepDedicateHandle | null>(
+    null,
+  );
 
   /* ── Lock scroll ── */
 
@@ -86,13 +95,16 @@ const DedicatePhotoModal = ({
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   /* ── Reset on close ── */
 
   useEffect(() => {
     if (!isOpen) {
+      dispatch({ type: "OPEN_DEDICATE" });
       setStep(1);
       setIsTrayOpen(false);
       setIsPhraseTrayOpen(false);
@@ -109,7 +121,7 @@ const DedicatePhotoModal = ({
         setComposedPhotoUrl(null);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   /* ── Navigation: forward ── */
@@ -118,8 +130,9 @@ const DedicatePhotoModal = ({
     if (!cropRef.current) return;
     const data = cropRef.current.getCrop();
     setCropData(data);
+    dispatch({ type: "DEDICATE_NEXT" });
     setStep(2);
-  }, []);
+  }, [dispatch]);
 
   const handleNextFromStep2 = useCallback(async () => {
     if (!customizeApi) return;
@@ -129,6 +142,7 @@ const DedicatePhotoModal = ({
       // Revoke previous if any
       if (composedPhotoUrl) URL.revokeObjectURL(composedPhotoUrl);
       setComposedPhotoUrl(url);
+      dispatch({ type: "DEDICATE_NEXT" });
       setStep(3);
     } catch (err) {
       console.error("Failed to compose photo:", err);
@@ -148,6 +162,7 @@ const DedicatePhotoModal = ({
 
   const handleBackConfirm = useCallback(() => {
     setShowBackAlert(false);
+    dispatch({ type: "DEDICATE_BACK" });
     if (step === 2) {
       setCropData(null);
       setStep(1);
@@ -157,30 +172,38 @@ const DedicatePhotoModal = ({
       setDedicationText("");
       setStep(2);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, step]);
 
   /* ── Sticker handling (Paso 2 only) ── */
 
-  const handleSelectSticker = useCallback((url: string) => {
-    customizeApi?.addSticker(url);
-  }, [customizeApi]);
+  const handleSelectSticker = useCallback(
+    (url: string) => {
+      customizeApi?.addSticker(url);
+    },
+    [customizeApi],
+  );
 
   /* ── Phrase selection (Paso 3) ── */
 
   const handleSelectPhrase = useCallback((phrase: DedicationPhrase) => {
-    setDedicationText(phrase.text);
+    setDedicationText((prev) => {
+      if (!prev.trim()) return phrase.text;
+      return `${prev} ${phrase.text}`;
+    });
   }, []);
 
   /* ── Submit dedication ── */
 
   const handleDedicateClick = useCallback(() => {
+    dispatch({ type: "DEDICATE_OPEN_CONFIRM" });
     setShowConfirm(true);
-  }, []);
+  }, [dispatch]);
 
   const handleConfirmDedicate = useCallback(async () => {
     if (!dedicateApi || isProcessing) return;
     setIsProcessing(true);
+    dispatch({ type: "DEDICATE_CONFIRM_SUBMIT" });
 
     try {
       const blob = await dedicateApi.exportToBlob();
@@ -190,7 +213,8 @@ const DedicatePhotoModal = ({
 
       // Upload to S3 — NO download to device
       if (eventToken) {
-        const { uploadDevotedPhoto } = await import("../utils/uploadDevotedPhoto");
+        const { uploadDevotedPhoto } =
+          await import("../utils/uploadDevotedPhoto");
         await uploadDevotedPhoto({ eventToken, blob, fileName });
       }
 
@@ -279,15 +303,25 @@ const DedicatePhotoModal = ({
               className={`${styles.dedicateStepDot} ${s === step ? styles.dedicateStepDotActive : ""}`}
             />
           ))}
-          <span className={styles.dedicateStepLabel}>
-            {STEP_LABELS[step]}
-          </span>
+          <span className={styles.dedicateStepLabel}>{STEP_LABELS[step]}</span>
         </div>
 
         {/* ── Step 1: Crop ── */}
         {step === 1 && (
           <>
-            <PolaroidCanvas ref={cropRef} imageUrl={photo.publicUrl} />
+            <div className={styles.step1PolaroidWrap}>
+              <PolaroidCanvas ref={cropRef} imageUrl={photo.publicUrl} />
+              <header className={styles.topEditorBar}>
+                <button
+                  type="button"
+                  className={styles.topEditorBackBtn}
+                  onClick={onClose}
+                  aria-label="Cerrar"
+                >
+                  ← Cerrar
+                </button>
+              </header>
+            </div>
             <footer className={styles.dedicateFooter}>
               <button
                 type="button"
@@ -296,13 +330,6 @@ const DedicatePhotoModal = ({
               >
                 Siguiente
               </button>
-              <button
-                type="button"
-                className={styles.dedicateBackLink}
-                onClick={onClose}
-              >
-                Cancelar
-              </button>
             </footer>
           </>
         )}
@@ -310,17 +337,20 @@ const DedicatePhotoModal = ({
         {/* ── Step 2: Customize (Fabric.js + stickers) ── */}
         {step === 2 && cropData && (
           <>
-            <div className={styles.canvasWrapper}>
-              <StepCustomizePhoto
-                imageUrl={photo.publicUrl}
-                crop={cropData}
-                onReady={setCustomizeApi}
-              />
-              <TopEditorBar
-                onBack={handleBackRequest}
-                onStickers={() => setIsTrayOpen(true)}
-              />
-            </div>
+            <PolaroidFrame>
+              <div className={styles.canvasWrapper}>
+                <StepCustomizePhoto
+                  imageUrl={photo.publicUrl}
+                  crop={cropData}
+                  onReady={setCustomizeApi}
+                />
+                <TopEditorBar
+                  onBack={handleBackRequest}
+                  onStickers={() => setIsTrayOpen(true)}
+                  backLabel="Regresar"
+                />
+              </div>
+            </PolaroidFrame>
             <footer className={styles.dedicateFooter}>
               <button
                 type="button"
@@ -328,13 +358,6 @@ const DedicatePhotoModal = ({
                 onClick={handleNextFromStep2}
               >
                 Siguiente
-              </button>
-              <button
-                type="button"
-                className={styles.dedicateBackLink}
-                onClick={handleBackRequest}
-              >
-                Volver a encuadrar
               </button>
             </footer>
           </>
@@ -394,7 +417,11 @@ const DedicatePhotoModal = ({
       <ConfirmDedicateDialog
         isOpen={showConfirm}
         isProcessing={isProcessing}
-        onCancel={() => { setShowConfirm(false); setIsProcessing(false); }}
+        onCancel={() => {
+          dispatch({ type: "DEDICATE_CANCEL_CONFIRM" });
+          setShowConfirm(false);
+          setIsProcessing(false);
+        }}
         onConfirm={handleConfirmDedicate}
       />
 

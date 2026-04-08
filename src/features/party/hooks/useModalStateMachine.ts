@@ -21,9 +21,15 @@ function modalReducer(
 ): ModalStateWithContext {
   const { state, context } = current;
 
-  // OPEN_PHOTO resets to gallery-photo from any state
+  // Global resets — work from ANY state
   if (event.type === "OPEN_PHOTO") {
     return { state: "gallery-photo", context: { isDirty: false } };
+  }
+  if (event.type === "OPEN_DEDICATE") {
+    return { state: "dedicate-step-1", context: { isDirty: false } };
+  }
+  if (event.type === "OPEN_PERSONALIZE") {
+    return { state: "personalize-editor", context: { isDirty: false } };
   }
 
   switch (state) {
@@ -32,10 +38,7 @@ function modalReducer(
         return { ...current, state: "share-confirm" };
       if (event.type === "DOWNLOAD_ORIGINAL_SUCCESS")
         return { ...current, state: "post-download" };
-      if (event.type === "OPEN_PERSONALIZE")
-        return { ...current, state: "personalize-editor" };
-      if (event.type === "OPEN_DEDICATE")
-        return { ...current, state: "dedicate-step-1" };
+      // OPEN_PERSONALIZE and OPEN_DEDICATE handled as global resets above
       break;
 
     case "share-confirm":

@@ -1116,7 +1116,12 @@
 
 .mobileHeroMirrorKicker {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   font-weight: 600;
   color: #fff;
   font-size: clamp(0.9rem, 5.5vw, 1.6rem);
@@ -1133,10 +1138,7 @@
   gap: 0.15rem;
   color: #fff;
   font-family:
-    "Snell Roundhand",
-    "Segoe Script",
-    "Brush Script MT",
-    "Lucida Handwriting",
+    "Snell Roundhand", "Segoe Script", "Brush Script MT", "Lucida Handwriting",
     cursive;
   font-size: clamp(2.5rem, 15vw, 4.5rem);
   font-weight: 600;
@@ -1152,7 +1154,12 @@
 
 .mobileEyebrow {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   font-weight: 600;
   letter-spacing: 0.01em;
   font-size: clamp(0.9rem, 5.5vw, 1.6rem);
@@ -1563,8 +1570,7 @@
   justify-content: center;
   cursor: pointer;
   z-index: 96;
-  transition:
-    transform 0.18s ease;
+  transition: transform 0.18s ease;
 }
 
 .viewerNavLeft {
@@ -1651,19 +1657,38 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .btnPersonalizar {
   background: linear-gradient(135deg, #6b5cff 0%, #1aa7ff 100%);
-  box-shadow: 0 4px 18px rgba(92, 100, 255, 0.4),
+  box-shadow:
+    0 4px 18px rgba(92, 100, 255, 0.4),
     inset 0 1px 1px rgba(255, 255, 255, 0.12);
 }
 
 .btnDedicar {
+  position: relative;
   background: linear-gradient(135deg, #e04590 0%, #c23ddb 100%);
-  box-shadow: 0 4px 18px rgba(224, 69, 144, 0.35),
+  box-shadow:
+    0 4px 18px rgba(224, 69, 144, 0.35),
     inset 0 1px 1px rgba(255, 255, 255, 0.12);
+}
+
+.badgeNew {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ff6b6b;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 
 .btnExperience:active {
@@ -1740,7 +1765,8 @@
   background: rgba(20, 21, 38, 0.82);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(190, 198, 255, 0.12);
-  box-shadow: 0 12px 36px rgba(9, 8, 26, 0.5),
+  box-shadow:
+    0 12px 36px rgba(9, 8, 26, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
@@ -1798,7 +1824,9 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .returnToGalleryBtn:active {
@@ -1813,7 +1841,8 @@
   background: rgba(20, 21, 38, 0.82);
   backdrop-filter: blur(14px);
   border: 1px solid rgba(190, 198, 255, 0.12);
-  box-shadow: 0 12px 36px rgba(9, 8, 26, 0.5),
+  box-shadow:
+    0 12px 36px rgba(9, 8, 26, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
@@ -1887,9 +1916,12 @@
   color: #fff;
   font-size: 13px;
   font-weight: 700;
-  box-shadow: 0 4px 18px rgba(92, 100, 255, 0.4),
+  box-shadow:
+    0 4px 18px rgba(92, 100, 255, 0.4),
     inset 0 1px 1px rgba(255, 255, 255, 0.12);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
   cursor: pointer;
 }
 
@@ -2182,7 +2214,9 @@
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  transition: background 0.18s, border-color 0.18s;
+  transition:
+    background 0.18s,
+    border-color 0.18s;
 }
 
 .stickerDeleteBtnActive .stickerDeleteCircle {
@@ -2283,13 +2317,16 @@
   padding: 12px 32px;
   border: none;
   border-radius: 24px;
-  background: #6C63FF;
+  background: #6c63ff;
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(107, 92, 255, 0.4);
-  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .downloadCtaBtn:hover:not(:disabled) {
@@ -2319,8 +2356,12 @@
 }
 
 @keyframes trayFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .stickerTraySheet {
@@ -2340,8 +2381,12 @@
 }
 
 @keyframes traySlideUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .stickerTrayHandle {
@@ -2372,7 +2417,9 @@
   background: rgba(255, 255, 255, 0.06);
   padding: 12px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    transform 0.15s;
 }
 
 .stickerPaletteItemVertical:hover {
@@ -2405,12 +2452,36 @@
 }
 
 .dedicateRoot {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
   max-width: 380px;
   gap: 1rem;
+}
+
+.step1PolaroidWrap {
+  position: relative;
+  width: 100%;
+}
+
+.dedicateBackTopBtn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+  cursor: pointer;
 }
 
 .dedicateStepIndicator {
@@ -2450,6 +2521,15 @@
   width: 100%;
 }
 
+.polaroidContentArea {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
 .polaroidPhotoArea {
   position: relative;
   width: 100%;
@@ -2463,6 +2543,41 @@
 
 .polaroidPhotoArea:active {
   cursor: grabbing;
+}
+
+.adjustArrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.adjustArrowUp {
+  top: 12px;
+}
+
+.adjustArrowDown {
+  bottom: 12px;
+}
+
+.adjustArrowHint {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 0;
 }
 
 .polaroidPhotoImg {
@@ -2524,7 +2639,7 @@
   background: transparent;
   color: #333;
   font-size: 1rem;
-  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  font-family: "Comic Sans MS", "Chalkboard SE", cursive;
   text-align: center;
   line-height: 1.4;
   padding: 0;
@@ -2533,6 +2648,21 @@
 .dedicationTextArea::placeholder {
   color: #ccc;
   font-style: italic;
+}
+
+.charCounter {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.35);
+  text-align: right;
+  margin-top: 4px;
+  padding-right: 4px;
+}
+
+.charWarning {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.35);
+  margin-top: 4px;
+  text-align: center;
 }
 
 /* Sticker inside dedication area */
@@ -2586,7 +2716,9 @@
   font-size: 0.88rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    transform 0.15s;
 }
 
 .dedicateToolBtn:hover {
@@ -2634,7 +2766,9 @@
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 
 .dedicateNextBtn:hover:not(:disabled) {
@@ -2740,7 +2874,9 @@
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 
 .confirmDialogConfirm:hover {
@@ -2857,7 +2993,10 @@
   line-height: 1.35;
   text-align: center;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.15s;
 }
 
 .phraseGridItem:hover {
