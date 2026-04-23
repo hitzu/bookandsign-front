@@ -38,9 +38,11 @@ const nextConfig = {
         protocol: "https",
         hostname: "*.storage.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "*.supabase.co",
+      },
     ],
-    // Explicitly allow our current Supabase host as well.
-    domains: ["uljzbxuxzknilubykrlw.storage.supabase.co"],
   },
   env: {
     // API URL configuration
