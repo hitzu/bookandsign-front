@@ -118,3 +118,195 @@
 .red:active {
   transform: translateY(0);
 }
+
+/* ── Variant: page (rosita card — footer de /fiesta) ── */
+
+.pageCard {
+  margin-top: 20px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #fce7f3 0%, #f5e6ff 100%);
+  border: 1px solid rgba(236, 72, 153, 0.12);
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+
+.pageSparkle {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: #ec4899;
+}
+
+.pageTitulo {
+  font-family: 'Dancing Script', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  color: #be185d;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.pageSubtitulo {
+  font-size: 13px;
+  color: rgba(190, 24, 93, 0.45);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.pageFollowNote {
+  font-size: 12px;
+  color: rgba(190, 24, 93, 0.35);
+  margin-bottom: 12px;
+}
+
+.pageWaBtn {
+  width: 100%;
+  height: 50px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border: none;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+  margin-bottom: 14px;
+  transition: transform 0.15s;
+  text-decoration: none;
+}
+
+.pageWaBtn:active { transform: scale(0.97); }
+
+.pageSocialRow {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.pageSocialBtn {
+  height: 38px;
+  border-radius: 10px;
+  padding: 0 16px;
+  border: none;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s;
+  text-decoration: none;
+}
+
+.pageSocialBtn:active { transform: scale(0.95); }
+.pageSocialBtnIg { background: linear-gradient(135deg, #f9a8d4, #c084fc); color: #be185d; }
+.pageSocialBtnTt { background: #f1f5f9; color: #1a0a12; }
+.pageSocialBtnFb { background: #dbeafe; color: #1d4ed8; }
+
+.pageTagline {
+  font-size: 11px;
+  color: rgba(190, 24, 93, 0.3);
+  letter-spacing: 0.06em;
+}
+
+/* ── Variant: sheet (contenido para bottom sheet blanco — /mis-fotos) ── */
+
+.sheetContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  text-align: left;
+}
+
+.sheetCloseBtn {
+  position: absolute;
+  top: -8px;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fce7f3;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: #ec4899;
+  transition: transform 0.15s;
+}
+
+.sheetCloseBtn:active { transform: scale(0.9); }
+
+.sheetTitulo {
+  font-family: 'Dancing Script', cursive;
+  font-size: 26px;
+  font-weight: 700;
+  color: #be185d;
+  line-height: 1.1;
+}
+
+.sheetSubtitulo {
+  font-size: 14px;
+  color: #f9a8d4;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.sheetWaBtn {
+  margin-top: 6px;
+  height: 54px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(34, 197, 94, 0.35);
+  transition: transform 0.2s;
+  width: 100%;
+  text-decoration: none;
+}
+
+.sheetWaBtn:active { transform: scale(0.97); }
+
+.sheetSocialRow {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.sheetSocialBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fce7f3;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+  color: #ec4899;
+  text-decoration: none;
+}
+
+.sheetSocialBtn:active { transform: scale(0.9); }

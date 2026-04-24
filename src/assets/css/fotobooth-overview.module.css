@@ -1,0 +1,592 @@
+/* ─── Page shell ─────────────────────────────────────────────────────────── */
+
+.page {
+  background: #fff5f7;
+  min-height: 100dvh;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  color: #1a0a12;
+  overflow-x: hidden;
+}
+
+.centerPage {
+  background: #fff5f7;
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 2rem;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+}
+
+.centerPage p {
+  font-size: 0.95rem;
+  color: rgba(190, 24, 93, 0.5);
+}
+
+.loaderOrb {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(236, 72, 153, 0.2);
+  border-top-color: #ec4899;
+  animation: spin 1s linear infinite;
+  margin-inline: auto;
+}
+
+.retryBtn {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.8rem;
+  border-radius: 2rem;
+  border: 2px solid #fbcfe8;
+  background: transparent;
+  color: #ec4899;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+}
+
+.retryBtn:hover { background: #fce7f3; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Hero Header ────────────────────────────────────────────────────────── */
+
+.heroHeader {
+  padding: 52px 24px 0;
+  background: #fff5f7;
+  display: flex;
+  flex-direction: column;
+}
+
+.brandLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(190, 24, 93, 0.4);
+  margin-bottom: 10px;
+}
+
+.eventName {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(36px, 10vw, 52px);
+  font-weight: 700;
+  background: linear-gradient(135deg, #be185d, #9333ea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 2px 12px rgba(190, 24, 93, 0.12));
+}
+
+.eventDate {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(190, 24, 93, 0.45);
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+}
+
+/* ─── Carousel ───────────────────────────────────────────────────────────── */
+
+.carouselWindow {
+  position: relative;
+  height: 380px;
+  overflow: hidden;
+}
+
+.carouselSlide {
+  position: absolute;
+  inset: 0;
+  transition: opacity 1.2s ease;
+}
+
+.carouselImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carouselPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #fce7f3 0%, #f5e6ff 60%, #fce7f3 100%);
+}
+
+.carouselVignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(255,245,247,0.35) 0%, transparent 18%, transparent 82%, rgba(255,245,247,0.35) 100%),
+    linear-gradient(to bottom, rgba(255,245,247,0.15) 0%, transparent 20%, transparent 80%, rgba(255,245,247,0.2) 100%);
+}
+
+.carouselDots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  z-index: 10;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transition: all 0.4s;
+}
+
+.dotActive {
+  width: 14px;
+  background: white;
+  border-radius: 3px;
+  box-shadow: 0 0 6px rgba(236, 72, 153, 0.5);
+}
+
+/* ─── Action Buttons ─────────────────────────────────────────────────────── */
+
+.heroActions {
+  padding: 16px 20px 20px;
+  background: #fff5f7;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.btnPrimary {
+  width: 100%;
+  height: 54px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  border: none;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(236, 72, 153, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btnPrimary:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.2);
+}
+
+.btnSecondary {
+  width: 100%;
+  height: 50px;
+  border-radius: 16px;
+  background: transparent;
+  border: 2px solid #fbcfe8;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ec4899;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.btnSecondary:active { background: #fce7f3; }
+
+/* ─── Share toast ────────────────────────────────────────────────────────── */
+
+.shareToast {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: white;
+  border: 1px solid #fbcfe8;
+  border-radius: 30px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #be185d;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 300;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+}
+
+.shareToastVisible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Page body ──────────────────────────────────────────────────────────── */
+
+.pageBody {
+  background: #fff5f7;
+  padding: 0 16px 40px;
+}
+
+.sectionDivider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, #fbcfe8, transparent);
+}
+
+/* ─── Sessions header ────────────────────────────────────────────────────── */
+
+.sessionsHeader {
+  padding: 18px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sessionsDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  flex-shrink: 0;
+}
+
+.sessionsLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(190, 24, 93, 0.45);
+  letter-spacing: 0.04em;
+}
+
+/* ─── Sessions grid ──────────────────────────────────────────────────────── */
+
+.sessionsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sessionCard {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  cursor: pointer;
+  background: #fce7f3;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.12), 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  padding: 0;
+  display: block;
+  width: 100%;
+}
+
+.sessionCard:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.1);
+}
+
+.sessionCover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sessionPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #fce7f3, #f5e6ff);
+}
+
+.sessionGradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(to top, rgba(255, 245, 247, 0.95) 0%, transparent 100%);
+  z-index: 2;
+}
+
+.collectionBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(236, 72, 153, 0.15);
+  border-radius: 10px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.1);
+}
+
+.collectionCount {
+  font-size: 11px;
+  font-weight: 700;
+  color: #ec4899;
+}
+
+.sessionTime {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px 12px 12px;
+  z-index: 3;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(190, 24, 93, 0.5);
+  text-align: left;
+}
+
+/* ─── Empty state ────────────────────────────────────────────────────────── */
+
+.emptyState {
+  padding: 32px 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.mirrorFrame {
+  position: relative;
+  width: 130px;
+  height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.mirrorOval {
+  position: absolute;
+  inset: 0;
+  border-radius: 65px / 85px;
+  border: 2px solid #fbcfe8;
+  background: linear-gradient(160deg, #fff0f5 0%, #f5e6ff 100%);
+  box-shadow: 0 4px 28px rgba(236, 72, 153, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+.mirrorShine {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 28px;
+  height: 60px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.6), transparent);
+  transform: rotate(-15deg);
+}
+
+.mirrorCam {
+  position: relative;
+  z-index: 3;
+}
+
+.mirrorBase {
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 10px;
+  background: linear-gradient(to bottom, #fbcfe8, #f5d0fe);
+  border-radius: 0 0 8px 8px;
+}
+
+.mirrorStand {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, transparent, #fbcfe8, transparent);
+}
+
+.mirrorSparkle {
+  position: absolute;
+  font-size: 11px;
+  color: #ec4899;
+  opacity: 0.6;
+  animation: sparklePop 2s ease-in-out infinite;
+}
+
+@keyframes sparklePop {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.emptyTitle {
+  font-family: 'Dancing Script', cursive;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #be185d, #9333ea);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.emptySub {
+  font-size: 14px;
+  color: rgba(190, 24, 93, 0.4);
+  line-height: 1.55;
+  max-width: 260px;
+  font-weight: 400;
+  margin-bottom: 22px;
+}
+
+.emptyDots {
+  display: flex;
+  gap: 7px;
+}
+
+.emptyDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fbcfe8;
+  animation: emptyPulse 1.8s ease-in-out infinite;
+}
+
+.emptyDot:nth-child(2) { animation-delay: 0.3s; }
+.emptyDot:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes emptyPulse {
+  0%, 100% { background: #fbcfe8; transform: scale(1); }
+  50% { background: #ec4899; transform: scale(1.35); box-shadow: 0 0 8px rgba(236, 72, 153, 0.3); }
+}
+
+/* ─── Brand CTA ──────────────────────────────────────────────────────────── */
+
+.brandCta {
+  margin-top: 20px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #fce7f3 0%, #f5e6ff 100%);
+  border: 1px solid rgba(236, 72, 153, 0.12);
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+
+.brandCtaSparkle {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: #ec4899;
+}
+
+.brandCtaTitle {
+  font-family: 'Dancing Script', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  color: #be185d;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.brandCtaSub {
+  font-size: 13px;
+  color: rgba(190, 24, 93, 0.45);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.brandCtaFollowNote {
+  font-size: 12px;
+  color: rgba(190, 24, 93, 0.35);
+  margin-bottom: 12px;
+}
+
+.btnWa {
+  width: 100%;
+  height: 50px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  border: none;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+  margin-bottom: 14px;
+  transition: transform 0.15s;
+  text-decoration: none;
+}
+
+.btnWa:active { transform: scale(0.97); }
+
+.socialRow {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.btnSocial {
+  height: 38px;
+  border-radius: 10px;
+  padding: 0 16px;
+  border: none;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform 0.15s;
+  text-decoration: none;
+}
+
+.btnSocial:active { transform: scale(0.95); }
+
+.btnIg {
+  background: linear-gradient(135deg, #f9a8d4, #c084fc);
+  color: #be185d;
+}
+
+.btnFb {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.brandCtaTagline {
+  font-size: 11px;
+  color: rgba(190, 24, 93, 0.3);
+  letter-spacing: 0.06em;
+}

@@ -79,6 +79,16 @@ const EventList = () => {
         header: "Token",
         accessorKey: "token",
         enableColumnFilter: false,
+        cell: (cellProps: any) => {
+          return (
+            <Link
+              href={`/fiesta/${cellProps.row.original.token}`}
+              target="_blank"
+            >
+              {cellProps.row.original.token}
+            </Link>
+          );
+        },
       },
       {
         header: "Festejados",

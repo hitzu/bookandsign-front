@@ -12,6 +12,7 @@ type HeroCoverMobileProps = {
   parallaxOffset?: number;
   onViewPhotos: () => void;
   onShareLink: () => void;
+  className?: string;
 };
 
 const HeroCoverMobile = ({
@@ -22,6 +23,7 @@ const HeroCoverMobile = ({
   parallaxOffset = 0,
   onViewPhotos,
   onShareLink,
+  className,
 }: HeroCoverMobileProps) => {
   const reduceMotion = useReducedMotion();
   const normalizedDescription = eventDescription?.trim() || "";
@@ -66,7 +68,7 @@ const HeroCoverMobile = ({
   const activeCoverUrl = availableCovers[activeCoverIndex] || null;
 
   return (
-    <section className={styles.mobileHero}>
+    <section className={[styles.mobileHero, className].filter(Boolean).join(" ")}>
       <motion.div
         className={styles.mobileHeroMedia}
         initial={{ opacity: 0, y: 10 }}
