@@ -17,3 +17,5 @@ export * from "./partyPublic";
 export * from "./photos";
 export * from "./events";
 export * from "./analyticsAction";
+export * from "./eventThemes";
+export * from "./eventGallery";

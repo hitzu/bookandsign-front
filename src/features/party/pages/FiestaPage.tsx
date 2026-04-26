@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import { axiosInstanceWithoutToken } from "../../../api/config/axiosConfig";
 import { getExperience } from "../experiences";
-import { GalleryResponse, GallerySessionItem, SessionEventData } from "../types";
+import {
+  GallerySessionItem,
+  SessionEventData,
+} from "../../../interfaces/eventGallery";
 import { shareUrl } from "../utils/mediaActions";
 import styles from "@assets/css/fotobooth-overview.module.css";
+import { getEventGalleryV2 } from "../../../api/services/partyPublicService";
 
 const SPLASH_DURATION_MS = 3200;
 
@@ -25,9 +28,7 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
 
   const fetchGallery = async () => {
     try {
-      const { data } = await axiosInstanceWithoutToken.get<GalleryResponse>(
-        `/sessions/gallery/${eventToken}`,
-      );
+      const data = await getEventGalleryV2(eventToken);
       setEventData(data.event);
       setSessions(data.sessions);
       setIsEmpty(data.sessions.length === 0);
@@ -44,7 +45,7 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   useEffect(() => {
     if (!eventToken) return;
     fetchGallery();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventToken]);
 
   // Polling cuando no hay sesiones aún
@@ -52,7 +53,7 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
     if (!isEmpty) return;
     const interval = setInterval(fetchGallery, 4000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEmpty]);
 
   const handleSplashComplete = () => {
@@ -65,7 +66,7 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
     await shareUrl(url, eventData?.honoreesNames ?? "Evento");
   };
 
-  const { Splash, Overview } = getExperience(eventData?.eventType);
+  const { Splash, Overview } = getExperience(eventData?.eventTheme?.key);
 
   if (showSplash) {
     return (

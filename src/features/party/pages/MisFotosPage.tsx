@@ -5,8 +5,9 @@ import {
   SessionEventData,
   SessionPhoto,
   SessionResponse,
-} from "../types";
+} from "../../../interfaces/eventGallery";
 import styles from "@assets/css/party-public.module.css";
+import { getEventGallerySessionV2 } from "../../../api/services/partyPublicService";
 
 type PageState = "loading" | "ready" | "empty" | "error";
 
@@ -63,7 +64,10 @@ const EmptyStateError = ({
         {eventData.date} · Mientras tanto puedes ir por tu foto impresa
       </p>
     )}
-    <button className={styles.retryBtn} onClick={() => window.location.reload()}>
+    <button
+      className={styles.retryBtn}
+      onClick={() => window.location.reload()}
+    >
       Reintentar
     </button>
   </div>
@@ -85,26 +89,22 @@ export default function MisFotosPage({
   const photosData = useRef<SessionPhoto[]>([]);
   const splashDoneRef = useRef(false);
 
+  const fetchSession = async () => {
+    try {
+      const { photos, event } = await getEventGallerySessionV2(sessionToken);
+      setPhotos(photos);
+      setEventData(event);
+      setPageState("ready");
+    } catch {
+      setPageState("error");
+    }
+  };
+
   // Fetch en paralelo al splash
   useEffect(() => {
     if (!sessionToken) return;
 
-    axiosInstanceWithoutToken
-      .get<SessionResponse>(`/sessions/${sessionToken}`)
-      .then(({ data }) => {
-        setPhotos(data.photos);
-        photosData.current = data.photos;
-        setEventData(data.event);
-        photosReady.current = true;
-
-        if (splashDoneRef.current) {
-          setPageState(data.photos.length > 0 ? "ready" : "empty");
-        }
-      })
-      .catch(() => {
-        photosReady.current = true;
-        if (splashDoneRef.current) setPageState("error");
-      });
+    fetchSession();
   }, [sessionToken]);
 
   const handleSplashComplete = () => {
@@ -117,11 +117,13 @@ export default function MisFotosPage({
 
   // El eventType vendrá del backend cuando esté disponible.
   // Por ahora el factory devuelve siempre fotoBoothExperience.
-  const { Splash, Carousel } = getExperience(/* eventData?.eventType */);
+  const { Splash, Carousel } = getExperience(eventData?.eventTheme?.key);
 
   // Mostrar splash hasta que tanto el splash haya terminado como los datos lleguen.
   // Si el splash termina antes que los datos: esperamos.
-  const showSplash = !splashDone || (splashDone && !photosReady.current && pageState === "loading");
+  const showSplash =
+    !splashDone ||
+    (splashDone && !photosReady.current && pageState === "loading");
 
   if (showSplash) {
     return (

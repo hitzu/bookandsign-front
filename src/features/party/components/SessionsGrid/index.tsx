@@ -1,5 +1,5 @@
 import React from "react";
-import { GallerySessionItem } from "../../types";
+import { GallerySessionItem } from "../../../../interfaces/eventGallery";
 import SessionCard from "../SessionCard";
 import styles from "@assets/css/party-public.module.css";
 
@@ -12,7 +12,8 @@ const SessionsGrid = ({ sessions, onSelectSession }: SessionsGridProps) => (
   <section id="galeria" className={styles.sessionsGridSection}>
     <div className={styles.mobileGalleryHeader}>
       <p>
-        {sessions.length} sesión{sessions.length !== 1 ? "es" : ""} en este evento
+        {sessions.length} sesión{sessions.length !== 1 ? "es" : ""} en este
+        evento
       </p>
     </div>
     <div className={styles.mobileMasonry}>

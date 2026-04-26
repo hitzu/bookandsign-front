@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "@assets/css/fotobooth-overview.module.css";
 import { SocialMediaCTA } from "../../components/SocialMediaCTA";
-import { GallerySessionItem } from "../../types";
+import { GallerySessionItem } from "../../../../interfaces/eventGallery";
 import { OverviewProps } from "../types";
 
 // ─── Icons (solo los que usa Overview directamente) ──────────────────────────
@@ -288,12 +288,6 @@ const FotoBoothOverview = ({
 
         {/* Action buttons */}
         <div className={styles.heroActions}>
-          {!isEmpty && (
-            <button className={styles.btnPrimary} onClick={handleVerFotos}>
-              <IconEye />
-              Ver fotos
-            </button>
-          )}
           <button className={styles.btnSecondary} onClick={handleShare}>
             <IconShare />
             Compartir enlace

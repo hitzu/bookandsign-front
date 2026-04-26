@@ -1,5 +1,5 @@
 import React from "react";
-import { GallerySessionItem } from "../../types";
+import { GallerySessionItem } from "../../../../interfaces/eventGallery";
 import styles from "@assets/css/party-public.module.css";
 
 interface SessionCardProps {

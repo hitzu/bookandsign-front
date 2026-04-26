@@ -3,7 +3,10 @@ import Link from "next/link";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { SocialMediaCTA } from "../SocialMediaCTA";
-import { SessionPhoto, SessionEventData } from "../../types";
+import {
+  SessionPhoto,
+  SessionEventData,
+} from "../../../../interfaces/eventGallery";
 import {
   downloadPhoto,
   sharePhoto,
@@ -21,7 +24,9 @@ interface SessionCarouselProps {
 const SessionCarousel = ({ photos, eventData }: SessionCarouselProps) => {
   const [index, setIndex] = useState(0);
   const [actionState, setActionState] = useState<ActionState>("buttons");
-  const [ctaContext, setCtaContext] = useState<"download" | "personalized">("download");
+  const [ctaContext, setCtaContext] = useState<"download" | "personalized">(
+    "download",
+  );
 
   const slides = photos.map((p) => ({ src: p.url }));
 
@@ -47,7 +52,12 @@ const SessionCarousel = ({ photos, eventData }: SessionCarouselProps) => {
         close={() => {}}
         slides={slides}
         index={index}
-        on={{ view: ({ index: i }) => { setIndex(i); setActionState("buttons"); } }}
+        on={{
+          view: ({ index: i }) => {
+            setIndex(i);
+            setActionState("buttons");
+          },
+        }}
         className={styles.yarlDarkOverlay}
         render={{
           buttonClose: () => null,
@@ -62,9 +72,14 @@ const SessionCarousel = ({ photos, eventData }: SessionCarouselProps) => {
                     aria-label="Descargar foto"
                   >
                     <svg
-                      width="16" height="16" viewBox="0 0 24 24"
-                      fill="none" stroke="currentColor"
-                      strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       style={{ marginRight: 6 }}
                     >
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -80,9 +95,14 @@ const SessionCarousel = ({ photos, eventData }: SessionCarouselProps) => {
                     aria-label="Compartir foto"
                   >
                     <svg
-                      width="16" height="16" viewBox="0 0 24 24"
-                      fill="none" stroke="currentColor"
-                      strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       style={{ marginRight: 6 }}
                     >
                       <line x1="22" y1="2" x2="11" y2="13" />

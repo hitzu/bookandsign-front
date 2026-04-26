@@ -6,6 +6,8 @@ import {
   PublicEvent,
   PublicEventResponse,
   EventPhraseResponse,
+  GalleryResponse,
+  SessionResponse
 } from "../../interfaces";
 import { axiosInstanceWithoutToken } from "../config/axiosConfig";
 
@@ -116,3 +118,29 @@ export const getPublicPhotosByEventToken = async (
   });
   return response.items;
 };
+
+
+export const getEventGalleryV2 = async (
+  token: string,
+): Promise<GalleryResponse> => {
+  const normalizedToken = encodeURIComponent(token);
+
+  const response = await axiosInstanceWithoutToken.get<GalleryResponse>(
+    `/sessions/gallery/${normalizedToken}`,
+  );
+
+  return response.data
+};
+
+export const getEventGallerySessionV2 = async (
+  token: string,
+): Promise<SessionResponse> => {
+  const normalizedToken = encodeURIComponent(token);
+
+  const response = await axiosInstanceWithoutToken.get<SessionResponse>(
+    `/sessions/${normalizedToken}`,
+  );
+
+  return response.data
+};
+

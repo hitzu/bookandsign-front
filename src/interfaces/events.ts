@@ -1,3 +1,5 @@
+import { EventThemes } from "./eventThemes";
+
 export interface Event {
   id: number;
   name: string;
@@ -15,6 +17,7 @@ export interface Event {
   delegateName: string;
   createdAt: string;
   updatedAt: string;
+  eventTheme?: EventThemes
 }
 
 export interface CreateEventPayload {

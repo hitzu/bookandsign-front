@@ -1,3 +1,5 @@
+import { EventThemes } from "./eventThemes";
+
 export interface SessionPhoto {
   url: string;
   position: number;
@@ -8,6 +10,7 @@ export interface SessionEventData {
   date: string;
   eventToken?: string;
   eventType?: string;
+  eventTheme?: EventThemes
 }
 
 export interface SessionResponse {

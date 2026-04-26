@@ -1,5 +1,5 @@
 import { ComponentType } from "react";
-import { GallerySessionItem, SessionEventData, SessionPhoto } from "../types";
+import { GallerySessionItem, SessionEventData, SessionPhoto } from "../../../interfaces/eventGallery";
 
 export interface SplashProps {
   honoreesNames?: string;
