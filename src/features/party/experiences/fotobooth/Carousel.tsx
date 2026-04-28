@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "@assets/css/fotobooth.module.css";
 import {
   buildDownloadFilename,
@@ -7,14 +7,57 @@ import {
 } from "../../utils/mediaActions";
 import { SocialMediaCTA } from "../../components/SocialMediaCTA";
 import { CarouselProps } from "../types";
+import { AnalyticsAction } from "../../../../interfaces";
+import { trackEvent } from "../../../../api/services/eventAnalyticsService";
 
+type CtaSource = "download" | "share";
 
-const FotoBoothCarousel = ({ photos, eventData }: CarouselProps) => {
+const FotoBoothCarousel = ({
+  photos,
+  eventData,
+  eventToken,
+  sessionToken,
+}: CarouselProps) => {
   const [index, setIndex] = useState(0);
   const [showCTA, setShowCTA] = useState(false);
+  const [ctaSource, setCtaSource] = useState<CtaSource>("download");
   const [showToast, setShowToast] = useState(false);
 
   const touchStartX = useRef(0);
+  const viewedPhotoIndexes = useRef(new Set<number>());
+  const hasTrackedSessionView = useRef(false);
+
+  const trackSessionEvent = (
+    action: AnalyticsAction,
+    metadata: Record<string, unknown> = {},
+  ) => {
+    if (!eventToken) return;
+
+    trackEvent(action, eventToken, {
+      sessionId: sessionToken,
+      metadata: {
+        entryPoint: "session_qr",
+        photoCount: photos.length,
+        ...metadata,
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (!eventToken || hasTrackedSessionView.current) return;
+
+    hasTrackedSessionView.current = true;
+    trackSessionEvent(AnalyticsAction.SESSION_VIEW);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventToken]);
+
+  useEffect(() => {
+    if (!eventToken || viewedPhotoIndexes.current.has(index)) return;
+
+    viewedPhotoIndexes.current.add(index);
+    trackSessionEvent(AnalyticsAction.PHOTO_VIEW, { photoIndex: index });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventToken, index]);
 
   const goTo = (next: number) => {
     setIndex(((next % photos.length) + photos.length) % photos.length);
@@ -25,14 +68,33 @@ const FotoBoothCarousel = ({ photos, eventData }: CarouselProps) => {
       photos[index].url,
       buildDownloadFilename(eventData.honoreesNames, index),
     );
+    trackSessionEvent(AnalyticsAction.DOWNLOAD, { photoIndex: index });
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2500);
+    setCtaSource("download");
     setTimeout(() => setShowCTA(true), 800);
   };
 
   const handleShare = async () => {
     await sharePhoto(photos[index].url, eventData.honoreesNames);
+    trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
+      photoIndex: index,
+      surface: "session_carousel",
+    });
+    setCtaSource("share");
     setShowCTA(true);
+  };
+
+  const handleWaClick = () => {
+    trackSessionEvent(
+      ctaSource === "download"
+        ? AnalyticsAction.CTA_WA_POST_DOWNLOAD
+        : AnalyticsAction.CTA_WA_MODAL,
+      {
+        photoIndex: index,
+        surface: "session_carousel_sheet",
+      },
+    );
   };
 
   const formattedDate = (() => {
@@ -184,6 +246,7 @@ const FotoBoothCarousel = ({ photos, eventData }: CarouselProps) => {
                 context="eventBooking"
                 variant="sheet"
                 nombreFestejado={eventData.honoreesNames}
+                onWAClick={handleWaClick}
                 onClose={() => setShowCTA(false)}
               />
             </div>

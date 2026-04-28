@@ -13,9 +13,12 @@ export interface SplashProps {
 export interface CarouselProps {
   photos: SessionPhoto[];
   eventData: SessionEventData;
+  eventToken?: string;
+  sessionToken?: string;
 }
 
 export interface OverviewProps {
+  eventToken: string;
   sessions: GallerySessionItem[];
   eventData: SessionEventData | null;
   onSelectSession: (token: string) => void;

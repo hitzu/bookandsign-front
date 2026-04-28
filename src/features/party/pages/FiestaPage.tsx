@@ -154,6 +154,7 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
 
   return (
     <Overview
+      eventToken={eventToken}
       sessions={sessions}
       eventData={eventData}
       onSelectSession={(token) => router.push(`/mis-fotos/${token}`)}

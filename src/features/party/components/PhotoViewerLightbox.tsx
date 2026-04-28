@@ -312,7 +312,7 @@ const PhotoViewerLightbox = ({
                             onClick={async () => {
                               if (eventToken) {
                                 trackEvent(
-                                  AnalyticsAction.SHARE_CONFIRM_EJECUTADO,
+                                  AnalyticsAction.SHARE_CONFIRM_EXECUTED,
                                   eventToken,
                                 );
                               }

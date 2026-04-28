@@ -183,5 +183,12 @@ export default function MisFotosPage({
     );
   }
 
-  return <Carousel photos={photos} eventData={eventData!} />;
+  return (
+    <Carousel
+      photos={photos}
+      eventData={eventData!}
+      eventToken={eventData?.eventToken}
+      sessionToken={sessionToken}
+    />
+  );
 }

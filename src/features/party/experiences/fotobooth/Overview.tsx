@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "@assets/css/fotobooth-overview.module.css";
 import { SocialMediaCTA } from "../../components/SocialMediaCTA";
 import {
@@ -7,6 +7,8 @@ import {
 } from "../../../../interfaces/eventGallery";
 import { OverviewProps } from "../types";
 import { parseLocalDate } from "@common/dates";
+import { AnalyticsAction } from "../../../../interfaces";
+import { trackEvent } from "../../../../api/services/eventAnalyticsService";
 
 // ─── Icons (solo los que usa Overview directamente) ──────────────────────────
 
@@ -175,6 +177,7 @@ const getAlbumPhrase = (eventData: SessionEventData | null) =>
 // ─── Overview ─────────────────────────────────────────────────────────────────
 
 const FotoBoothOverview = ({
+  eventToken,
   sessions,
   eventData,
   onSelectSession,
@@ -188,6 +191,7 @@ const FotoBoothOverview = ({
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [showToast, setShowToast] = useState(false);
+  const hasTrackedView = useRef(false);
 
   useEffect(() => {
     if (coverUrls.length <= 1) return;
@@ -199,8 +203,30 @@ const FotoBoothOverview = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slideCount]);
 
+  useEffect(() => {
+    if (!eventToken || hasTrackedView.current) return;
+
+    hasTrackedView.current = true;
+    trackEvent(
+      isEmpty ? AnalyticsAction.GALLERY_EMPTY_VIEW : AnalyticsAction.GALLERY_VIEW,
+      eventToken,
+      {
+        metadata: {
+          entryPoint: "general_qr",
+          sessionCount: sessions.length,
+        },
+      },
+    );
+  }, [eventToken, isEmpty, sessions.length]);
+
   const handleShare = async () => {
     await onShare();
+    trackEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, eventToken, {
+      metadata: {
+        entryPoint: "general_qr",
+        surface: "gallery_overview",
+      },
+    });
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
   };
@@ -211,6 +237,30 @@ const FotoBoothOverview = ({
 
   const dateLabel = eventData?.date ? formatDate(eventData.date) : "";
   const albumPhrase = getAlbumPhrase(eventData);
+
+  const handleSessionClick = (
+    session: GallerySessionItem,
+    sessionIndex: number,
+  ) => {
+    trackEvent(AnalyticsAction.GALLERY_SESSION_CLICK, eventToken, {
+      sessionId: session.sessionToken,
+      metadata: {
+        entryPoint: "general_qr",
+        sessionIndex,
+        photoCount: session.photoCount,
+      },
+    });
+    onSelectSession(session.sessionToken);
+  };
+
+  const handleGalleryWaClick = () => {
+    trackEvent(AnalyticsAction.CTA_WA_GALLERY, eventToken, {
+      metadata: {
+        entryPoint: "general_qr",
+        surface: "gallery_overview",
+      },
+    });
+  };
 
   return (
     <div className={styles.page}>
@@ -307,11 +357,11 @@ const FotoBoothOverview = ({
               </p>
             </div>
             <div className={styles.sessionsGrid}>
-              {sessions.map((session) => (
+              {sessions.map((session, sessionIndex) => (
                 <SessionCard
                   key={session.sessionToken}
                   session={session}
-                  onClick={() => onSelectSession(session.sessionToken)}
+                  onClick={() => handleSessionClick(session, sessionIndex)}
                 />
               ))}
             </div>
@@ -337,6 +387,7 @@ const FotoBoothOverview = ({
           context="eventOverview"
           variant="page"
           nombreFestejado={eventData?.honoreesNames ?? ""}
+          onWAClick={handleGalleryWaClick}
         />
       </div>
     </div>
