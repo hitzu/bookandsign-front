@@ -8,6 +8,8 @@ export interface SessionPhoto {
 export interface SessionEventData {
   honoreesNames: string;
   date: string;
+  albumPhrase?: string;
+  albumPhase?: string;
   eventToken?: string;
   eventType?: string;
   eventTheme?: EventThemes

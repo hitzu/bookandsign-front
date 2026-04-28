@@ -8,8 +8,12 @@ import {
 import { shareUrl } from "../utils/mediaActions";
 import styles from "@assets/css/fotobooth-overview.module.css";
 import { getEventGalleryV2 } from "../../../api/services/partyPublicService";
+import { formatSplashDate } from "../utils/formatSplashDate";
+import { preloadImages } from "../utils/preloadImages";
 
 const SPLASH_DURATION_MS = 3200;
+const CRITICAL_COVER_COUNT = 10;
+const READY_REVEAL_MS = 1800;
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
@@ -22,23 +26,69 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   const [eventData, setEventData] = useState<SessionEventData | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [error, setError] = useState(false);
+  const [isSplashReady, setIsSplashReady] = useState(false);
+  const [splashStep, setSplashStep] = useState("Preparando la experiencia");
 
   const splashDone = useRef(false);
-  const dataReady = useRef(false);
+  const assetsReady = useRef(false);
+  const readyRevealDone = useRef(false);
+
+  const finishSplashIfReady = () => {
+    if (splashDone.current && assetsReady.current && readyRevealDone.current) {
+      setShowSplash(false);
+    }
+  };
+
+  const completeSplashLoading = (showReadyState: boolean) => {
+    assetsReady.current = true;
+
+    if (!showReadyState) {
+      readyRevealDone.current = true;
+      finishSplashIfReady();
+      return;
+    }
+
+    setIsSplashReady(true);
+    window.setTimeout(() => {
+      readyRevealDone.current = true;
+      finishSplashIfReady();
+    }, READY_REVEAL_MS);
+  };
+
+  const preloadGalleryCovers = async (gallerySessions: GallerySessionItem[]) => {
+    const coverUrls = gallerySessions
+      .map((session) => session.coverPhoto)
+      .filter(Boolean);
+    const criticalCoverUrls = coverUrls.slice(0, CRITICAL_COVER_COUNT);
+    const backgroundCoverUrls = coverUrls.slice(CRITICAL_COVER_COUNT);
+
+    if (criticalCoverUrls.length > 0) {
+      setSplashStep("Revelando los mejores momentos");
+      await preloadImages(criticalCoverUrls);
+    }
+
+    if (backgroundCoverUrls.length > 0) {
+      void preloadImages(backgroundCoverUrls);
+    }
+  };
 
   const fetchGallery = async () => {
     try {
+      setSplashStep("Buscando las fotos de la fiesta");
       const data = await getEventGalleryV2(eventToken);
       setEventData(data.event);
       setSessions(data.sessions);
       setIsEmpty(data.sessions.length === 0);
       setError(false);
+
+      setSplashStep("Acomodando la galería");
+      await preloadGalleryCovers(data.sessions);
+      setLoading(false);
+      completeSplashLoading(true);
     } catch {
       setError(true);
-    } finally {
-      dataReady.current = true;
       setLoading(false);
-      if (splashDone.current) setShowSplash(false);
+      completeSplashLoading(false);
     }
   };
 
@@ -58,7 +108,7 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
 
   const handleSplashComplete = () => {
     splashDone.current = true;
-    if (dataReady.current) setShowSplash(false);
+    finishSplashIfReady();
   };
 
   const handleShare = async () => {
@@ -67,12 +117,15 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   };
 
   const { Splash, Overview } = getExperience(eventData?.eventTheme?.key);
+  const splashDate = formatSplashDate(eventData?.date);
 
   if (showSplash) {
     return (
       <Splash
         honoreesNames={eventData?.honoreesNames}
-        date={eventData?.date}
+        date={splashDate}
+        isReady={isSplashReady}
+        stepLabel={splashStep}
         onComplete={handleSplashComplete}
         duration={SPLASH_DURATION_MS}
       />

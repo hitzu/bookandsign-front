@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styles from "@assets/css/fotobooth-overview.module.css";
 import { SocialMediaCTA } from "../../components/SocialMediaCTA";
-import { GallerySessionItem } from "../../../../interfaces/eventGallery";
+import {
+  GallerySessionItem,
+  SessionEventData,
+} from "../../../../interfaces/eventGallery";
 import { OverviewProps } from "../types";
+import { parseLocalDate } from "@common/dates";
 
 // ─── Icons (solo los que usa Overview directamente) ──────────────────────────
 
@@ -156,14 +160,17 @@ const SessionCard = ({
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const formatDate = (iso: string) => {
-  const d = new Date(iso);
+  const d = parseLocalDate(iso);
   if (isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  return `${day}.${month}.${year}`;
 };
+
+const getAlbumPhrase = (eventData: SessionEventData | null) =>
+  eventData?.albumPhrase || eventData?.albumPhase || "";
 
 // ─── Overview ─────────────────────────────────────────────────────────────────
 
@@ -203,37 +210,37 @@ const FotoBoothOverview = ({
   };
 
   const dateLabel = eventData?.date ? formatDate(eventData.date) : "";
+  const albumPhrase = getAlbumPhrase(eventData);
 
   return (
     <div className={styles.page}>
-      {/* Hero header */}
-      <header className={styles.heroHeader}>
-        <p className={styles.brandLabel}>✦ TU MOMENTO · TU BRILLO ✦</p>
-        <h1 className={styles.eventName}>
-          {eventData?.honoreesNames ?? "Bienvenido"}
-        </h1>
-        {dateLabel && <p className={styles.eventDate}>{dateLabel}</p>}
-      </header>
-
-      {/* Carousel */}
       {!isEmpty && (
-        <div className={styles.carouselWindow}>
+        <section className={styles.mirrorHero}>
           {coverUrls.length > 0 ? (
             coverUrls.map((url, i) => (
               <div
                 key={i}
-                className={styles.carouselSlide}
+                className={styles.mirrorSlide}
                 style={{ opacity: i === activeSlide ? 1 : 0 }}
               >
-                <img src={url} alt="" className={styles.carouselImg} />
+                <img src={url} alt="" className={styles.mirrorHeroImg} />
               </div>
             ))
           ) : (
-            <div className={styles.carouselSlide} style={{ opacity: 1 }}>
+            <div className={styles.mirrorSlide} style={{ opacity: 1 }}>
               <div className={styles.carouselPlaceholder} />
             </div>
           )}
-          <div className={styles.carouselVignette} />
+          <div className={styles.mirrorScrim} />
+          <div className={styles.mirrorHeroContent}>
+            {albumPhrase && (
+              <p className={styles.mirrorPhrase}>{albumPhrase}</p>
+            )}
+            <h1 className={styles.mirrorName}>
+              {eventData?.honoreesNames ?? "Bienvenido"}
+            </h1>
+            {dateLabel && <p className={styles.mirrorDate}>{dateLabel}</p>}
+          </div>
           {coverUrls.length > 1 && (
             <div className={styles.carouselDots}>
               {coverUrls.map((_, i) => (
@@ -244,17 +251,42 @@ const FotoBoothOverview = ({
               ))}
             </div>
           )}
-        </div>
+          <div className={styles.mirrorActions}>
+            <button className={styles.btnPrimary} onClick={handleVerFotos}>
+              <IconEye />
+              Ver fotos
+            </button>
+            <button className={styles.btnSecondary} onClick={handleShare}>
+              <IconShare />
+              Compartir enlace
+            </button>
+            <div
+              className={`${styles.shareToast} ${showToast ? styles.shareToastVisible : ""}`}
+            >
+              <IconCheck />
+              Enlace copiado ✦
+            </div>
+          </div>
+        </section>
       )}
 
       {/* Body: empty state or sessions grid */}
       <div className={styles.pageBody} id="sesiones">
-        <div className={styles.sectionDivider} />
+        {!isEmpty && <div className={styles.sectionDivider} />}
 
         {isEmpty ? (
           <div className={styles.emptyState}>
             <MirrorOrnament />
             <p className={styles.emptyTitle}>¡La noche apenas empieza!</p>
+            <div className={styles.emptyEventInfo}>
+              {albumPhrase && (
+                <p className={styles.emptyPhrase}>{albumPhrase}</p>
+              )}
+              <h1 className={styles.emptyEventName}>
+                {eventData?.honoreesNames ?? "Bienvenido"}
+              </h1>
+              {dateLabel && <p className={styles.emptyEventDate}>{dateLabel}</p>}
+            </div>
             <p className={styles.emptySub}>
               Las fotos de tu fiesta aparecerán aquí en cuanto comiencen las
               sesiones
@@ -286,19 +318,20 @@ const FotoBoothOverview = ({
           </>
         )}
 
-        {/* Action buttons */}
-        <div className={styles.heroActions}>
-          <button className={styles.btnSecondary} onClick={handleShare}>
-            <IconShare />
-            Compartir enlace
-          </button>
-          <div
-            className={`${styles.shareToast} ${showToast ? styles.shareToastVisible : ""}`}
-          >
-            <IconCheck />
-            Enlace copiado ✦
+        {isEmpty && (
+          <div className={styles.emptyActions}>
+            <button className={styles.btnSecondary} onClick={handleShare}>
+              <IconShare />
+              Compartir enlace
+            </button>
+            <div
+              className={`${styles.shareToast} ${showToast ? styles.shareToastVisible : ""}`}
+            >
+              <IconCheck />
+              Enlace copiado ✦
+            </div>
           </div>
-        </div>
+        )}
 
         <SocialMediaCTA
           context="eventOverview"

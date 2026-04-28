@@ -4,6 +4,8 @@ import { GallerySessionItem, SessionEventData, SessionPhoto } from "../../../int
 export interface SplashProps {
   honoreesNames?: string;
   date?: string;
+  isReady?: boolean;
+  stepLabel?: string;
   onComplete: () => void;
   duration?: number;
 }

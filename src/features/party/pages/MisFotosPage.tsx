@@ -8,8 +8,12 @@ import {
 } from "../../../interfaces/eventGallery";
 import styles from "@assets/css/party-public.module.css";
 import { getEventGallerySessionV2 } from "../../../api/services/partyPublicService";
+import { formatSplashDate } from "../utils/formatSplashDate";
+import { preloadImages } from "../utils/preloadImages";
 
 type PageState = "loading" | "ready" | "empty" | "error";
+const SPLASH_DURATION_MS = 3200;
+const READY_REVEAL_MS = 1800;
 
 // ─── Empty states ────────────────────────────────────────────────────────────
 
@@ -83,20 +87,57 @@ export default function MisFotosPage({
   const [pageState, setPageState] = useState<PageState>("loading");
   const [photos, setPhotos] = useState<SessionPhoto[]>([]);
   const [eventData, setEventData] = useState<SessionEventData | null>(null);
-  const [splashDone, setSplashDone] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+  const [isSplashReady, setIsSplashReady] = useState(false);
+  const [splashStep, setSplashStep] = useState("Preparando la experiencia");
 
-  const photosReady = useRef(false);
-  const photosData = useRef<SessionPhoto[]>([]);
-  const splashDoneRef = useRef(false);
+  const splashDone = useRef(false);
+  const assetsReady = useRef(false);
+  const readyRevealDone = useRef(false);
+
+  const finishSplashIfReady = () => {
+    if (splashDone.current && assetsReady.current && readyRevealDone.current) {
+      setShowSplash(false);
+    }
+  };
+
+  const completeSplashLoading = (showReadyState: boolean) => {
+    assetsReady.current = true;
+
+    if (!showReadyState) {
+      readyRevealDone.current = true;
+      finishSplashIfReady();
+      return;
+    }
+
+    setIsSplashReady(true);
+    window.setTimeout(() => {
+      readyRevealDone.current = true;
+      finishSplashIfReady();
+    }, READY_REVEAL_MS);
+  };
 
   const fetchSession = async () => {
     try {
+      setSplashStep("Buscando tu sesión de fotos");
       const { photos, event } = await getEventGallerySessionV2(sessionToken);
-      setPhotos(photos);
       setEventData(event);
+
+      if (photos.length === 0) {
+        setPhotos([]);
+        setPageState("empty");
+        completeSplashLoading(true);
+        return;
+      }
+
+      setSplashStep("Revelando tus fotos");
+      await preloadImages(photos.map((photo) => photo.url));
+      setPhotos(photos);
       setPageState("ready");
+      completeSplashLoading(true);
     } catch {
       setPageState("error");
+      completeSplashLoading(false);
     }
   };
 
@@ -108,30 +149,24 @@ export default function MisFotosPage({
   }, [sessionToken]);
 
   const handleSplashComplete = () => {
-    splashDoneRef.current = true;
-    setSplashDone(true);
-    if (photosReady.current) {
-      setPageState(photosData.current.length > 0 ? "ready" : "empty");
-    }
+    splashDone.current = true;
+    finishSplashIfReady();
   };
 
   // El eventType vendrá del backend cuando esté disponible.
   // Por ahora el factory devuelve siempre fotoBoothExperience.
   const { Splash, Carousel } = getExperience(eventData?.eventTheme?.key);
-
-  // Mostrar splash hasta que tanto el splash haya terminado como los datos lleguen.
-  // Si el splash termina antes que los datos: esperamos.
-  const showSplash =
-    !splashDone ||
-    (splashDone && !photosReady.current && pageState === "loading");
+  const splashDate = formatSplashDate(eventData?.date);
 
   if (showSplash) {
     return (
       <Splash
         honoreesNames={eventData?.honoreesNames}
-        date={eventData?.date}
+        date={splashDate}
+        isReady={isSplashReady}
+        stepLabel={splashStep}
         onComplete={handleSplashComplete}
-        duration={3200}
+        duration={SPLASH_DURATION_MS}
       />
     );
   }
