@@ -32,7 +32,7 @@ export const createEvent = async (
 
 export const getEventById = async (id: number): Promise<Event> => {
   try {
-    const response = await axiosInstanceWithToken.get<Event>(`/events/${id}`);
+    const response = await axiosInstanceWithToken.get<Event>(`/events/id/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching event by id:", error);

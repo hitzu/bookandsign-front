@@ -113,7 +113,7 @@ const FotoBoothCarousel = ({
     <div className={styles.screen}>
       {/* Header */}
       <div className={styles.carouselHeader}>
-        <div className={styles.carouselLogo}>✦ mis fotos</div>
+        <div className={styles.carouselLogo}>✦ Mis fotos ✦</div>
         <div className={styles.carouselCount}>
           {index + 1} / {photos.length}
         </div>

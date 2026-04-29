@@ -175,30 +175,48 @@
   padding: max(52px, env(safe-area-inset-top, 52px)) 20px 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  position: relative;
   flex-shrink: 0;
 }
 
 .carouselLogo {
   font-family: 'Dancing Script', cursive;
-  font-size: 22px;
+  font-size: clamp(30px, 9vw, 42px);
   font-weight: 700;
   background: linear-gradient(135deg, #ec4899, #a855f7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+  filter: drop-shadow(0 4px 16px rgba(190, 24, 93, 0.16));
 }
 
 .carouselCount {
+  position: absolute;
+  right: 20px;
+  top: max(54px, calc(env(safe-area-inset-top, 52px) + 2px));
+  min-width: 48px;
+  height: 28px;
+  border: 1px solid rgba(236, 72, 153, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 12px;
-  font-weight: 600;
-  color: #f9a8d4;
+  font-weight: 700;
+  color: rgba(190, 24, 93, 0.58);
   letter-spacing: 0.05em;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.08);
 }
 
 .carouselNameBar {
-  padding: 0 20px 14px;
+  padding: 0 20px 16px;
   flex-shrink: 0;
+  text-align: center;
 }
 
 .carouselNameText {

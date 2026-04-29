@@ -208,7 +208,9 @@ const FotoBoothOverview = ({
 
     hasTrackedView.current = true;
     trackEvent(
-      isEmpty ? AnalyticsAction.GALLERY_EMPTY_VIEW : AnalyticsAction.GALLERY_VIEW,
+      isEmpty
+        ? AnalyticsAction.GALLERY_EMPTY_VIEW
+        : AnalyticsAction.GALLERY_VIEW,
       eventToken,
       {
         metadata: {
@@ -327,15 +329,17 @@ const FotoBoothOverview = ({
         {isEmpty ? (
           <div className={styles.emptyState}>
             <MirrorOrnament />
-            <p className={styles.emptyTitle}>¡La noche apenas empieza!</p>
+            {/* <p className={styles.emptyTitle}>¡La noche apenas empieza!</p> */}
             <div className={styles.emptyEventInfo}>
               {albumPhrase && (
-                <p className={styles.emptyPhrase}>{albumPhrase}</p>
+                <p className={styles.emptyTitle}>{albumPhrase}</p>
               )}
               <h1 className={styles.emptyEventName}>
                 {eventData?.honoreesNames ?? "Bienvenido"}
               </h1>
-              {dateLabel && <p className={styles.emptyEventDate}>{dateLabel}</p>}
+              {dateLabel && (
+                <p className={styles.emptyEventDate}>{dateLabel}</p>
+              )}
             </div>
             <p className={styles.emptySub}>
               Las fotos de tu fiesta aparecerán aquí en cuanto comiencen las

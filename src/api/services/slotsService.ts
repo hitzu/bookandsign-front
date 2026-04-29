@@ -80,27 +80,6 @@ export const updateLeadInfo = async (
   }
 };
 
-export const bookSlot = async ({
-  slotId,
-  contractId,
-}: {
-  slotId: number;
-  contractId: number;
-}) => {
-  try {
-    const response = await axiosInstanceWithToken.patch(
-      `/slots/${slotId}/book`,
-      {
-        contractId: contractId,
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error booking slot:", error);
-    throw error;
-  }
-};
-
 export const getSlotsByMonthAndYear = async (
   month: number,
   year: number

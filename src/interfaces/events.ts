@@ -8,6 +8,7 @@ export interface Event {
   token: string;
   contractId: number;
   eventTypeId: number;
+  eventThemeId?: number;
   honoreesNames: string;
   albumPhrase: string;
   venueName: string;
@@ -15,9 +16,12 @@ export interface Event {
   serviceStartsAt: string;
   serviceEndsAt: string;
   delegateName: string;
+  photoCount?: number;
+  printTemplate?: string;
+  decorativeIcon?: string;
   createdAt: string;
   updatedAt: string;
-  eventTheme?: EventThemes
+  eventTheme?: EventThemes;
 }
 
 export interface CreateEventPayload {
@@ -26,6 +30,7 @@ export interface CreateEventPayload {
   description: string;
   key: string;
   eventTypeId: number;
+  eventThemeId?: number;
   honoreesNames: string;
   albumPhrase: string;
   venueName: string;
@@ -33,6 +38,9 @@ export interface CreateEventPayload {
   serviceStartsAt: string;
   serviceEndsAt: string;
   delegateName: string;
+  photoCount?: number;
+  printTemplate?: string;
+  decorativeIcon?: string;
 }
 
 export interface UpdateEventPayload {
@@ -40,6 +48,7 @@ export interface UpdateEventPayload {
   description?: string;
   key?: string;
   eventTypeId?: number;
+  eventThemeId?: number;
   honoreesNames?: string;
   albumPhrase?: string;
   venueName?: string;
@@ -47,6 +56,9 @@ export interface UpdateEventPayload {
   serviceStartsAt?: string;
   serviceEndsAt?: string;
   delegateName?: string;
+  photoCount?: number;
+  printTemplate?: string;
+  decorativeIcon?: string;
 }
 
 export type EventPhraseResponse = {

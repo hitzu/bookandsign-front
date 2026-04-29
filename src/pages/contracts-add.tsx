@@ -17,7 +17,7 @@ import {
   Payment,
   Note,
 } from "../interfaces";
-import { bookSlot, getSlots, holdSlot } from "../api/services/slotsService";
+import { getSlots, holdSlot } from "../api/services/slotsService";
 import { generateContract } from "../api/services/contractService";
 import { createNote } from "../api/services/notesService";
 import QRCode from "react-qr-code";
@@ -428,8 +428,6 @@ const ContractsAddPage = () => {
         await Promise.all(promises);
       }
       setContract(contract);
-
-      await bookSlot({ slotId: held.id, contractId: contract.id });
     } catch (error) {
       console.error("Error generating contract:", error);
     }

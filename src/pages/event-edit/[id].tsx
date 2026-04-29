@@ -29,6 +29,9 @@ interface EventFormValues {
   serviceStartsAt: string;
   serviceEndsAt: string;
   delegateName: string;
+  photoCount: string;
+  printTemplate: string;
+  decorativeIcon: string;
 }
 
 const validationSchema = yup.object().shape({
@@ -43,6 +46,9 @@ const validationSchema = yup.object().shape({
   serviceStartsAt: yup.string().required("La fecha de inicio es requerida"),
   serviceEndsAt: yup.string().required("La fecha de fin es requerida"),
   delegateName: yup.string().optional(),
+  photoCount: yup.number().integer().min(1).optional(),
+  printTemplate: yup.string().optional(),
+  decorativeIcon: yup.string().optional(),
 });
 
 const toLocalDatetimeValue = (isoStr: string) => {
@@ -77,6 +83,9 @@ const EventEdit = () => {
       serviceStartsAt: "",
       serviceEndsAt: "",
       delegateName: "",
+      photoCount: "",
+      printTemplate: "",
+      decorativeIcon: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -92,6 +101,9 @@ const EventEdit = () => {
         serviceStartsAt: new Date(values.serviceStartsAt).toISOString(),
         serviceEndsAt: new Date(values.serviceEndsAt).toISOString(),
         delegateName: values.delegateName,
+        ...(values.photoCount ? { photoCount: Number(values.photoCount) } : {}),
+        ...(values.printTemplate ? { printTemplate: values.printTemplate } : {}),
+        ...(values.decorativeIcon ? { decorativeIcon: values.decorativeIcon } : {}),
       };
 
       try {
@@ -127,8 +139,10 @@ const EventEdit = () => {
             serviceStartsAt: toLocalDatetimeValue(event.serviceStartsAt),
             serviceEndsAt: toLocalDatetimeValue(event.serviceEndsAt),
             delegateName: event.delegateName || "",
+            photoCount: event.photoCount != null ? String(event.photoCount) : "",
+            printTemplate: event.printTemplate || "",
+            decorativeIcon: event.decorativeIcon || "",
           });
-          setSearchTerm(event.name || "");
         } catch (error) {
           console.error("Error fetching event:", error);
           setToastMessage("Error al cargar el evento");
@@ -483,6 +497,61 @@ const EventEdit = () => {
                     {formik.errors.delegateName}
                   </Form.Control.Feedback>
                 </Form.Group>
+
+                <Row>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Numero de fotos</Form.Label>
+                      <Form.Control
+                        type="number"
+                        placeholder="Ej: 3"
+                        name="photoCount"
+                        min={1}
+                        value={formik.values.photoCount}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("photoCount")}
+                        isInvalid={formik.touched.photoCount && !!formik.errors.photoCount}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.photoCount}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Plantilla de impresion</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Ej: polaroid_2"
+                        name="printTemplate"
+                        value={formik.values.printTemplate}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("printTemplate")}
+                        isInvalid={formik.touched.printTemplate && !!formik.errors.printTemplate}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.printTemplate}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Icono decorativo</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Ej: rings"
+                        name="decorativeIcon"
+                        value={formik.values.decorativeIcon}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("decorativeIcon")}
+                        isInvalid={formik.touched.decorativeIcon && !!formik.errors.decorativeIcon}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.decorativeIcon}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
                 <Button
                   type="submit"

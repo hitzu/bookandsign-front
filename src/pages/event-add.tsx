@@ -6,11 +6,13 @@ import { useFormik } from "formik";
 import {
   Contract,
   CreateEventPayload,
+  EventThemes,
   GetEventTypesResponse,
 } from "../interfaces";
 import { createEvent } from "../api/services/eventsService";
 import { getContracts } from "../api/services/contractService";
 import { getEventTypes } from "../api/services/eventTypesService";
+import { getEventThemes } from "../api/services/eventThemesService";
 import * as yup from "yup";
 
 interface EventFormValues {
@@ -19,6 +21,7 @@ interface EventFormValues {
   description: string;
   key: string;
   eventType: string;
+  eventThemeId: string;
   honoreesNames: string;
   albumPhrase: string;
   venueName: string;
@@ -26,6 +29,9 @@ interface EventFormValues {
   serviceStartsAt: string;
   serviceEndsAt: string;
   delegateName: string;
+  photoCount: string;
+  printTemplate: string;
+  decorativeIcon: string;
 }
 
 const validationSchema = yup.object().shape({
@@ -34,6 +40,7 @@ const validationSchema = yup.object().shape({
   description: yup.string().optional(),
   key: yup.string().required("La clave del evento es requerida"),
   eventType: yup.string().required("El tipo de evento es requerido"),
+  eventThemeId: yup.string().optional(),
   honoreesNames: yup
     .string()
     .required("Los nombres de los festejados son requeridos"),
@@ -43,6 +50,9 @@ const validationSchema = yup.object().shape({
   serviceStartsAt: yup.string().required("La fecha de inicio es requerida"),
   serviceEndsAt: yup.string().required("La fecha de fin es requerida"),
   delegateName: yup.string().optional(),
+  photoCount: yup.number().integer().min(1).optional(),
+  printTemplate: yup.string().optional(),
+  decorativeIcon: yup.string().optional(),
 });
 
 const EventAdd = () => {
@@ -53,16 +63,21 @@ const EventAdd = () => {
   );
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [eventTypes, setEventTypes] = useState<GetEventTypesResponse[]>([]);
+  const [eventThemes, setEventThemes] = useState<EventThemes[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [contractsRes, eventTypesRes] = await Promise.all([
-          getContracts({ includeFinalized: false, excludeWithEvents: true }),
-          getEventTypes(),
-        ]);
+        const [contractsRes, eventTypesRes, eventThemesRes] = await Promise.all(
+          [
+            getContracts({ includeFinalized: false, excludeWithEvents: true }),
+            getEventTypes(),
+            getEventThemes(),
+          ],
+        );
         setContracts(contractsRes);
         setEventTypes(eventTypesRes);
+        setEventThemes(eventThemesRes);
       } catch (error) {
         console.error("Error fetching form data:", error);
       }
@@ -77,6 +92,7 @@ const EventAdd = () => {
       description: "",
       key: "",
       eventType: "",
+      eventThemeId: "",
       honoreesNames: "",
       albumPhrase: "",
       venueName: "",
@@ -84,6 +100,9 @@ const EventAdd = () => {
       serviceStartsAt: "",
       serviceEndsAt: "",
       delegateName: "",
+      photoCount: "",
+      printTemplate: "",
+      decorativeIcon: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -93,6 +112,9 @@ const EventAdd = () => {
         description: values.description,
         key: values.key,
         eventTypeId: Number(values.eventType),
+        ...(values.eventThemeId
+          ? { eventThemeId: Number(values.eventThemeId) }
+          : {}),
         honoreesNames: values.honoreesNames,
         albumPhrase: values.albumPhrase,
         venueName: values.venueName,
@@ -100,6 +122,9 @@ const EventAdd = () => {
         serviceStartsAt: new Date(values.serviceStartsAt).toISOString(),
         serviceEndsAt: new Date(values.serviceEndsAt).toISOString(),
         delegateName: values.delegateName,
+        ...(values.photoCount ? { photoCount: Number(values.photoCount) } : {}),
+        ...(values.printTemplate ? { printTemplate: values.printTemplate } : {}),
+        ...(values.decorativeIcon ? { decorativeIcon: values.decorativeIcon } : {}),
       };
 
       try {
@@ -204,6 +229,48 @@ const EventAdd = () => {
                       </Form.Select>
                       <Form.Control.Feedback type="invalid">
                         {formik.errors.eventType}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Tema del evento</Form.Label>
+                      <Form.Select
+                        name="eventThemeId"
+                        value={formik.values.eventThemeId}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("eventThemeId")}
+                      >
+                        <option value="">Sin tema...</option>
+                        {eventThemes.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Numero de fotos</Form.Label>
+                      <Form.Control
+                        type="number"
+                        placeholder="Ej: 3"
+                        name="photoCount"
+                        min={1}
+                        value={formik.values.photoCount}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("photoCount")}
+                        isInvalid={
+                          formik.touched.photoCount &&
+                          !!formik.errors.photoCount
+                        }
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.photoCount}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
@@ -387,6 +454,35 @@ const EventAdd = () => {
                       <Form.Control.Feedback type="invalid">
                         {formik.errors.serviceEndsAt}
                       </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Plantilla de impresion</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Ej: polaroid_2"
+                        name="printTemplate"
+                        value={formik.values.printTemplate}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("printTemplate")}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Icono decorativo</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Ej: rings"
+                        name="decorativeIcon"
+                        value={formik.values.decorativeIcon}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("decorativeIcon")}
+                      />
                     </Form.Group>
                   </Col>
                 </Row>
