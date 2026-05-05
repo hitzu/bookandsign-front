@@ -1,3 +1,23 @@
+const sanitizeBaseUrl = (value) => {
+  if (typeof value !== "string") return "";
+
+  const trimmed = value.trim().replace(/^['"]|['"]$/g, "");
+  if (!trimmed) return "";
+  if (!/^https?:\/\//i.test(trimmed)) return "";
+
+  return trimmed.replace(/\/+$/, "");
+};
+
+const defaultApiBaseUrl =
+  process.env.NODE_ENV === "production"
+    ? "https://bookandsign-api.onrender.com"
+    : "http://localhost:3000";
+
+const apiBaseUrl =
+  sanitizeBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL) ||
+  sanitizeBaseUrl(process.env.NEXT_PUBLIC_API_URL) ||
+  defaultApiBaseUrl;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -32,6 +52,14 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/backend/:path*",
+        destination: `${apiBaseUrl}/:path*`,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
@@ -48,11 +76,7 @@ const nextConfig = {
     // API URL configuration
     // Defaults to localhost:3000 for local development
     // Override with NEXT_PUBLIC_API_URL environment variable for production
-    NEXT_PUBLIC_API_URL:
-      process.env.NEXT_PUBLIC_API_URL ||
-      (process.env.NODE_ENV === "production"
-        ? "https://bookandsign-api.onrender.com"
-        : "http://localhost:3000"),
+    NEXT_PUBLIC_API_URL: apiBaseUrl,
   },
 };
 

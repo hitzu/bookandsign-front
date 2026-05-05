@@ -141,6 +141,6 @@ export const getEventGallerySessionV2 = async (
     `/sessions/${normalizedToken}`,
   );
 
-  return response.data
+  return response.data;
 };
 

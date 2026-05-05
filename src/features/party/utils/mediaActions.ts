@@ -1,4 +1,4 @@
-type ShareResult = "shared" | "copied" | "unsupported";
+export type ShareResult = "shared" | "copied" | "unsupported";
 
 const sanitizeSegment = (value: string) =>
   value
@@ -9,9 +9,46 @@ const sanitizeSegment = (value: string) =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 60);
 
-export const buildDownloadFilename = (eventName: string, photoIndex: number) => {
+const normalizeExtension = (extension: string) => {
+  const sanitized = extension.replace(/^\./, "").trim().toLowerCase();
+  return sanitized || "jpg";
+};
+
+const inferMimeTypeFromExtension = (extension: string) => {
+  switch (normalizeExtension(extension)) {
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "webp":
+      return "image/webp";
+    case "gif":
+      return "image/gif";
+    case "mp4":
+      return "video/mp4";
+    default:
+      return "application/octet-stream";
+  }
+};
+
+export const getFileExtensionFromUrl = (url: string, fallback = "jpg") => {
+  try {
+    const pathname = new URL(url).pathname;
+    const extension = pathname.split(".").pop();
+    return normalizeExtension(extension || fallback);
+  } catch (_error) {
+    return normalizeExtension(fallback);
+  }
+};
+
+export const buildDownloadFilename = (
+  eventName: string,
+  photoIndex: number,
+  extension = "jpg",
+) => {
   const safeEventName = sanitizeSegment(eventName || "evento");
-  return `brillipoint-${safeEventName}-${photoIndex + 1}.jpg`;
+  return `brillipoint-${safeEventName}-${photoIndex + 1}.${normalizeExtension(extension)}`;
 };
 
 export const downloadPhoto = async (url: string, filename: string) => {
@@ -27,6 +64,36 @@ export const downloadPhoto = async (url: string, filename: string) => {
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(objectUrl);
+};
+
+export const downloadFile = (file: File, filename?: string) => {
+  const objectUrl = URL.createObjectURL(file);
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = filename || file.name;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(objectUrl);
+};
+
+export const fetchRemoteFile = async (url: string, filename?: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("No se pudo descargar el archivo original");
+  }
+
+  const blob = await response.blob();
+  const fallbackExtension =
+    blob.type.split("/").pop() || getFileExtensionFromUrl(url, "jpg");
+  const resolvedFileName =
+    filename || `brillipoint.${getFileExtensionFromUrl(url, fallbackExtension)}`;
+  const resolvedMimeType =
+    blob.type && blob.type !== "application/octet-stream"
+      ? blob.type
+      : inferMimeTypeFromExtension(getFileExtensionFromUrl(url, fallbackExtension));
+
+  return new File([blob], resolvedFileName, { type: resolvedMimeType });
 };
 
 export const copyToClipboard = async (value: string): Promise<boolean> => {
@@ -68,15 +135,10 @@ export const sharePhoto = async (
   if (typeof navigator === "undefined") return "unsupported";
 
   try {
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    const file = new File([blob], "brillipoint.jpg", { type: blob.type });
+    const file = await fetchRemoteFile(imageUrl);
 
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: `Recuerdo de ${nombreEvento}`,
-      });
+    const result = await shareFile(file, `Recuerdo de ${nombreEvento}`);
+    if (result === "shared") {
       return "shared";
     }
   } catch (_error) {
@@ -84,6 +146,51 @@ export const sharePhoto = async (
   }
 
   window.open(imageUrl, "_blank");
+  return "unsupported";
+};
+
+export const shareFile = async (
+  file: File,
+  title: string,
+): Promise<ShareResult> => {
+  if (typeof navigator === "undefined") return "unsupported";
+  if (!navigator.share) return "unsupported";
+
+  const shareDataWithTitle = {
+    files: [file],
+    title,
+  };
+  const shareDataMinimal = {
+    files: [file],
+  };
+
+  try {
+    const canShareFiles = navigator.canShare?.(shareDataMinimal);
+    const canShareWithTitle = navigator.canShare?.(shareDataWithTitle);
+
+    if (canShareWithTitle !== false) {
+      await navigator.share(shareDataWithTitle);
+      return "shared";
+    }
+
+    if (canShareFiles !== false) {
+      await navigator.share(shareDataMinimal);
+      return "shared";
+    }
+  } catch (error) {
+    try {
+      await navigator.share(shareDataMinimal);
+      return "shared";
+    } catch (_retryError) {
+      console.warn("[mediaActions] Native file share failed", {
+        fileName: file.name,
+        fileType: file.type,
+        error,
+      });
+      return "unsupported";
+    }
+  }
+
   return "unsupported";
 };
 

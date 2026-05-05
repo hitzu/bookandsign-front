@@ -5,6 +5,12 @@ export interface SessionPhoto {
   position: number;
 }
 
+export interface SessionEventTheme extends EventThemes {
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
 export interface SessionEventData {
   honoreesNames: string;
   date: string;
@@ -12,12 +18,13 @@ export interface SessionEventData {
   albumPhase?: string;
   eventToken?: string;
   eventType?: string;
-  eventTheme?: EventThemes
+  eventTheme?: SessionEventTheme;
 }
 
 export interface SessionResponse {
   sessionToken: string;
-  status: 'active' | 'complete';
+  status: "active" | "complete";
+  gifUrl?: string | null;
   photos: SessionPhoto[];
   event: SessionEventData;
 }

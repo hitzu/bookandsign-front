@@ -1,7 +1,15 @@
 import axios from "axios";
 
+const getApiBaseUrl = () => {
+  if (typeof window !== "undefined") {
+    return "/api/backend";
+  }
+
+  return process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL;
+};
+
 const axiosInstanceWithToken = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: getApiBaseUrl(),
   timeout: 50000,
 });
 
@@ -31,7 +39,7 @@ axiosInstanceWithToken.interceptors.response.use(
 );
 
 const axiosInstanceWithoutToken = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: getApiBaseUrl(),
   timeout: 10000,
 });
 

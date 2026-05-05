@@ -310,3 +310,114 @@
 }
 
 .sheetSocialBtn:active { transform: scale(0.9); }
+
+/* ── Variant: compact (presencia discreta en sesión) ── */
+
+.compactCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(252, 231, 243, 0.92));
+  border: 1px solid rgba(236, 72, 153, 0.12);
+  box-shadow: 0 10px 24px rgba(236, 72, 153, 0.08);
+}
+
+.compactCopy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.compactActions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.compactEyebrow {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(190, 24, 93, 0.46);
+}
+
+.compactTitulo {
+  margin: 0;
+  color: #9d174d;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.compactSubtitulo {
+  margin: 0;
+  color: rgba(91, 33, 72, 0.64);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.compactWaBtn {
+  flex-shrink: 0;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.24);
+}
+
+.compactSocialRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compactSocialBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(236, 72, 153, 0.14);
+  color: #ec4899;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.08);
+}
+
+@media (max-width: 480px) {
+  .compactCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .compactActions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .compactSocialRow {
+    justify-content: center;
+  }
+
+  .compactWaBtn {
+    width: 100%;
+  }
+}

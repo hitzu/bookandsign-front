@@ -8,8 +8,9 @@ import {
 } from "../../../interfaces/eventGallery";
 import styles from "@assets/css/party-public.module.css";
 import { getEventGallerySessionV2 } from "../../../api/services/partyPublicService";
+import { buildSessionItems, getPhotoItems } from "../utils/buildSessionItems";
 import { formatSplashDate } from "../utils/formatSplashDate";
-import { preloadImages } from "../utils/preloadImages";
+import { SessionItem } from "../types/session";
 
 type PageState = "loading" | "ready" | "empty" | "error";
 const SPLASH_DURATION_MS = 3200;
@@ -30,7 +31,7 @@ const EmptyStateEnCamino = ({
         const { data } = await axiosInstanceWithoutToken.get<SessionResponse>(
           `/sessions/${sessionToken}`,
         );
-        if (data.photos.length > 0) window.location.reload();
+        if (buildSessionItems(data).length > 0) window.location.reload();
       } catch {
         // ignorar
       }
@@ -85,6 +86,7 @@ export default function MisFotosPage({
   sessionToken: string;
 }) {
   const [pageState, setPageState] = useState<PageState>("loading");
+  const [items, setItems] = useState<SessionItem[]>([]);
   const [photos, setPhotos] = useState<SessionPhoto[]>([]);
   const [eventData, setEventData] = useState<SessionEventData | null>(null);
   const [showSplash, setShowSplash] = useState(true);
@@ -120,22 +122,39 @@ export default function MisFotosPage({
   const fetchSession = async () => {
     try {
       setSplashStep("Buscando tu sesión de fotos");
-      const { photos, event } = await getEventGallerySessionV2(sessionToken);
-      setEventData(event);
+      const session = await getEventGallerySessionV2(sessionToken);
+      const sessionItems = buildSessionItems(session);
+      const orderedPhotos: SessionPhoto[] = getPhotoItems(sessionItems).map(
+        (item) => ({
+          url: item.src,
+          position: item.photoPosition ?? item.index,
+        }),
+      );
 
-      if (photos.length === 0) {
+      setEventData(session?.event ?? null);
+      setItems(sessionItems);
+
+      if (sessionItems.length === 0) {
+        setItems([]);
         setPhotos([]);
         setPageState("empty");
         completeSplashLoading(true);
         return;
       }
 
-      setSplashStep("Revelando tus fotos");
-      await preloadImages(photos.map((photo) => photo.url));
-      setPhotos(photos);
+      setSplashStep(
+        sessionItems.some((item) => item.type === "gif")
+          ? "Preparando tu video"
+          : "Revelando tus fotos",
+      );
+      setPhotos(orderedPhotos);
       setPageState("ready");
       completeSplashLoading(true);
-    } catch {
+    } catch (error) {
+      console.error("[MisFotosPage] Failed to load session", {
+        sessionToken,
+        error,
+      });
       setPageState("error");
       completeSplashLoading(false);
     }
@@ -185,6 +204,7 @@ export default function MisFotosPage({
 
   return (
     <Carousel
+      items={items}
       photos={photos}
       eventData={eventData!}
       eventToken={eventData?.eventToken}

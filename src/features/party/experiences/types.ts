@@ -1,5 +1,6 @@
 import { ComponentType } from "react";
 import { GallerySessionItem, SessionEventData, SessionPhoto } from "../../../interfaces/eventGallery";
+import { SessionItem } from "../types/session";
 
 export interface SplashProps {
   honoreesNames?: string;
@@ -12,6 +13,7 @@ export interface SplashProps {
 
 export interface CarouselProps {
   photos: SessionPhoto[];
+  items?: SessionItem[];
   eventData: SessionEventData;
   eventToken?: string;
   sessionToken?: string;
