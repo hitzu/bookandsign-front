@@ -1,5 +1,10 @@
 export type ShareResult = "shared" | "copied" | "unsupported";
 
+type ShareUrlOptions = {
+  nativeOnly?: boolean;
+  text?: string;
+};
+
 const sanitizeSegment = (value: string) =>
   value
     .toLowerCase()
@@ -211,14 +216,25 @@ export const shareFile = async (
   return "unsupported";
 };
 
-export const shareUrl = async (url: string, title: string): Promise<ShareResult> => {
+export const shareUrl = async (
+  url: string,
+  title: string,
+  options: ShareUrlOptions = {},
+): Promise<ShareResult> => {
   if (typeof navigator === "undefined") return "unsupported";
+  const { nativeOnly = false, text } = options;
 
   try {
     if (navigator.share) {
-      await navigator.share({ title, url });
+      await navigator.share({
+        title,
+        url,
+        ...(text ? { text } : {}),
+      });
       return "shared";
     }
+
+    if (nativeOnly) return "unsupported";
 
     const copied = await copyToClipboard(url);
     return copied ? "copied" : "unsupported";

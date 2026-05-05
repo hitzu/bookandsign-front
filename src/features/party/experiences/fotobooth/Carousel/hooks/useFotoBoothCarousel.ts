@@ -7,13 +7,18 @@ import {
   downloadFile,
   fetchRemoteFile,
   getFileExtensionFromUrl,
-  shareFile,
+  shareUrl,
 } from "../../../../utils/mediaActions";
 import { AnalyticsAction } from "../../../../../../interfaces";
 import { trackEvent } from "../../../../../../api/services/eventAnalyticsService";
 import { useFotoBoothCarouselStore } from "../stores/useFotoBoothCarouselStore";
 import { buildFallbackItems } from "../types";
 import { appendSourceToPath } from "../../../../utils/sourceTracking";
+import {
+  buildSessionShareUrl,
+  buildWhatsappShareText,
+  buildWhatsappShareUrl,
+} from "../../../../utils/sessionShare";
 
 const SWIPE_THRESHOLD_PX = 40;
 
@@ -47,16 +52,11 @@ export const useFotoBoothCarousel = ({
     gifHintVisible,
     isGeneratingAsset,
     isSuccessCtaOpen,
-    shareFallbackFile,
-    shareFallbackPreviewUrl,
-    isShareFallbackOpen,
     itemStates,
     setIndex,
     setIsGeneratingAsset,
     openSuccessCta,
     closeSuccessCta,
-    openShareFallback,
-    closeShareFallback,
     setGifHintVisible,
     markItemLoaded,
     markItemError,
@@ -121,28 +121,6 @@ export const useFotoBoothCarousel = ({
     openSuccessCta();
   };
 
-  const handleShareSuccess = async (file: File) => {
-    if (!activeItem) return;
-
-    const shareTitle = `${eventData.honoreesNames} · original`;
-    const shareResult = await shareFile(file, shareTitle);
-
-    if (shareResult === "shared") {
-      trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
-        itemIndex: index,
-        itemType: activeItem.type,
-        effectName: activeEffect,
-        variant: "original",
-        surface: "session_carousel",
-      });
-      openSuccessCta();
-      return;
-    }
-
-    const previewUrl = URL.createObjectURL(file);
-    openShareFallback(file, previewUrl);
-  };
-
   const goTo = (nextIndex: number) => {
     if (!canNavigate) return;
 
@@ -178,27 +156,61 @@ export const useFotoBoothCarousel = ({
   };
 
   const handleShare = async () => {
-    if (!activeItem) return;
+    if (typeof window === "undefined" || !sessionToken) return;
 
     setIsGeneratingAsset(true);
     try {
-      const file = await buildOriginalItemFile();
-      await handleShareSuccess(file);
+      const sessionShareUrl = buildSessionShareUrl({
+        origin: window.location.origin,
+        sessionToken,
+        source,
+      });
+      const shareText = buildWhatsappShareText({
+        eventName: eventData.honoreesNames,
+        url: sessionShareUrl,
+      });
+
+      const nativeShareResult = await shareUrl(
+        sessionShareUrl,
+        eventData.honoreesNames ?? "Brillipoint",
+        {
+          nativeOnly: true,
+          text: shareText,
+        },
+      );
+
+      if (nativeShareResult === "shared") {
+        trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
+          channel: "native",
+          surface: "session_link",
+        });
+        return;
+      }
+
+      const whatsappWindow = window.open(
+        buildWhatsappShareUrl(shareText),
+        "_blank",
+        "noopener,noreferrer",
+      );
+
+      if (whatsappWindow) {
+        trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
+          channel: "whatsapp",
+          surface: "session_link",
+        });
+        return;
+      }
+
+      const copied = await copyToClipboard(sessionShareUrl);
+      if (copied) {
+        trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
+          channel: "copy_link",
+          surface: "session_link",
+        });
+      }
     } finally {
       setIsGeneratingAsset(false);
     }
-  };
-
-  const handleFallbackDownload = () => {
-    if (!shareFallbackFile) return;
-    downloadFile(shareFallbackFile);
-    closeShareFallback();
-    openSuccessCta();
-  };
-
-  const handleCopySessionLink = async (): Promise<boolean> => {
-    if (typeof window === "undefined") return false;
-    return copyToClipboard(window.location.href);
   };
 
   const handleOpenGallery = () => {
@@ -214,13 +226,10 @@ export const useFotoBoothCarousel = ({
     activeItemState,
     canNavigate,
     canOpenGallery,
-    closeShareFallback,
     closeSuccessCta,
     formattedDate,
     gifHintVisible,
     goTo,
-    handleCopySessionLink,
-    handleFallbackDownload,
     handleItemError: markItemError,
     handleItemLoad: markItemLoaded,
     handleOpenGallery,
@@ -231,10 +240,8 @@ export const useFotoBoothCarousel = ({
     handleShare,
     index,
     isGeneratingAsset,
-    isShareFallbackOpen,
     isSuccessCtaOpen,
     items: normalizedItems,
     setGifHintVisible,
-    shareFallbackPreviewUrl,
   };
 };
