@@ -2,7 +2,7 @@ import { PointerEvent, useRef } from "react";
 import { useRouter } from "next/router";
 import { CarouselProps } from "../../../types";
 import {
-  buildDownloadFilename,
+  buildUniqueDownloadFilename,
   copyToClipboard,
   downloadFile,
   fetchRemoteFile,
@@ -96,9 +96,8 @@ export const useFotoBoothCarousel = ({
 
     return fetchRemoteFile(
       activeItem.src,
-      buildDownloadFilename(
-        eventData.honoreesNames,
-        activeItem.index,
+      buildUniqueDownloadFilename(
+        "brillipoint",
         getFileExtensionFromUrl(
           activeItem.src,
           activeItem.type === "gif" ? "gif" : "jpg",

@@ -51,6 +51,23 @@ export const buildDownloadFilename = (
   return `brillipoint-${safeEventName}-${photoIndex + 1}.${normalizeExtension(extension)}`;
 };
 
+const buildUniqueId = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID().replace(/-/g, "").slice(0, 10);
+  }
+
+  return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+};
+
+export const buildUniqueDownloadFilename = (
+  prefix = "brillipoint",
+  extension = "jpg",
+) => {
+  const normalizedPrefix = sanitizeSegment(prefix || "brillipoint").replace(/-/g, "_");
+  const safePrefix = normalizedPrefix || "brillipoint";
+  return `${safePrefix}_${buildUniqueId()}.${normalizeExtension(extension)}`;
+};
+
 export const downloadPhoto = async (url: string, filename: string) => {
   const response = await fetch(url);
   if (!response.ok) throw new Error("No se pudo descargar la foto");
