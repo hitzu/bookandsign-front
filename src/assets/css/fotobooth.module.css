@@ -777,6 +777,12 @@
   transform: scale(0.97);
 }
 
+.btnSave:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
+}
+
 .btnShare {
   flex: 1;
   height: 52px;
@@ -799,6 +805,13 @@
 .btnShare:active {
   transform: scale(0.97);
   box-shadow: 0 2px 8px rgba(236, 72, 153, 0.2);
+}
+
+.btnShare:disabled {
+  opacity: 0.8;
+  cursor: wait;
+  transform: none;
+  box-shadow: 0 6px 24px rgba(236, 72, 153, 0.2);
 }
 
 .sessionInlineCta {

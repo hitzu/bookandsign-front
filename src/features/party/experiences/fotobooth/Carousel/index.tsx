@@ -4,7 +4,6 @@ import { CarouselProps } from "../../types";
 import { useFotoBoothCarousel } from "./hooks/useFotoBoothCarousel";
 import { useFotoBoothCarouselEffects } from "./hooks/useFotoBoothCarouselEffects";
 import ActionBar from "./ui/ActionBar";
-import AssetPickerSheet from "./ui/AssetPickerSheet";
 import CarouselHeader from "./ui/CarouselHeader";
 import ItemStage from "./ui/ItemStage";
 import SessionInlineCta from "./ui/SessionInlineCta";
@@ -18,7 +17,6 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     activeItemState,
     canNavigate,
     canOpenGallery,
-    closePicker,
     closeShareFallback,
     closeSuccessCta,
     gifHintVisible,
@@ -33,17 +31,13 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     handleRetry,
     handleSave,
     handleShare,
-    handleVariantSelect,
     index,
     isGeneratingAsset,
-    isPickerOpen,
     isShareFallbackOpen,
     isSuccessCtaOpen,
     items,
-    pickerNote,
     setGifHintVisible,
     shareFallbackPreviewUrl,
-    supportsExport,
   } = useFotoBoothCarousel(props);
 
   useFotoBoothCarouselEffects({
@@ -83,23 +77,12 @@ const FotoBoothCarousel = (props: CarouselProps) => {
       />
 
       <ActionBar
+        isBusy={isGeneratingAsset}
         onSave={handleSave}
         onShare={handleShare}
       />
 
       <SessionInlineCta eventName={props.eventData.honoreesNames} />
-
-      <AssetPickerSheet
-        activeEffect={activeEffect}
-        activeItem={activeItem}
-        eventData={props.eventData}
-        isGenerating={isGeneratingAsset}
-        isOpen={isPickerOpen}
-        note={pickerNote}
-        onClose={closePicker}
-        onSelectVariant={handleVariantSelect}
-        supportsStaticExport={supportsExport}
-      />
 
       <SuccessCtaModal
         eventName={props.eventData.honoreesNames}

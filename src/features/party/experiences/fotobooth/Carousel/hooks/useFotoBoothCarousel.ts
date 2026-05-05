@@ -11,10 +11,8 @@ import {
 } from "../../../../utils/mediaActions";
 import { AnalyticsAction } from "../../../../../../interfaces";
 import { trackEvent } from "../../../../../../api/services/eventAnalyticsService";
-import { ExportVariant } from "../../../../types/session";
 import { useFotoBoothCarouselStore } from "../stores/useFotoBoothCarouselStore";
 import { buildFallbackItems } from "../types";
-import { generateStaticExportAsset } from "../export/generateStaticExportAsset";
 
 const SWIPE_THRESHOLD_PX = 40;
 
@@ -45,8 +43,6 @@ export const useFotoBoothCarousel = ({
     index,
     activeEffect,
     gifHintVisible,
-    pickerAction,
-    isPickerOpen,
     isGeneratingAsset,
     isSuccessCtaOpen,
     shareFallbackFile,
@@ -54,8 +50,6 @@ export const useFotoBoothCarousel = ({
     isShareFallbackOpen,
     itemStates,
     setIndex,
-    openPicker,
-    closePicker,
     setIsGeneratingAsset,
     openSuccessCta,
     closeSuccessCta,
@@ -113,33 +107,31 @@ export const useFotoBoothCarousel = ({
     );
   };
 
-  const handleDownloadSuccess = (file: File, variant: ExportVariant) => {
+  const handleDownloadSuccess = (file: File) => {
     if (!activeItem) return;
 
     downloadFile(file);
-    closePicker();
     trackSessionEvent(AnalyticsAction.DOWNLOAD, {
       itemIndex: index,
       itemType: activeItem.type,
       effectName: activeEffect,
-      variant,
+      variant: "original",
     });
     openSuccessCta();
   };
 
-  const handleShareSuccess = async (file: File, variant: ExportVariant) => {
+  const handleShareSuccess = async (file: File) => {
     if (!activeItem) return;
 
-    const shareTitle = `${eventData.honoreesNames} · ${variant}`;
+    const shareTitle = `${eventData.honoreesNames} · original`;
     const shareResult = await shareFile(file, shareTitle);
 
     if (shareResult === "shared") {
-      closePicker();
       trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
         itemIndex: index,
         itemType: activeItem.type,
         effectName: activeEffect,
-        variant,
+        variant: "original",
         surface: "session_carousel",
       });
       openSuccessCta();
@@ -147,7 +139,6 @@ export const useFotoBoothCarousel = ({
     }
 
     const previewUrl = URL.createObjectURL(file);
-    closePicker();
     openShareFallback(file, previewUrl);
   };
 
@@ -176,55 +167,22 @@ export const useFotoBoothCarousel = ({
   const handleSave = async () => {
     if (!activeItem) return;
 
-    if (activeItem.type === "gif") {
+    setIsGeneratingAsset(true);
+    try {
       const file = await buildOriginalItemFile();
-      handleDownloadSuccess(file, "original");
-      return;
+      handleDownloadSuccess(file);
+    } finally {
+      setIsGeneratingAsset(false);
     }
-
-    openPicker("download");
   };
 
   const handleShare = async () => {
     if (!activeItem) return;
 
-    if (activeItem.type === "gif") {
-      const file = await buildOriginalItemFile();
-      await handleShareSuccess(file, "original");
-      return;
-    }
-
-    openPicker("share");
-  };
-
-  const handleVariantSelect = async (variant: ExportVariant) => {
-    if (
-      !activeItem ||
-      !pickerAction ||
-      activeItem.type !== "photo"
-    ) {
-      return;
-    }
-
     setIsGeneratingAsset(true);
-
     try {
-      const generatedFile =
-        variant === "original" && activeEffect === "original"
-          ? await buildOriginalItemFile()
-          : await generateStaticExportAsset({
-              effect: activeEffect,
-              eventData,
-              item: activeItem,
-              variant,
-            });
-
-      if (pickerAction === "download") {
-        handleDownloadSuccess(generatedFile, variant);
-        return;
-      }
-
-      await handleShareSuccess(generatedFile, variant);
+      const file = await buildOriginalItemFile();
+      await handleShareSuccess(file);
     } finally {
       setIsGeneratingAsset(false);
     }
@@ -253,7 +211,6 @@ export const useFotoBoothCarousel = ({
     activeItemState,
     canNavigate,
     canOpenGallery,
-    closePicker,
     closeShareFallback,
     closeSuccessCta,
     formattedDate,
@@ -269,16 +226,12 @@ export const useFotoBoothCarousel = ({
     handleRetry: retryItem,
     handleSave,
     handleShare,
-    handleVariantSelect,
     index,
     isGeneratingAsset,
-    isPickerOpen,
     isShareFallbackOpen,
     isSuccessCtaOpen,
     items: normalizedItems,
-    pickerNote: null,
     setGifHintVisible,
     shareFallbackPreviewUrl,
-    supportsExport: activeItem?.type === "photo",
   };
 };

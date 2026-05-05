@@ -2,17 +2,19 @@ import React from "react";
 import styles from "@assets/css/fotobooth.module.css";
 
 type ActionBarProps = {
+  isBusy?: boolean;
   onSave: () => void | Promise<void>;
   onShare: () => void | Promise<void>;
 };
 
-const ActionBar = ({ onSave, onShare }: ActionBarProps) => (
+const ActionBar = ({ isBusy = false, onSave, onShare }: ActionBarProps) => (
   <div className={styles.actionRow}>
     <button
       type="button"
       className={styles.btnSave}
       onClick={onSave}
       aria-label="Guardar foto"
+      disabled={isBusy}
     >
       <svg
         width="16"
@@ -28,7 +30,7 @@ const ActionBar = ({ onSave, onShare }: ActionBarProps) => (
         <polyline points="7 10 12 15 17 10" />
         <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
-      Guardar
+      {isBusy ? "Procesando..." : "Guardar"}
     </button>
 
     <button
@@ -36,6 +38,7 @@ const ActionBar = ({ onSave, onShare }: ActionBarProps) => (
       className={styles.btnShare}
       onClick={onShare}
       aria-label="Compartir foto"
+      disabled={isBusy}
     >
       <svg
         width="16"
@@ -50,7 +53,7 @@ const ActionBar = ({ onSave, onShare }: ActionBarProps) => (
         <line x1="22" y1="2" x2="11" y2="13" />
         <polygon points="22 2 15 22 11 13 2 9 22 2" />
       </svg>
-      Compartir
+      {isBusy ? "Procesando..." : "Compartir"}
     </button>
 
   </div>

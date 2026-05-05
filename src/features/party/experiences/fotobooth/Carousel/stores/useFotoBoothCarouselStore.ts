@@ -1,13 +1,11 @@
 import { create } from "zustand";
 import { EffectName } from "../../../../types/session";
-import { CtaSource, ItemLoadState } from "../types";
+import { ItemLoadState } from "../types";
 
 type FotoBoothCarouselState = {
   index: number;
   activeEffect: EffectName;
   gifHintVisible: boolean;
-  pickerAction: CtaSource | null;
-  isPickerOpen: boolean;
   isGeneratingAsset: boolean;
   isSuccessCtaOpen: boolean;
   shareFallbackFile: File | null;
@@ -16,8 +14,6 @@ type FotoBoothCarouselState = {
   itemStates: Record<number, ItemLoadState>;
   setIndex: (index: number) => void;
   setActiveEffect: (effect: EffectName) => void;
-  openPicker: (action: CtaSource) => void;
-  closePicker: () => void;
   setIsGeneratingAsset: (isGeneratingAsset: boolean) => void;
   openSuccessCta: () => void;
   closeSuccessCta: () => void;
@@ -34,8 +30,6 @@ const initialState = {
   index: 0,
   activeEffect: "original" as EffectName,
   gifHintVisible: false,
-  pickerAction: null as CtaSource | null,
-  isPickerOpen: false,
   isGeneratingAsset: false,
   isSuccessCtaOpen: false,
   shareFallbackFile: null as File | null,
@@ -51,8 +45,7 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
       set({
         index,
         activeEffect: "original",
-        isPickerOpen: false,
-        pickerAction: null,
+        isGeneratingAsset: false,
         isSuccessCtaOpen: false,
         isShareFallbackOpen: false,
         shareFallbackFile: null,
@@ -60,24 +53,10 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
         gifHintVisible: false,
       }),
     setActiveEffect: (activeEffect) => set({ activeEffect }),
-    openPicker: (pickerAction) =>
-      set({
-        pickerAction,
-        isPickerOpen: true,
-        isSuccessCtaOpen: false,
-      }),
-    closePicker: () =>
-      set({
-        isPickerOpen: false,
-        pickerAction: null,
-        isGeneratingAsset: false,
-      }),
     setIsGeneratingAsset: (isGeneratingAsset) => set({ isGeneratingAsset }),
     openSuccessCta: () =>
       set({
         isSuccessCtaOpen: true,
-        isPickerOpen: false,
-        pickerAction: null,
         isShareFallbackOpen: false,
         shareFallbackFile: null,
         shareFallbackPreviewUrl: null,
