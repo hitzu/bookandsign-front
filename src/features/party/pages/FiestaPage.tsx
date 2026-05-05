@@ -5,11 +5,14 @@ import {
   GallerySessionItem,
   SessionEventData,
 } from "../../../interfaces/eventGallery";
+import { AnalyticsAction } from "../../../interfaces";
+import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import { shareUrl } from "../utils/mediaActions";
 import styles from "@assets/css/fotobooth-overview.module.css";
 import { getEventGalleryV2 } from "../../../api/services/partyPublicService";
 import { formatSplashDate } from "../utils/formatSplashDate";
 import { preloadImages } from "../utils/preloadImages";
+import { appendSourceToPath, readSourceFromRouter } from "../utils/sourceTracking";
 
 const SPLASH_DURATION_MS = 3200;
 const CRITICAL_COVER_COUNT = 10;
@@ -32,6 +35,8 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   const splashDone = useRef(false);
   const assetsReady = useRef(false);
   const readyRevealDone = useRef(false);
+  const hasTrackedGalleryOpened = useRef(false);
+  const source = readSourceFromRouter(router);
 
   const finishSplashIfReady = () => {
     if (splashDone.current && assetsReady.current && readyRevealDone.current) {
@@ -116,6 +121,19 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
     await shareUrl(url, eventData?.honoreesNames ?? "Evento");
   };
 
+  useEffect(() => {
+    if (!eventToken || loading || error || hasTrackedGalleryOpened.current) return;
+
+    hasTrackedGalleryOpened.current = true;
+    trackEvent(AnalyticsAction.GALLERY_OPENED, eventToken, {
+      metadata: {
+        source,
+        sessionCount: sessions.length,
+        isEmpty,
+      },
+    });
+  }, [error, eventToken, isEmpty, loading, sessions.length, source]);
+
   const { Splash, Overview } = getExperience(eventData?.eventTheme?.key);
   const splashDate = formatSplashDate(eventData?.date);
 
@@ -157,7 +175,10 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
       eventToken={eventToken}
       sessions={sessions}
       eventData={eventData}
-      onSelectSession={(token) => router.push(`/mis-fotos/${token}`)}
+      source={source}
+      onSelectSession={(token) =>
+        router.push(appendSourceToPath(`/mis-fotos/${token}`, source))
+      }
       onShare={handleShare}
     />
   );

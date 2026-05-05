@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import { axiosInstanceWithoutToken } from "../../../api/config/axiosConfig";
 import { getExperience } from "../experiences";
 import {
@@ -11,6 +12,7 @@ import { getEventGallerySessionV2 } from "../../../api/services/partyPublicServi
 import { buildSessionItems, getPhotoItems } from "../utils/buildSessionItems";
 import { formatSplashDate } from "../utils/formatSplashDate";
 import { SessionItem } from "../types/session";
+import { readSourceFromRouter } from "../utils/sourceTracking";
 
 type PageState = "loading" | "ready" | "empty" | "error";
 const SPLASH_DURATION_MS = 3200;
@@ -85,6 +87,7 @@ export default function MisFotosPage({
 }: {
   sessionToken: string;
 }) {
+  const router = useRouter();
   const [pageState, setPageState] = useState<PageState>("loading");
   const [items, setItems] = useState<SessionItem[]>([]);
   const [photos, setPhotos] = useState<SessionPhoto[]>([]);
@@ -96,6 +99,7 @@ export default function MisFotosPage({
   const splashDone = useRef(false);
   const assetsReady = useRef(false);
   const readyRevealDone = useRef(false);
+  const source = readSourceFromRouter(router);
 
   const finishSplashIfReady = () => {
     if (splashDone.current && assetsReady.current && readyRevealDone.current) {
@@ -209,6 +213,7 @@ export default function MisFotosPage({
       eventData={eventData!}
       eventToken={eventData?.eventToken}
       sessionToken={sessionToken}
+      source={source}
     />
   );
 }

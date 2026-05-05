@@ -47,6 +47,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     index,
     items,
     photos: props.photos,
+    source: props.source,
     shareFallbackPreviewUrl,
     sessionToken: props.sessionToken,
     setGifHintVisible,

@@ -8,8 +8,10 @@ export enum AnalyticsAction {
   SHARE_CONFIRM_OPEN = "share_confirm_open",
   SHARE_CONFIRM_EXECUTED = "share_confirm_executed",
   GALLERY_VIEW = "gallery_view",
+  GALLERY_OPENED = "gallery_opened",
   GALLERY_EMPTY_VIEW = "gallery_empty_view",
   GALLERY_SESSION_CLICK = "gallery_session_click",
   SESSION_VIEW = "session_view",
+  SESSION_OPENED = "session_opened",
   PHOTO_VIEW = "photo_view",
 }

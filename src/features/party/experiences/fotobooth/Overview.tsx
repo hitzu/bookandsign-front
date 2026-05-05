@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "@assets/css/fotobooth-overview.module.css";
 import { SocialMediaCTA } from "../../components/SocialMediaCTA";
 import {
@@ -180,6 +180,7 @@ const FotoBoothOverview = ({
   eventToken,
   sessions,
   eventData,
+  source,
   onSelectSession,
   onShare,
 }: OverviewProps) => {
@@ -191,7 +192,6 @@ const FotoBoothOverview = ({
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [showToast, setShowToast] = useState(false);
-  const hasTrackedView = useRef(false);
 
   useEffect(() => {
     if (coverUrls.length <= 1) return;
@@ -203,29 +203,11 @@ const FotoBoothOverview = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slideCount]);
 
-  useEffect(() => {
-    if (!eventToken || hasTrackedView.current) return;
-
-    hasTrackedView.current = true;
-    trackEvent(
-      isEmpty
-        ? AnalyticsAction.GALLERY_EMPTY_VIEW
-        : AnalyticsAction.GALLERY_VIEW,
-      eventToken,
-      {
-        metadata: {
-          entryPoint: "general_qr",
-          sessionCount: sessions.length,
-        },
-      },
-    );
-  }, [eventToken, isEmpty, sessions.length]);
-
   const handleShare = async () => {
     await onShare();
     trackEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, eventToken, {
       metadata: {
-        entryPoint: "general_qr",
+        source,
         surface: "gallery_overview",
       },
     });
@@ -247,7 +229,7 @@ const FotoBoothOverview = ({
     trackEvent(AnalyticsAction.GALLERY_SESSION_CLICK, eventToken, {
       sessionId: session.sessionToken,
       metadata: {
-        entryPoint: "general_qr",
+        source,
         sessionIndex,
         photoCount: session.photoCount,
       },
@@ -258,7 +240,7 @@ const FotoBoothOverview = ({
   const handleGalleryWaClick = () => {
     trackEvent(AnalyticsAction.CTA_WA_GALLERY, eventToken, {
       metadata: {
-        entryPoint: "general_qr",
+        source,
         surface: "gallery_overview",
       },
     });

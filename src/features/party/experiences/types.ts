@@ -1,6 +1,7 @@
 import { ComponentType } from "react";
 import { GallerySessionItem, SessionEventData, SessionPhoto } from "../../../interfaces/eventGallery";
 import { SessionItem } from "../types/session";
+import { GallerySource } from "../utils/sourceTracking";
 
 export interface SplashProps {
   honoreesNames?: string;
@@ -17,12 +18,14 @@ export interface CarouselProps {
   eventData: SessionEventData;
   eventToken?: string;
   sessionToken?: string;
+  source?: GallerySource;
 }
 
 export interface OverviewProps {
   eventToken: string;
   sessions: GallerySessionItem[];
   eventData: SessionEventData | null;
+  source: GallerySource;
   onSelectSession: (token: string) => void;
   onShare: () => void | Promise<void>;
 }

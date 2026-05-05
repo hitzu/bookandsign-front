@@ -13,6 +13,7 @@ import { AnalyticsAction } from "../../../../../../interfaces";
 import { trackEvent } from "../../../../../../api/services/eventAnalyticsService";
 import { useFotoBoothCarouselStore } from "../stores/useFotoBoothCarouselStore";
 import { buildFallbackItems } from "../types";
+import { appendSourceToPath } from "../../../../utils/sourceTracking";
 
 const SWIPE_THRESHOLD_PX = 40;
 
@@ -35,6 +36,7 @@ export const useFotoBoothCarousel = ({
   eventData,
   eventToken,
   sessionToken,
+  source = "direct",
 }: CarouselProps) => {
   const router = useRouter();
   const pointerStartX = useRef<number | null>(null);
@@ -81,7 +83,7 @@ export const useFotoBoothCarousel = ({
     trackEvent(action, eventToken, {
       sessionId: sessionToken,
       metadata: {
-        entryPoint: "session_qr",
+        source,
         photoCount: photos.length,
         itemCount: normalizedItems.length,
         ...metadata,
@@ -201,7 +203,9 @@ export const useFotoBoothCarousel = ({
 
   const handleOpenGallery = () => {
     if (!eventData.eventToken) return;
-    void router.push(`/fiesta/${eventData.eventToken}`);
+    void router.push(
+      appendSourceToPath(`/fiesta/${eventData.eventToken}`, "gallery"),
+    );
   };
 
   return {

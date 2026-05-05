@@ -7,7 +7,7 @@ import { useFotoBoothCarouselStore } from "../stores/useFotoBoothCarouselStore";
 
 type UseFotoBoothCarouselEffectsParams = Pick<
   CarouselProps,
-  "eventToken" | "photos" | "sessionToken"
+  "eventToken" | "photos" | "sessionToken" | "source"
 > & {
   activeItem: SessionItem | null;
   activeItemStatus: "idle" | "loaded" | "error";
@@ -24,6 +24,7 @@ export const useFotoBoothCarouselEffects = ({
   index,
   items,
   photos,
+  source = "direct",
   shareFallbackPreviewUrl,
   sessionToken,
   setGifHintVisible,
@@ -44,16 +45,16 @@ export const useFotoBoothCarouselEffects = ({
     if (!eventToken || hasTrackedSessionView.current) return;
 
     hasTrackedSessionView.current = true;
-    trackEvent(AnalyticsAction.SESSION_VIEW, eventToken, {
+    trackEvent(AnalyticsAction.SESSION_OPENED, eventToken, {
       sessionId: sessionToken,
       metadata: {
-        entryPoint: "session_qr",
+        source,
         photoCount: photos.length,
         itemCount: items.length,
         hasGif: items.some((item) => item.type === "gif"),
       },
     });
-  }, [eventToken, items, photos.length, sessionToken]);
+  }, [eventToken, items, photos.length, sessionToken, source]);
 
   useEffect(() => {
     if (!eventToken || viewedItemIndexes.current.has(index)) return;
@@ -62,12 +63,12 @@ export const useFotoBoothCarouselEffects = ({
     trackEvent(AnalyticsAction.PHOTO_VIEW, eventToken, {
       sessionId: sessionToken,
       metadata: {
-        entryPoint: "session_qr",
+        source,
         itemIndex: index,
         itemType: activeItem?.type ?? "photo",
       },
     });
-  }, [activeItem?.type, eventToken, index, sessionToken]);
+  }, [activeItem?.type, eventToken, index, sessionToken, source]);
 
   useEffect(() => {
     if (activeItem?.type !== "gif" || activeItemStatus === "loaded") {
