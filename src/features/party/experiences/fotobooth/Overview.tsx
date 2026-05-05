@@ -152,7 +152,6 @@ const SessionCard = ({
     )}
     <div className={styles.collectionBadge}>
       <IconStack />
-      <span className={styles.collectionCount}>{session.photoCount}</span>
     </div>
     <div className={styles.sessionGradient} />
     {session.time && <div className={styles.sessionTime}>{session.time}</div>}

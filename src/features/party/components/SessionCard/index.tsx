@@ -37,7 +37,6 @@ const SessionCard = ({ session, index, onClick }: SessionCardProps) => (
     {session.photoCount > 1 && (
       <div className={styles.multiPhotoIcon}>
         <MultiPhotoIcon />
-        <span>{session.photoCount}</span>
       </div>
     )}
   </button>

@@ -83,14 +83,10 @@
   background: rgba(0, 0, 0, 0.52);
   backdrop-filter: blur(4px);
   border-radius: 6px;
-  padding: 3px 6px 3px 4px;
+  padding: 5px;
   display: flex;
   align-items: center;
-  gap: 4px;
   color: #fff;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
   pointer-events: none;
 }
 
