@@ -215,6 +215,12 @@ const FotoBoothOverview = ({
   };
 
   const handleVerFotos = () => {
+    trackEvent(AnalyticsAction.GALLERY_CTA_CLICKED, eventToken, {
+      metadata: {
+        source,
+        surface: "gallery_overview",
+      },
+    });
     document.getElementById("sesiones")?.scrollIntoView({ behavior: "smooth" });
   };
 

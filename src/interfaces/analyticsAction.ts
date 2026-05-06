@@ -7,6 +7,7 @@ export enum AnalyticsAction {
   CTA_WA_GALLERY = "cta_whatsapp_gallery",
   SHARE_CONFIRM_OPEN = "share_confirm_open",
   SHARE_CONFIRM_EXECUTED = "share_confirm_executed",
+  GALLERY_CTA_CLICKED = "gallery_cta_clicked",
   GALLERY_VIEW = "gallery_view",
   GALLERY_OPENED = "gallery_opened",
   GALLERY_EMPTY_VIEW = "gallery_empty_view",

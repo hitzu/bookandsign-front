@@ -46,6 +46,7 @@ export const useFotoBoothCarouselEffects = ({
       sessionId: sessionToken,
       metadata: {
         source,
+        session_id: sessionToken,
         photoCount: photos.length,
         itemCount: items.length,
         hasGif: items.some((item) => item.type === "gif"),

@@ -84,6 +84,7 @@ export const useFotoBoothCarousel = ({
       sessionId: sessionToken,
       metadata: {
         source,
+        session_id: sessionToken,
         photoCount: photos.length,
         itemCount: normalizedItems.length,
         ...metadata,
@@ -204,6 +205,9 @@ export const useFotoBoothCarousel = ({
 
   const handleOpenGallery = () => {
     if (!eventData.eventToken) return;
+    trackSessionEvent(AnalyticsAction.GALLERY_CTA_CLICKED, {
+      surface: "session_header",
+    });
     void router.push(
       appendSourceToPath(`/fiesta/${eventData.eventToken}`, "gallery"),
     );
