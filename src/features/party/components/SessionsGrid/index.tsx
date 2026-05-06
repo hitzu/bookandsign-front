@@ -17,11 +17,10 @@ const SessionsGrid = ({ sessions, onSelectSession }: SessionsGridProps) => (
       </p>
     </div>
     <div className={styles.mobileMasonry}>
-      {sessions.map((session, index) => (
+      {sessions.map((session) => (
         <SessionCard
           key={session.sessionToken}
           session={session}
-          index={index}
           onClick={() => onSelectSession(session.sessionToken)}
         />
       ))}

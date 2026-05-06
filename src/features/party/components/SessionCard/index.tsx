@@ -4,7 +4,6 @@ import styles from "@assets/css/party-public.module.css";
 
 interface SessionCardProps {
   session: GallerySessionItem;
-  index: number;
   onClick: () => void;
 }
 
@@ -21,16 +20,16 @@ const MultiPhotoIcon = () => (
   </svg>
 );
 
-const SessionCard = ({ session, index, onClick }: SessionCardProps) => (
+const SessionCard = ({ session, onClick }: SessionCardProps) => (
   <button
     type="button"
     className={styles.mobileMasonryCard}
     onClick={onClick}
-    aria-label={`Ver fotos de la sesión ${index + 1}`}
+    aria-label="Ver fotos de esta sesión"
   >
     <img
       src={session.coverPhoto}
-      alt={`Portada sesión ${index + 1}`}
+      alt="Portada de la sesión"
       className={styles.mobileMasonryImage}
       loading="lazy"
     />
