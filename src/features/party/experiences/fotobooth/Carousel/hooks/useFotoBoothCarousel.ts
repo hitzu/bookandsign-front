@@ -15,9 +15,9 @@ import { useFotoBoothCarouselStore } from "../stores/useFotoBoothCarouselStore";
 import { buildFallbackItems } from "../types";
 import { appendSourceToPath } from "../../../../utils/sourceTracking";
 import {
+  buildSessionShareMessage,
+  buildSessionShareText,
   buildSessionShareUrl,
-  buildWhatsappShareText,
-  buildWhatsappShareUrl,
 } from "../../../../utils/sessionShare";
 
 const SWIPE_THRESHOLD_PX = 40;
@@ -165,14 +165,17 @@ export const useFotoBoothCarousel = ({
         sessionToken,
         source,
       });
-      const shareText = buildWhatsappShareText({
+      const shareText = buildSessionShareText({
+        eventName: eventData.honoreesNames,
+      });
+      const shareMessage = buildSessionShareMessage({
         eventName: eventData.honoreesNames,
         url: sessionShareUrl,
       });
 
       const nativeShareResult = await shareUrl(
         sessionShareUrl,
-        eventData.honoreesNames ?? "Brillipoint",
+        `Fotos de ${eventData.honoreesNames?.trim() || "este evento"}`,
         {
           nativeOnly: true,
           text: shareText,
@@ -187,21 +190,7 @@ export const useFotoBoothCarousel = ({
         return;
       }
 
-      const whatsappWindow = window.open(
-        buildWhatsappShareUrl(shareText),
-        "_blank",
-        "noopener,noreferrer",
-      );
-
-      if (whatsappWindow) {
-        trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
-          channel: "whatsapp",
-          surface: "session_link",
-        });
-        return;
-      }
-
-      const copied = await copyToClipboard(sessionShareUrl);
+      const copied = await copyToClipboard(shareMessage);
       if (copied) {
         trackSessionEvent(AnalyticsAction.SHARE_CONFIRM_EXECUTED, {
           channel: "copy_link",

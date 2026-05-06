@@ -1,6 +1,7 @@
 export type ShareResult = "shared" | "copied" | "unsupported";
 
 type ShareUrlOptions = {
+  fallbackText?: string;
   nativeOnly?: boolean;
   text?: string;
 };
@@ -222,7 +223,7 @@ export const shareUrl = async (
   options: ShareUrlOptions = {},
 ): Promise<ShareResult> => {
   if (typeof navigator === "undefined") return "unsupported";
-  const { nativeOnly = false, text } = options;
+  const { fallbackText, nativeOnly = false, text } = options;
 
   try {
     if (navigator.share) {
@@ -236,7 +237,7 @@ export const shareUrl = async (
 
     if (nativeOnly) return "unsupported";
 
-    const copied = await copyToClipboard(url);
+    const copied = await copyToClipboard(fallbackText || url);
     return copied ? "copied" : "unsupported";
   } catch (_error) {
     return "unsupported";

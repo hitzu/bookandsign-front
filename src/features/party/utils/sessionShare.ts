@@ -13,16 +13,28 @@ export const buildSessionShareUrl = ({
   return new URL(sessionPath, origin).toString();
 };
 
-export const buildWhatsappShareText = ({
+const resolveShareEventName = (eventName?: string) => {
+  const resolvedEventName = eventName?.trim() || "este evento";
+  return resolvedEventName;
+};
+
+export const buildSessionShareText = ({
+  eventName,
+}: {
+  eventName?: string;
+}) => `Mira mis fotos de ${resolveShareEventName(eventName)} 📸`;
+
+export const buildSessionShareMessage = ({
   eventName,
   url,
 }: {
   eventName?: string;
   url: string;
 }) => {
-  const resolvedEventName = eventName?.trim() || "este evento";
-  return `Mira las fotos de ${resolvedEventName} 📸 ${url}`;
+  return `${buildSessionShareText({ eventName })} ${url}`;
 };
+
+export const buildWhatsappShareText = buildSessionShareMessage;
 
 export const buildWhatsappShareUrl = (text: string) =>
   `https://wa.me/?text=${encodeURIComponent(text)}`;
