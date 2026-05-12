@@ -1,7 +1,9 @@
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
 const API_BASE_URL = trimTrailingSlash(
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:3000",
 );
 
 type ApiRequestOptions = RequestInit & {
@@ -61,11 +63,7 @@ export const apiGet = async <T>(
  * No Supabase from frontend.
  */
 
-/** Use proxy path to avoid CORS when frontend and backend are different origins */
 const getBaseUrl = () => {
-  if (typeof window !== "undefined") {
-    return "/api/backend";
-  }
   return (
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     process.env.NEXT_PUBLIC_API_URL ||

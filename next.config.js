@@ -52,14 +52,6 @@ const nextConfig = {
       },
     ];
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/backend/:path*",
-        destination: `${apiBaseUrl}/:path*`,
-      },
-    ];
-  },
   images: {
     remotePatterns: [
       {
