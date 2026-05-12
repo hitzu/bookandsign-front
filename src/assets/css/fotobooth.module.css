@@ -752,90 +752,35 @@
   display: flex;
   gap: 10px;
   flex-shrink: 0;
-  align-items: center;
 }
 
-.swipeDownload {
+.btnSave {
   flex: 1;
   height: 52px;
-  padding: 0;
   border-radius: 16px;
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, #fff6fb 100%);
-  border: 1px solid rgba(236, 72, 153, 0.18);
-  display: block;
-  font-family: 'Public Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 700;
-  color: #be185d;
-  cursor: pointer;
-  transition: all 0.2s;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.swipeDownload:active {
-  transform: scale(0.99);
-}
-
-.swipeDownload:disabled {
-  cursor: wait;
-  transform: none;
-}
-
-.swipeDownloadProgress {
-  position: absolute;
-  inset: 4px auto 4px 4px;
-  min-width: 44px;
-  border-radius: 13px;
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
-  box-shadow: 0 10px 24px rgba(236, 72, 153, 0.24);
-  transition: width 0.18s ease;
-}
-
-.swipeDownloadText,
-.swipeDownloadHint {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.swipeDownloadText {
-  left: 18px;
-  right: 18px;
-  text-align: center;
-  letter-spacing: 0.01em;
-}
-
-.swipeDownloadHint {
-  right: 16px;
-  font-size: 12px;
-  font-weight: 800;
-  color: rgba(157, 23, 77, 0.72);
-  transition: opacity 0.18s ease;
-}
-
-.swipeDownloadThumb {
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
+  background: transparent;
+  border: 2px solid #fbcfe8;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  gap: 7px;
+  font-family: 'Public Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
   color: #ec4899;
-  box-shadow:
-    0 8px 20px rgba(236, 72, 153, 0.22),
-    inset 0 0 0 1px rgba(236, 72, 153, 0.12);
-  z-index: 2;
-  transition: transform 0.18s ease;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnSave:active {
+  background: #fce7f3;
+  transform: scale(0.97);
+}
+
+.btnSave:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
 }
 
 .btnShare {

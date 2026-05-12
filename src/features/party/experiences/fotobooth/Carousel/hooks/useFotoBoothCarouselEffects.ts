@@ -13,6 +13,7 @@ type UseFotoBoothCarouselEffectsParams = Pick<
   activeItemStatus: "idle" | "loaded" | "error";
   index: number;
   items: SessionItem[];
+  shareFallbackPreviewUrl: string | null;
   setGifHintVisible: (gifHintVisible: boolean) => void;
 };
 
@@ -24,12 +25,14 @@ export const useFotoBoothCarouselEffects = ({
   items,
   photos,
   source = "direct",
+  shareFallbackPreviewUrl,
   sessionToken,
   setGifHintVisible,
 }: UseFotoBoothCarouselEffectsParams) => {
   const hasTrackedSessionView = useRef(false);
   const viewedItemIndexes = useRef(new Set<number>());
   const preloadedItemIndexes = useRef(new Set<number>());
+  const previousFallbackPreviewUrl = useRef<string | null>(null);
   const reset = useFotoBoothCarouselStore((state) => state.reset);
 
   useEffect(() => {
@@ -96,4 +99,23 @@ export const useFotoBoothCarouselEffects = ({
       image.src = item.src;
     });
   }, [activeItemStatus, index, items]);
+
+  useEffect(() => {
+    if (
+      previousFallbackPreviewUrl.current &&
+      previousFallbackPreviewUrl.current !== shareFallbackPreviewUrl
+    ) {
+      URL.revokeObjectURL(previousFallbackPreviewUrl.current);
+    }
+
+    previousFallbackPreviewUrl.current = shareFallbackPreviewUrl;
+  }, [shareFallbackPreviewUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (previousFallbackPreviewUrl.current) {
+        URL.revokeObjectURL(previousFallbackPreviewUrl.current);
+      }
+    };
+  }, []);
 };

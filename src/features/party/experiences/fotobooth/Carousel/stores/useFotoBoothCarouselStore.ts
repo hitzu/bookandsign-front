@@ -8,12 +8,17 @@ type FotoBoothCarouselState = {
   gifHintVisible: boolean;
   isGeneratingAsset: boolean;
   isSuccessCtaOpen: boolean;
+  shareFallbackFile: File | null;
+  shareFallbackPreviewUrl: string | null;
+  isShareFallbackOpen: boolean;
   itemStates: Record<number, ItemLoadState>;
   setIndex: (index: number) => void;
   setActiveEffect: (effect: EffectName) => void;
   setIsGeneratingAsset: (isGeneratingAsset: boolean) => void;
   openSuccessCta: () => void;
   closeSuccessCta: () => void;
+  openShareFallback: (file: File, previewUrl: string) => void;
+  closeShareFallback: () => void;
   setGifHintVisible: (gifHintVisible: boolean) => void;
   markItemLoaded: (index: number) => void;
   markItemError: (index: number) => void;
@@ -27,6 +32,9 @@ const initialState = {
   gifHintVisible: false,
   isGeneratingAsset: false,
   isSuccessCtaOpen: false,
+  shareFallbackFile: null as File | null,
+  shareFallbackPreviewUrl: null as string | null,
+  isShareFallbackOpen: false,
   itemStates: {} as Record<number, ItemLoadState>,
 };
 
@@ -39,6 +47,9 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
         activeEffect: "original",
         isGeneratingAsset: false,
         isSuccessCtaOpen: false,
+        isShareFallbackOpen: false,
+        shareFallbackFile: null,
+        shareFallbackPreviewUrl: null,
         gifHintVisible: false,
       }),
     setActiveEffect: (activeEffect) => set({ activeEffect }),
@@ -46,9 +57,25 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
     openSuccessCta: () =>
       set({
         isSuccessCtaOpen: true,
+        isShareFallbackOpen: false,
+        shareFallbackFile: null,
+        shareFallbackPreviewUrl: null,
         isGeneratingAsset: false,
       }),
     closeSuccessCta: () => set({ isSuccessCtaOpen: false }),
+    openShareFallback: (shareFallbackFile, shareFallbackPreviewUrl) =>
+      set({
+        isShareFallbackOpen: true,
+        isSuccessCtaOpen: false,
+        shareFallbackFile,
+        shareFallbackPreviewUrl,
+      }),
+    closeShareFallback: () =>
+      set({
+        isShareFallbackOpen: false,
+        shareFallbackFile: null,
+        shareFallbackPreviewUrl: null,
+      }),
     setGifHintVisible: (gifHintVisible) => set({ gifHintVisible }),
     markItemLoaded: (index) =>
       set((state) => ({

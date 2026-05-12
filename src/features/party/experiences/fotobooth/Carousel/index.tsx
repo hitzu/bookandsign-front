@@ -7,6 +7,7 @@ import ActionBar from "./ui/ActionBar";
 import CarouselHeader from "./ui/CarouselHeader";
 import ItemStage from "./ui/ItemStage";
 import SessionInlineCta from "./ui/SessionInlineCta";
+import ShareFallbackModal from "./ui/ShareFallbackModal";
 import SuccessCtaModal from "./ui/SuccessCtaModal";
 
 const FotoBoothCarousel = (props: CarouselProps) => {
@@ -16,9 +17,12 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     activeItemState,
     canNavigate,
     canOpenGallery,
+    closeShareFallback,
     closeSuccessCta,
     gifHintVisible,
     goTo,
+    handleCopySessionLink,
+    handleFallbackDownload,
     handleItemError,
     handleItemLoad,
     handleOpenGallery,
@@ -29,9 +33,11 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     handleShare,
     index,
     isGeneratingAsset,
+    isShareFallbackOpen,
     isSuccessCtaOpen,
     items,
     setGifHintVisible,
+    shareFallbackPreviewUrl,
   } = useFotoBoothCarousel(props);
 
   useFotoBoothCarouselEffects({
@@ -42,6 +48,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     items,
     photos: props.photos,
     source: props.source,
+    shareFallbackPreviewUrl,
     sessionToken: props.sessionToken,
     setGifHintVisible,
   });
@@ -83,6 +90,15 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         isOpen={isSuccessCtaOpen}
         onClose={closeSuccessCta}
       />
+
+      {isShareFallbackOpen && shareFallbackPreviewUrl && (
+        <ShareFallbackModal
+          onClose={closeShareFallback}
+          onCopyLink={handleCopySessionLink}
+          onDownload={handleFallbackDownload}
+          previewUrl={shareFallbackPreviewUrl}
+        />
+      )}
     </div>
   );
 };
