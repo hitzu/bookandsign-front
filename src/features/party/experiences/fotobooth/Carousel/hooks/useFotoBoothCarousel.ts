@@ -2,7 +2,6 @@ import { PointerEvent, useRef } from "react";
 import { useRouter } from "next/router";
 import { CarouselProps } from "../../../types";
 import {
-  buildDownloadFilename,
   buildUniqueDownloadFilename,
   copyToClipboard,
   downloadFile,
@@ -174,9 +173,8 @@ export const useFotoBoothCarousel = ({
     try {
       await downloadPhoto(
         activeItem.src,
-        buildDownloadFilename(
-          eventData.honoreesNames,
-          activeItem.index,
+        buildUniqueDownloadFilename(
+          eventData.honoreesNames || "brillipoint",
           getFileExtensionFromUrl(
             activeItem.src,
             activeItem.type === "gif" ? "gif" : "jpg",
