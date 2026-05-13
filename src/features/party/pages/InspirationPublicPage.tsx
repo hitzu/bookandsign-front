@@ -79,8 +79,8 @@ const PERSON_FILTERS: {
   emoji?: string;
 }[] = [
   { key: "1", silhouettes: 1 },
-  { key: "2_1", silhouettes: 2 },
-  { key: "2", silhouettes: 2, emoji: "❤️" },
+  { key: "2_1", silhouettes: 2, emoji: "❤️" },
+  { key: "2", silhouettes: 2 },
   { key: "3", silhouettes: 3 },
 ];
 
@@ -243,7 +243,27 @@ const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
   const scrollToStep = (i: number) => {
     const el = stepElRefs.current[i];
     if (el && stepsScrollRef.current) {
-      stepsScrollRef.current.scrollLeft = el.offsetLeft - 14;
+      stepsScrollRef.current.scrollTo({
+        left: el.offsetLeft - 14,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleStepsScroll = () => {
+    const scrollEl = stepsScrollRef.current;
+    if (!scrollEl) return;
+
+    const viewportCenter = scrollEl.scrollLeft + scrollEl.clientWidth / 2;
+    const nextFocusedStep = stepElRefs.current.reduce((closest, el, i) => {
+      if (!el) return closest;
+      const stepCenter = el.offsetLeft + el.offsetWidth / 2;
+      const distance = Math.abs(stepCenter - viewportCenter);
+      return distance < closest.distance ? { index: i, distance } : closest;
+    }, { index: focusedStep, distance: Number.POSITIVE_INFINITY }).index;
+
+    if (nextFocusedStep !== focusedStep) {
+      setFocusedStep(nextFocusedStep);
     }
   };
 
@@ -304,26 +324,54 @@ const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
             style={{ maxHeight: tutorialOpen ? 520 : 120 }}
           >
             {tutorialOpen ? (
-              <div className={styles.tutorialSteps} ref={stepsScrollRef}>
-                {TUTORIAL_STEPS.map((s, i) => (
-                  <div
-                    key={i}
-                    className={`${styles.tutorialStep} ${focusedStep === i ? styles.tutorialStepFocused : ""}`}
-                    ref={(el) => {
-                      stepElRefs.current[i] = el;
-                    }}
-                  >
-                    <div className={styles.tutorialStepIcon}>{s.icon}</div>
-                    <div className={styles.tutorialStepContent}>
-                      <div className={styles.tutorialStepLabel}>
-                        PASO {i + 1}
-                      </div>
-                      <div className={styles.tutorialStepTitle}>{s.title}</div>
-                      <div className={styles.tutorialStepDesc}>{s.desc}</div>
-                    </div>
+              <>
+                <div className={styles.tutorialProgressRow}>
+                  <span className={styles.tutorialProgressLabel}>
+                    Paso {focusedStep + 1}/{TUTORIAL_STEPS.length}
+                  </span>
+                  <div className={styles.tutorialDots}>
+                    {TUTORIAL_STEPS.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        aria-label={`Ir al paso ${i + 1}`}
+                        className={`${styles.tutorialDot} ${focusedStep === i ? styles.tutorialDotActive : ""}`}
+                        onClick={() => {
+                          setFocusedStep(i);
+                          scrollToStep(i);
+                        }}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+
+                <div
+                  className={styles.tutorialSteps}
+                  ref={stepsScrollRef}
+                  onScroll={handleStepsScroll}
+                >
+                  {TUTORIAL_STEPS.map((s, i) => (
+                    <div
+                      key={i}
+                      className={`${styles.tutorialStep} ${focusedStep === i ? styles.tutorialStepFocused : ""}`}
+                      ref={(el) => {
+                        stepElRefs.current[i] = el;
+                      }}
+                    >
+                      <div className={styles.tutorialStepIcon}>{s.icon}</div>
+                      <div className={styles.tutorialStepContent}>
+                        <div className={styles.tutorialStepLabel}>
+                          PASO {i + 1}
+                        </div>
+                        <div className={styles.tutorialStepTitle}>
+                          {s.title}
+                        </div>
+                        <div className={styles.tutorialStepDesc}>{s.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div className={styles.tutorialCompact}>
                 {TUTORIAL_STEPS.map((s, i) => (
@@ -331,6 +379,7 @@ const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
                     <button
                       type="button"
                       className={styles.tutorialCompactStep}
+                      aria-label={`Ver paso ${i + 1}: ${s.title}`}
                       onClick={() => handleCompactStepClick(i)}
                     >
                       <div className={styles.tutorialCompactIcon}>{s.icon}</div>
@@ -430,7 +479,7 @@ const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
       ) : (
         <section className={styles.tabContent}>
           <div className={styles.frasesIntro}>
-            <p className={styles.frasesTitle}>💌 Frases para tu dedicatoria</p>
+            <p className={styles.frasesTitle}>Frases para tu dedicatoria</p>
             {eventName && (
               <p className={styles.frasesSubtitle}>
                 Inspírate con estas frases para el libro de{" "}

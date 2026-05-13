@@ -147,6 +147,57 @@
   transition: max-height 0.35s ease;
 }
 
+.tutorialProgressRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 14px 8px;
+}
+
+.tutorialProgressLabel {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(236, 72, 153, 0.1);
+  color: var(--bp2-text-wine);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.tutorialDots {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tutorialDot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(190, 24, 93, 0.22);
+  cursor: pointer;
+  transition: width 0.2s ease, background 0.2s ease;
+}
+
+.tutorialDot:focus-visible {
+  outline: 2px solid rgba(236, 72, 153, 0.45);
+  outline-offset: 3px;
+}
+
+.tutorialDotActive {
+  width: 18px;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+}
+
 /* Expanded steps — horizontal swipe carousel */
 .tutorialSteps {
   display: flex;
@@ -228,10 +279,20 @@
   align-items: flex-start;
   gap: 4px;
   padding: 0 16px 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, #000 88%, transparent);
+  scrollbar-width: none;
+}
+
+.tutorialCompact::-webkit-scrollbar {
+  display: none;
 }
 
 .tutorialCompactStep {
-  flex: 1;
+  flex: 0 0 66px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -241,6 +302,7 @@
   padding: 0;
   cursor: pointer;
   font-family: 'DM Sans', system-ui, sans-serif;
+  scroll-snap-align: start;
 }
 
 .tutorialCompactIcon {
@@ -264,7 +326,7 @@
 }
 
 .tutorialCompactDash {
-  flex: 0 0 6px;
+  flex: 0 0 14px;
   height: 1px;
   border-top: 1.5px dashed rgba(236, 72, 153, 0.35);
   margin-top: 14px;
