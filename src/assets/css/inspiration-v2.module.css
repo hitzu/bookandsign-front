@@ -1,0 +1,606 @@
+/* ─── Design tokens (Brillipoint v0.5 — light pink) ─────────────────────── */
+
+/* ─── Page root (CSS vars cascade to all children) ──────────────────────── */
+
+.pageRoot {
+  --bp2-bg: #fff5f7;
+  --bp2-gradient: linear-gradient(135deg, #ec4899, #a855f7);
+  --bp2-text-deep: #831843;
+  --bp2-text-wine: #9d174d;
+  --bp2-text-accent: #be185d;
+  --bp2-text-body: #4a4a4a;
+  --bp2-text-muted: #9ca3af;
+  min-height: 100dvh;
+  background:
+    radial-gradient(60% 40% at 50% 0%,   rgba(236, 72, 153, 0.14) 0%, transparent 60%),
+    radial-gradient(50% 50% at 100% 30%,  rgba(168, 85, 247, 0.10) 0%, transparent 60%),
+    #fff5f7;
+  color: var(--bp2-text-body);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─── Sparkles ───────────────────────────────────────────────────────────── */
+
+@keyframes bp2Twinkle {
+  0%, 100% { transform: scale(0.5) rotate(0deg);   opacity: 0.2; }
+  50%       { transform: scale(1.15) rotate(20deg); opacity: 0.8; }
+}
+
+.sparklesWrap {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.sparkle {
+  position: absolute;
+  animation: bp2Twinkle ease-in-out infinite;
+  text-shadow: 0 0 6px currentColor;
+  line-height: 1;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+
+.header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 36px 24px 20px;
+}
+
+.logoPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+}
+
+.logoImg {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  display: block;
+  border-radius: 0;
+}
+
+.eventName {
+  margin-top: 16px;
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(28px, 8vw, 40px);
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ─── Tutorial accordion ─────────────────────────────────────────────────── */
+
+.tutorialWrap {
+  position: relative;
+  z-index: 1;
+  padding: 0 18px;
+}
+
+.tutorialCard {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(236, 72, 153, 0.15);
+  border-radius: 18px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px rgba(236, 72, 153, 0.08);
+  overflow: hidden;
+}
+
+.tutorialHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tutorialTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--bp2-text-deep);
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(236, 72, 153, 0.08);
+  color: var(--bp2-text-accent);
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.tutorialBody {
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+/* Expanded steps — horizontal swipe carousel */
+.tutorialSteps {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 14px 16px;
+  scrollbar-width: none;
+}
+
+.tutorialSteps::-webkit-scrollbar {
+  display: none;
+}
+
+.tutorialStep {
+  flex: 0 0 90vw;
+  max-width: 360px;
+  scroll-snap-align: start;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 20px 18px;
+  background: rgba(255, 240, 245, 0.85);
+  border: 1.5px solid rgba(236, 72, 153, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(236, 72, 153, 0.07);
+}
+
+.tutorialStepFocused {
+  border-color: rgba(236, 72, 153, 0.4);
+  background: rgba(255, 240, 245, 1);
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.18);
+}
+
+.tutorialStepIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(236, 72, 153, 0.25);
+}
+
+.tutorialStepContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.tutorialStepLabel {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  font-weight: 700;
+  color: var(--bp2-text-wine);
+}
+
+.tutorialStepTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--bp2-text-deep);
+  margin-top: 2px;
+}
+
+.tutorialStepDesc {
+  font-size: 14px;
+  color: var(--bp2-text-body);
+  line-height: 1.45;
+  margin-top: 4px;
+}
+
+/* Collapsed compact view */
+.tutorialCompact {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 0 16px 14px;
+}
+
+.tutorialCompactStep {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.tutorialCompactIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff5f7, #fce7f3);
+  border: 1.5px solid rgba(236, 72, 153, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.tutorialCompactLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--bp2-text-deep);
+  text-align: center;
+  line-height: 1.15;
+}
+
+.tutorialCompactDash {
+  flex: 0 0 6px;
+  height: 1px;
+  border-top: 1.5px dashed rgba(236, 72, 153, 0.35);
+  margin-top: 14px;
+}
+
+/* ─── CTA wrapper ────────────────────────────────────────────────────────── */
+
+.ctaWrap {
+  position: relative;
+  z-index: 1;
+  padding: 16px 18px 0;
+}
+
+/* ─── Sticky tabs ────────────────────────────────────────────────────────── */
+
+.stickyTabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  background: rgba(255, 245, 247, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(236, 72, 153, 0.08);
+  margin-top: 16px;
+}
+
+.tabBtn {
+  flex: 1;
+  padding: 12px 4px 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--bp2-text-muted);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  transition: color 0.2s;
+}
+
+.tabBtnActive {
+  font-weight: 700;
+  color: var(--bp2-text-accent);
+}
+
+.tabIndicator {
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  right: 15%;
+  height: 2.5px;
+  border-radius: 2px;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+}
+
+/* ─── Tab content ────────────────────────────────────────────────────────── */
+
+.tabContent {
+  position: relative;
+  z-index: 1;
+  padding: 20px 18px 0;
+}
+
+/* ─── Poses tab ──────────────────────────────────────────────────────────── */
+
+.posesIntro {
+  margin-bottom: 16px;
+}
+
+.posesTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bp2-text-deep);
+  line-height: 1.2;
+  margin: 0 0 6px;
+}
+
+.posesSubtitle {
+  font-size: 12.5px;
+  color: var(--bp2-text-body);
+  line-height: 1.45;
+  margin: 0;
+}
+
+@keyframes bp2FadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.posesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  animation: bp2FadeIn 0.25s ease;
+}
+
+.poseCard {
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(236, 72, 153, 0.15);
+  box-shadow: 0 6px 14px rgba(236, 72, 153, 0.1);
+  background: linear-gradient(135deg, #fce7f3, #f5e6ff);
+}
+
+.poseImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ─── Person filter ──────────────────────────────────────────────────────── */
+
+.personFilterWrap {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.personFilterLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bp2-text-wine);
+  letter-spacing: 0.5px;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.personFilter {
+  display: flex;
+  gap: 6px;
+}
+
+.personBtn {
+  flex: 1;
+  height: 64px;
+  border-radius: 12px;
+  background: #fff0f5;
+  border: 1px solid rgba(236, 72, 153, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 4px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-family: 'DM Sans', system-ui, sans-serif;
+}
+
+.personBtn:active {
+  transform: scale(0.97);
+}
+
+.personBtnActive {
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+}
+
+.personBtnNum {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bp2-text-wine);
+  margin-top: 2px;
+}
+
+.personBtnActive .personBtnNum {
+  color: #fff;
+}
+
+.personBtnLabel {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--bp2-text-muted);
+}
+
+.personBtnActive .personBtnLabel {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.personBtnEmoji {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ─── Tip box (poses) ────────────────────────────────────────────────────── */
+
+.tipBox {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(245, 230, 255, 0.55);
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  font-size: 12px;
+  color: var(--bp2-text-body);
+  line-height: 1.45;
+  text-align: center;
+}
+
+/* ─── Frases tab ─────────────────────────────────────────────────────────── */
+
+.frasesIntro {
+  margin-bottom: 16px;
+}
+
+.frasesTitle {
+  font-family: 'Dancing Script', cursive;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  margin: 0 0 8px;
+}
+
+.frasesSubtitle {
+  font-size: 12.5px;
+  color: var(--bp2-text-body);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.frasesSubtitle strong {
+  color: var(--bp2-text-deep);
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--bp2-text-body);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.emptyStateSub {
+  margin-top: 6px;
+  color: var(--bp2-text-muted);
+  font-size: 12.5px;
+}
+
+/* Phrases list */
+.phrasesList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: bp2FadeIn 0.25s ease;
+}
+
+.phraseCard {
+  position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 14px 16px 14px 20px;
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.08);
+  overflow: hidden;
+}
+
+.phraseCardLeft {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #ec4899, #a855f7);
+}
+
+.phraseEmoji {
+  font-size: 18px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.phraseText {
+  font-family: 'Playfair Display', serif;
+  font-size: 15.5px;
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--bp2-text-deep);
+  margin: 0;
+}
+
+/* Tip box (frases) */
+.tipBoxPurple {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(245, 230, 255, 0.7);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.tipBoxTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--bp2-text-deep);
+  margin: 0 0 10px;
+}
+
+.tipList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tipItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--bp2-text-body);
+}
+
+.tipDot {
+  width: 4px;
+  height: 4px;
+  border-radius: 2px;
+  margin-top: 7px;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  flex-shrink: 0;
+}
+
+/* ─── Bottom spacer ──────────────────────────────────────────────────────── */
+
+.bottomSpacer {
+  height: 40px;
+}

@@ -16,6 +16,7 @@ export * from "./prepProfile";
 export * from "./partyPublic";
 export * from "./photos";
 export * from "./events";
+export * from "./sessions";
 export * from "./analyticsAction";
 export * from "./eventThemes";
 export * from "./eventGallery";

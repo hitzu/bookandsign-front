@@ -1,20 +1,96 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import styles from "@assets/css/party-public.module.css";
-import logoWhite from "@assets/images/logo-white.png";
-import { AnalyticsAction, EventPhoto } from "../../../interfaces";
+import styles from "@assets/css/inspiration-v2.module.css";
+import logoExperienceWhite from "@assets/images/logo-experience-white.png";
+import { AnalyticsAction, EventPhraseResponse } from "../../../interfaces";
 import { trackEvent } from "../../../api/services/eventAnalyticsService";
-import { SocialMediaPlugin } from "../../booking/components/SocialMediaPlugin";
-import BrillipointShell from "../components/BrillipointShell";
-import IntroHero from "../components/IntroHero";
-import PhotoGrid from "../components/PhotoGrid";
-import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
+import {
+  getPublicEventByToken,
+  getEventPhrases,
+} from "../../../api/services/partyPublicService";
+import { SocialMediaCTA } from "../components/SocialMediaCTA";
 import { readSourceFromRouter } from "../utils/sourceTracking";
 
-type InspirationPublicPageProps = {
-  eventToken?: string;
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+type PoseGroup = "1" | "2_1" | "2" | "3";
+
+const POSES: Record<PoseGroup, string[]> = {
+  "1": [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `/inspiracion/1/pose_1_${n}.png`),
+  "2_1": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(
+    (n) => `/inspiracion/2_1/pose_2_1_${n}.png`,
+  ),
+  "2": [1, 2, 3, 4, 15, 16, 17, 18].map(
+    (n) => `/inspiracion/2/pose_2_${n}.png`,
+  ),
+  "3": [1, 2, 3, 4].map((n) => `/inspiracion/3/pose_3_${n}.png`),
 };
+
+const TUTORIAL_STEPS = [
+  {
+    icon: "🎭",
+    shortLabel: "Accesorios",
+    title: "Elige los accesorios",
+    desc: "Sombreros, lentes, letreros y más. Toma lo que te haga sentir bien.",
+  },
+  {
+    icon: "📸",
+    shortLabel: "Posa",
+    title: "Posa para tu foto",
+    desc: "Nuestro equipo te guía con la pose. Solo disfruta y brilla.",
+  },
+  {
+    icon: "🔄",
+    shortLabel: "Cambia",
+    title: "Cambia de accesorios",
+    desc: "Atrévete con otra vibra. La cabina es tuya, no hay prisa.",
+  },
+  {
+    icon: "✨",
+    shortLabel: "Posa",
+    title: "Posa de nuevo",
+    desc: "Otra ronda, otra energía. Tantas como necesites para tu foto perfecta.",
+  },
+  {
+    icon: "🖼️",
+    shortLabel: "Recoge",
+    title: "Pasa por tu foto impresa",
+    desc: "Recibes 2 copias al instante. Una es tuya, la otra para el libro.",
+  },
+  {
+    icon: "✍️",
+    shortLabel: "Firma",
+    title: "Firma con una dedicatoria",
+    desc: "Pega tu foto en el libro y déjales unas palabras especiales.",
+  },
+  {
+    icon: "📲",
+    shortLabel: "Descarga",
+    title: "Escanea y comparte",
+    desc: "En tu QR tienes todas tus fotos digitales para compartir donde quieras.",
+  },
+];
+
+const PERSON_FILTERS: {
+  key: PoseGroup;
+  silhouettes: number;
+  emoji?: string;
+}[] = [
+  { key: "1", silhouettes: 1 },
+  { key: "2_1", silhouettes: 2 },
+  { key: "2", silhouettes: 2, emoji: "❤️" },
+  { key: "3", silhouettes: 3 },
+];
+
+const DEDICATION_TIPS = [
+  "Copia una frase y agrega algo personal al final.",
+  'Firma con un detalle: "Ej. tu prima Caro de Puebla".',
+  "Si te equivocas, no te preocupes. Lo hecho a mano siempre es más bonito.",
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const getQueryValue = (value?: string | string[]) =>
   Array.isArray(value) ? value[0] : value;
@@ -22,154 +98,379 @@ const getQueryValue = (value?: string | string[]) =>
 const isRoutePlaceholder = (value: string) =>
   value.startsWith("[") && value.endsWith("]");
 
-const getEventTokenFromPath = (asPath: string) => {
+const getTokenFromPath = (asPath: string) => {
   const [pathname = ""] = asPath.split("?");
   const segments = pathname.split("/").filter(Boolean);
-  const inspirationIndex = segments.findIndex(
-    (segment) => segment === "inspiracion" || segment === "inspiration",
+  const idx = segments.findIndex(
+    (s) => s === "inspiracion" || s === "inspiration",
   );
-
-  if (inspirationIndex === -1) return undefined;
-
-  const token = segments[inspirationIndex + 1];
+  if (idx === -1) return undefined;
+  const token = segments[idx + 1];
   if (!token || isRoutePlaceholder(token)) return undefined;
-
   return decodeURIComponent(token);
 };
 
-const INTRO_DURATION_MS = 2500;
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-// Placeholder: agrega más URLs aquí cuando expandamos el feed.
-const INSPIRATION_PHOTO_URLS = [
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/1.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/2.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/3.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/4.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/5.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/6.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/7.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/8.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/9.jpg",
-  "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/10.jpg",
-];
+function Sparkles() {
+  const sparks = useMemo(() => {
+    let s = 9301;
+    const r = () => {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+    return Array.from({ length: 14 }, () => ({
+      top: r() * 95 + 2,
+      left: r() * 95 + 2,
+      size: 6 + r() * 8,
+      delay: r() * 4,
+      dur: 2 + r() * 3,
+      rose: r() > 0.5,
+    }));
+  }, []);
+
+  return (
+    <div className={styles.sparklesWrap} aria-hidden="true">
+      {sparks.map((sp, i) => (
+        <span
+          key={i}
+          className={styles.sparkle}
+          style={{
+            top: `${sp.top}%`,
+            left: `${sp.left}%`,
+            fontSize: sp.size,
+            color: sp.rose ? "#ec4899" : "#a855f7",
+            animationDelay: `${sp.delay}s`,
+            animationDuration: `${sp.dur}s`,
+          }}
+        >
+          ✦
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function PersonSilhouette({ n, selected }: { n: number; selected: boolean }) {
+  const color = selected ? "#fff" : "#be185d";
+  const opacity = selected ? 1 : 0.55;
+  const W = n === 1 ? 14 : n === 2 ? 22 : n === 3 ? 28 : 34;
+  const positions: { x: number }[] =
+    n === 1
+      ? [{ x: 7 }]
+      : n === 2
+        ? [{ x: 5 }, { x: 11 }]
+        : n === 3
+          ? [{ x: 4 }, { x: 10 }, { x: 16 }]
+          : [{ x: 3 }, { x: 9 }, { x: 15 }, { x: 21 }];
+
+  return (
+    <svg
+      width={W}
+      height={14}
+      viewBox={`0 0 ${W} 14`}
+      fill="none"
+      aria-hidden="true"
+    >
+      {positions.map((p, i) => (
+        <g key={i} fill={color} opacity={opacity}>
+          <circle cx={p.x + 3} cy={3} r={2.2} />
+          <path
+            d={`M${p.x} 14 Q${p.x} 7 ${p.x + 3} 7 Q${p.x + 6} 7 ${p.x + 6} 14 Z`}
+          />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+type InspirationPublicPageProps = {
+  eventToken?: string;
+};
 
 const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
   const router = useRouter();
-  const [showIntro, setShowIntro] = useState(true);
-  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
-  const hasTrackedInspirationView = useRef(false);
+  const [tab, setTab] = useState<"poses" | "frases">("poses");
+  const [poseGroup, setPoseGroup] = useState<PoseGroup>("2_1");
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [focusedStep, setFocusedStep] = useState(0);
+  const [eventName, setEventName] = useState<string | null>(null);
+  const [phrases, setPhrases] = useState<EventPhraseResponse[]>([]);
+  const hasTracked = useRef(false);
+  const stepsScrollRef = useRef<HTMLDivElement>(null);
+  const stepElRefs = useRef<(HTMLDivElement | null)[]>([]);
   const source = readSourceFromRouter(router);
-  const resolvedEventToken =
+
+  const resolvedToken =
     eventToken ||
     getQueryValue(router.query.token) ||
     getQueryValue(router.query.eventToken) ||
-    getEventTokenFromPath(router.asPath);
+    getTokenFromPath(router.asPath);
 
   useEffect(() => {
-    const timer = window.setTimeout(
-      () => setShowIntro(false),
-      INTRO_DURATION_MS,
-    );
-    return () => window.clearTimeout(timer);
-  }, []);
+    if (!resolvedToken || isRoutePlaceholder(resolvedToken)) return;
+    const controller = new AbortController();
 
-  const inspirationPhotos = useMemo<EventPhoto[]>(
-    () =>
-      INSPIRATION_PHOTO_URLS.map((publicUrl, index) => ({
-        id: index + 1,
-        publicUrl,
-        storagePath: `inspiration/${index + 1}.jpg`,
-        consentAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      })),
-    [],
-  );
+    Promise.all([
+      getPublicEventByToken(resolvedToken),
+      getEventPhrases(resolvedToken, controller.signal),
+    ])
+      .then(([event, eventPhrases]) => {
+        setEventName(event.name ?? null);
+        setPhrases(eventPhrases);
+      })
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, [resolvedToken]);
 
   useEffect(() => {
     if (
       !router.isReady ||
-      !resolvedEventToken ||
-      isRoutePlaceholder(resolvedEventToken) ||
-      hasTrackedInspirationView.current
-    ) {
+      !resolvedToken ||
+      isRoutePlaceholder(resolvedToken) ||
+      hasTracked.current
+    )
       return;
-    }
-
-    hasTrackedInspirationView.current = true;
-    trackEvent(AnalyticsAction.GALLERY_VIEW, resolvedEventToken, {
-      metadata: {
-        source,
-        surface: "inspiration_page",
-        photoCount: inspirationPhotos.length,
-      },
+    hasTracked.current = true;
+    trackEvent(AnalyticsAction.GALLERY_VIEW, resolvedToken, {
+      metadata: { source, surface: "inspiration_page_v2" },
     });
-  }, [inspirationPhotos.length, resolvedEventToken, router.isReady, source]);
+  }, [resolvedToken, router.isReady, source]);
 
-  const eventTitle = "Ideas para tu foto";
-  const inspirationDescription =
-    "Poses y glitter para inspirarte. Elige tu idea favorita y prepárate para crear tu momento brillante.";
+  const scrollToStep = (i: number) => {
+    const el = stepElRefs.current[i];
+    if (el && stepsScrollRef.current) {
+      stepsScrollRef.current.scrollLeft = el.offsetLeft - 14;
+    }
+  };
+
+  const handleCompactStepClick = (i: number) => {
+    setFocusedStep(i);
+    if (!tutorialOpen) {
+      setTutorialOpen(true);
+      setTimeout(() => scrollToStep(i), 360);
+    } else {
+      scrollToStep(i);
+    }
+  };
+
+  const visiblePoses = POSES[poseGroup];
 
   return (
-    <BrillipointShell>
-      <IntroHero isVisible={showIntro} />
+    <div className={styles.pageRoot}>
+      <Head>
+        <title>Inspiración{eventName ? ` - ${eventName}` : ""}</title>
+      </Head>
+      <Sparkles />
 
-      <section
-        className={styles.inspirationBrandWrap}
-        aria-label="Brillipoint branding"
-      >
-        <Image
-          src={logoWhite}
-          alt="Logo Brillipoint Beauty & Glitter Bar"
-          className={styles.inspirationBrandLogo}
-          priority
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <header className={styles.header}>
+        <div className={styles.logoPill}>
+          <Image
+            src={logoExperienceWhite}
+            alt="Brillipoint Beauty & Glitter Bar"
+            className={styles.logoImg}
+            priority
+          />
+        </div>
+        {eventName && <p className={styles.eventName}>{eventName}</p>}
+      </header>
+
+      {/* ── Tutorial accordion ───────────────────────────────────────────── */}
+      <section className={styles.tutorialWrap}>
+        <div className={styles.tutorialCard}>
+          <button
+            type="button"
+            className={styles.tutorialHeader}
+            onClick={() => setTutorialOpen((v) => !v)}
+            aria-expanded={tutorialOpen}
+          >
+            <span className={styles.tutorialTitle}>
+              📸 ¿Cómo funciona tu sesión?
+            </span>
+            <span
+              className={`${styles.chevron} ${tutorialOpen ? styles.chevronOpen : ""}`}
+              aria-hidden="true"
+            >
+              ⌄
+            </span>
+          </button>
+
+          <div
+            className={styles.tutorialBody}
+            style={{ maxHeight: tutorialOpen ? 520 : 120 }}
+          >
+            {tutorialOpen ? (
+              <div className={styles.tutorialSteps} ref={stepsScrollRef}>
+                {TUTORIAL_STEPS.map((s, i) => (
+                  <div
+                    key={i}
+                    className={`${styles.tutorialStep} ${focusedStep === i ? styles.tutorialStepFocused : ""}`}
+                    ref={(el) => {
+                      stepElRefs.current[i] = el;
+                    }}
+                  >
+                    <div className={styles.tutorialStepIcon}>{s.icon}</div>
+                    <div className={styles.tutorialStepContent}>
+                      <div className={styles.tutorialStepLabel}>
+                        PASO {i + 1}
+                      </div>
+                      <div className={styles.tutorialStepTitle}>{s.title}</div>
+                      <div className={styles.tutorialStepDesc}>{s.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.tutorialCompact}>
+                {TUTORIAL_STEPS.map((s, i) => (
+                  <React.Fragment key={i}>
+                    <button
+                      type="button"
+                      className={styles.tutorialCompactStep}
+                      onClick={() => handleCompactStepClick(i)}
+                    >
+                      <div className={styles.tutorialCompactIcon}>{s.icon}</div>
+                      <div className={styles.tutorialCompactLabel}>
+                        {s.shortLabel}
+                      </div>
+                    </button>
+                    {i < TUTORIAL_STEPS.length - 1 && (
+                      <div
+                        className={styles.tutorialCompactDash}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ─────────────────────────────────────────────────────────── */}
+      <section className={styles.ctaWrap}>
+        <SocialMediaCTA
+          context="sessionPresence"
+          variant="compact"
+          nombreFestejado={eventName ?? ""}
         />
       </section>
 
-      <section className={styles.inspirationHeader}>
-        <p className={styles.heroKicker}>IDEAS PARA TU FOTO</p>
-        <p className={styles.inspirationActionLead}>{inspirationDescription}</p>
-      </section>
+      {/* ── Sticky tabs ──────────────────────────────────────────────────── */}
+      <div className={styles.stickyTabs} role="tablist">
+        {(["poses", "frases"] as const).map((t) => (
+          <button
+            key={t}
+            role="tab"
+            aria-selected={tab === t}
+            className={`${styles.tabBtn} ${tab === t ? styles.tabBtnActive : ""}`}
+            onClick={() => setTab(t)}
+          >
+            {t === "poses" ? "📸 Poses" : "💌 Frases"}
+            {tab === t && (
+              <span className={styles.tabIndicator} aria-hidden="true" />
+            )}
+          </button>
+        ))}
+      </div>
 
-      <PhotoGrid
-        id="inspiracion-galeria"
-        items={inspirationPhotos}
-        isLoading={false}
-        onSelectPhoto={setViewerIndex}
-        emptyTitle="Estamos preparando ideas para este evento ✨"
-        emptyDescription="Vuelve en unos minutos para descubrir nuevas poses + glitter."
-      />
+      {/* ── Tab content ──────────────────────────────────────────────────── */}
+      {tab === "poses" ? (
+        <section className={styles.tabContent}>
+          <div className={styles.posesIntro}>
+            <p className={styles.posesTitle}>¿No sabes qué pose hacer?</p>
+          </div>
 
-      <section className={styles.socialSection}>
-        <SocialMediaPlugin
-          copy={{
-            title: "¿Estás listo para tu propio evento Brillipoint?",
-            subtitle:
-              "Reserva tu fecha o solicita información personalizada por WhatsApp.",
-            followLabel:
-              "Sigue nuestras redes sociales para que no te pierdas nuestras promociones",
-            thanksText: "✨ Nos encantara ser parte de tu evento ✨",
-            ctas: [
-              {
-                label: "Reservar fecha",
-                message:
-                  "Hola, quiero reservar la experiencia Brillipoint para mi evento.",
-                variant: "primary",
-              },
-            ],
-          }}
-        />
-      </section>
+          <div className={styles.personFilterWrap}>
+            <div className={styles.personFilter}>
+              {PERSON_FILTERS.map(({ key, silhouettes, emoji }) => {
+                const sel = poseGroup === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`${styles.personBtn} ${sel ? styles.personBtnActive : ""}`}
+                    onClick={() => setPoseGroup(key)}
+                  >
+                    {emoji ? (
+                      <span
+                        className={styles.personBtnEmoji}
+                        aria-hidden="true"
+                      >
+                        {emoji}
+                      </span>
+                    ) : (
+                      <PersonSilhouette n={silhouettes} selected={sel} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      <PhotoViewerLightbox
-        isOpen={viewerIndex !== null}
-        photos={inspirationPhotos}
-        activeIndex={viewerIndex}
-        eventTitle={eventTitle}
-        onClose={() => setViewerIndex(null)}
-        onActiveIndexChange={setViewerIndex}
-        showMediaActions={false}
-      />
-    </BrillipointShell>
+          <div className={styles.posesGrid} key={poseGroup}>
+            {visiblePoses.map((url, i) => (
+              <div key={i} className={styles.poseCard}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={`Pose ${i + 1}`}
+                  className={styles.poseImg}
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : (
+        <section className={styles.tabContent}>
+          <div className={styles.frasesIntro}>
+            <p className={styles.frasesTitle}>💌 Frases para tu dedicatoria</p>
+            {eventName && (
+              <p className={styles.frasesSubtitle}>
+                Inspírate con estas frases para el libro de{" "}
+                <strong>{eventName}</strong>.
+              </p>
+            )}
+          </div>
+
+          {phrases.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>Estamos preparando las frases para este evento ✨</p>
+              <p className={styles.emptyStateSub}>Vuelve en unos minutos.</p>
+            </div>
+          ) : (
+            <div className={styles.phrasesList}>
+              {phrases.map((f) => (
+                <div key={f.id} className={styles.phraseCard}>
+                  <div className={styles.phraseCardLeft} aria-hidden="true" />
+                  <p className={styles.phraseText}>{f.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className={styles.tipBoxPurple}>
+            <p className={styles.tipBoxTitle}>💡 Tips para tu dedicatoria</p>
+            <ul className={styles.tipList}>
+              {DEDICATION_TIPS.map((tip, i) => (
+                <li key={i} className={styles.tipItem}>
+                  <span className={styles.tipDot} aria-hidden="true" />
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      <div className={styles.bottomSpacer} />
+    </div>
   );
 };
 

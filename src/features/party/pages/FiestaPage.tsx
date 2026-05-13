@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { getExperience } from "../experiences";
 import {
@@ -202,16 +203,30 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     );
   }
 
+  if (!resolvedEventToken) {
+    return (
+      <div className={styles.centerPage}>
+        <div className={styles.loaderOrb} />
+        <p>Cargando galería del evento...</p>
+      </div>
+    );
+  }
+
   return (
-    <Overview
-      eventToken={resolvedEventToken}
-      sessions={sessions}
-      eventData={eventData}
-      source={source}
-      onSelectSession={(token) =>
-        router.push(appendSourceToPath(`/mis-fotos/${token}`, source))
-      }
-      onShare={handleShare}
-    />
+    <>
+      <Head>
+        <title>Fiesta{eventData?.honoreesNames ? ` - ${eventData.honoreesNames}` : ""}</title>
+      </Head>
+      <Overview
+        eventToken={resolvedEventToken}
+        sessions={sessions}
+        eventData={eventData}
+        source={source}
+        onSelectSession={(token) =>
+          router.push(appendSourceToPath(`/mis-fotos/${token}`, source))
+        }
+        onShare={handleShare}
+      />
+    </>
   );
 }

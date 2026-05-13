@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { axiosInstanceWithoutToken } from "../../../api/config/axiosConfig";
 import { getExperience } from "../experiences";
@@ -207,13 +208,18 @@ export default function MisFotosPage({
   }
 
   return (
-    <Carousel
-      items={items}
-      photos={photos}
-      eventData={eventData!}
-      eventToken={eventData?.eventToken}
-      sessionToken={sessionToken}
-      source={source}
-    />
+    <>
+      <Head>
+        <title>Mis Fotos{eventData?.honoreesNames ? ` - ${eventData.honoreesNames}` : ""}</title>
+      </Head>
+      <Carousel
+        items={items}
+        photos={photos}
+        eventData={eventData!}
+        eventToken={eventData?.eventToken}
+        sessionToken={sessionToken}
+        source={source}
+      />
+    </>
   );
 }

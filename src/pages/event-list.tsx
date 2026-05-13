@@ -8,16 +8,23 @@ import React, {
 import Layout from "@layout/index";
 import { Event } from "../interfaces";
 import { deleteEventById, getEvents } from "../api/services/eventsService";
+import { clearSessionsCache } from "../api/services/sessionsService";
 import TableContainer from "@common/TableContainer";
 import Link from "next/link";
 import BreadcrumbItem from "@common/BreadcrumbItem";
-import { Card, Col, Row } from "react-bootstrap";
+import { Card, Col, Row, Toast } from "react-bootstrap";
 import DeleteModal from "@common/DeleteModal";
 
 const EventList = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<number>(0);
+  const [isClearingCache, setIsClearingCache] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState<"success" | "danger">(
+    "success",
+  );
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -51,6 +58,25 @@ const EventList = () => {
   const handleDelete = useCallback((id: number) => {
     setShowDeleteModal(true);
     setDeleteId(id);
+  }, []);
+
+  const handleClearSessionCache = useCallback(async () => {
+    setIsClearingCache(true);
+
+    try {
+      const response = await clearSessionsCache();
+      setToastMessage(
+        `Cache limpiado: ${response.cleared.sessions} sesiones, ${response.cleared.galleries} galerías`,
+      );
+      setToastVariant("success");
+    } catch (error) {
+      console.error("Error clearing sessions cache:", error);
+      setToastMessage("No se pudo limpiar el caché");
+      setToastVariant("danger");
+    } finally {
+      setShowToast(true);
+      setIsClearingCache(false);
+    }
   }, []);
 
   const formatDate = (dateStr: string) => {
@@ -167,7 +193,7 @@ const EventList = () => {
         },
       },
     ],
-    [],
+    [handleDelete],
   );
 
   return (
@@ -177,6 +203,30 @@ const EventList = () => {
         handleClose={handleClose}
         handleDeleteId={handleDeleteId}
       />
+
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          zIndex: 9999,
+        }}
+      >
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={4000}
+          autohide
+          bg={toastVariant}
+        >
+          <Toast.Header>
+            <strong className="me-auto">
+              {toastVariant === "success" ? "Éxito" : "Error"}
+            </strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+        </Toast>
+      </div>
 
       <BreadcrumbItem mainTitle="Eventos" subTitle="Lista de eventos" />
       <Row>
@@ -198,6 +248,24 @@ const EventList = () => {
                 tableClass="table table-hover datatable-table"
                 theadClass="table-light"
                 isPagination={true}
+                topRightContent={
+                  <button
+                    type="button"
+                    className="btn btn-primary d-inline-flex align-items-center gap-2 flex-shrink-0"
+                    disabled={isClearingCache}
+                    onClick={handleClearSessionCache}
+                  >
+                    {isClearingCache ? (
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <i className="ti ti-refresh f-18"></i>
+                    )}
+                    {isClearingCache ? "Limpiando..." : "Limpiar caché"}
+                  </button>
+                }
               />
             </Card.Body>
           </Card>
