@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { appendSourceToPath, resolveGallerySource } from "../sourceTracking";
+import {
+  appendSourceToPath,
+  readSourceFromRouter,
+  resolveGallerySource,
+} from "../sourceTracking";
 
 test("resolveGallerySource accepts known sources and defaults unknown values", () => {
   assert.equal(resolveGallerySource("qr"), "qr");
@@ -13,5 +17,15 @@ test("appendSourceToPath preserves existing query and hash", () => {
   assert.equal(
     appendSourceToPath("/mis-fotos/abc?foo=bar#foto", "gallery"),
     "/mis-fotos/abc?foo=bar&source=gallery#foto",
+  );
+});
+
+test("readSourceFromRouter falls back to asPath query", () => {
+  assert.equal(
+    readSourceFromRouter({
+      query: {},
+      asPath: "/inspiracion/abc?source=qr",
+    }),
+    "qr",
   );
 });

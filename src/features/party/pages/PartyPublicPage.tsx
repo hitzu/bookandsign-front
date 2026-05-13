@@ -1,12 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { AxiosError } from "axios";
 import styles from "@assets/css/party-public.module.css";
 import {
   getEventPhotosPage,
   getPublicEventByToken,
 } from "../../../api/services/partyPublicService";
-import { EventPhoto, PublicEvent } from "../../../interfaces";
+import { AnalyticsAction, EventPhoto, PublicEvent } from "../../../interfaces";
+import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import { SocialMediaPlugin } from "../../booking/components/SocialMediaPlugin";
 import { parseLocalDate } from "@common/dates";
 import EventEmptyState from "../components/EventEmptyState";
@@ -25,6 +27,7 @@ import {
   sharePhoto,
   shareUrl,
 } from "../utils/mediaActions";
+import { appendSourceToPath, readSourceFromRouter } from "../utils/sourceTracking";
 
 type Props = {
   token?: string;
@@ -40,6 +43,7 @@ const sortByNewest = (photos: EventPhoto[]) =>
   );
 
 const PartyPublicPage = ({ token }: Props) => {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [initialError, setInitialError] = useState<string | null>(null);
@@ -58,6 +62,8 @@ const PartyPublicPage = ({ token }: Props) => {
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const [isRetryingEmpty, setIsRetryingEmpty] = useState(false);
+  const hasTrackedGalleryOpened = useRef(false);
+  const source = readSourceFromRouter(router);
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -123,6 +129,18 @@ const PartyPublicPage = ({ token }: Props) => {
   useEffect(() => {
     handleInitialLoad();
   }, [handleInitialLoad]);
+
+  useEffect(() => {
+    if (!router.isReady || !token || hasTrackedGalleryOpened.current) return;
+
+    hasTrackedGalleryOpened.current = true;
+    trackEvent(AnalyticsAction.GALLERY_OPENED, token, {
+      metadata: {
+        source,
+        surface: "party_public_page",
+      },
+    });
+  }, [router.isReady, source, token]);
 
   useEffect(() => {
     if (!toastMessage) return;
@@ -386,7 +404,7 @@ const PartyPublicPage = ({ token }: Props) => {
               <h3>Ideas para tu próxima foto</h3>
               <p>Descubre poses + glitter y vuelve al álbum para capturar tu mejor momento.</p>
               <Link
-                href={`/inspiracion/${token}`}
+                href={appendSourceToPath(`/inspiracion/${token}`, source)}
                 className={`${styles.secondaryBtn} ${styles.actionTextStrong}`}
               >
                 ✨ Ver ideas de poses

@@ -18,9 +18,28 @@ const SPLASH_DURATION_MS = 3200;
 const CRITICAL_COVER_COUNT = 10;
 const READY_REVEAL_MS = 1800;
 
+const getQueryValue = (value?: string | string[]) =>
+  Array.isArray(value) ? value[0] : value;
+
+const isRoutePlaceholder = (value: string) =>
+  value.startsWith("[") && value.endsWith("]");
+
+const getFiestaTokenFromPath = (asPath: string) => {
+  const [pathname = ""] = asPath.split("?");
+  const segments = pathname.split("/").filter(Boolean);
+  const fiestaIndex = segments.findIndex((segment) => segment === "fiesta");
+
+  if (fiestaIndex === -1) return undefined;
+
+  const token = segments[fiestaIndex + 1];
+  if (!token || isRoutePlaceholder(token)) return undefined;
+
+  return decodeURIComponent(token);
+};
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-export default function FiestaPage({ eventToken }: { eventToken: string }) {
+export default function FiestaPage({ eventToken }: { eventToken?: string }) {
   const router = useRouter();
 
   const [showSplash, setShowSplash] = useState(true);
@@ -37,6 +56,10 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   const readyRevealDone = useRef(false);
   const hasTrackedGalleryOpened = useRef(false);
   const source = readSourceFromRouter(router);
+  const resolvedEventToken =
+    eventToken ||
+    getQueryValue(router.query.eventToken) ||
+    getFiestaTokenFromPath(router.asPath);
 
   const finishSplashIfReady = () => {
     if (splashDone.current && assetsReady.current && readyRevealDone.current) {
@@ -78,9 +101,11 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   };
 
   const fetchGallery = async () => {
+    if (!resolvedEventToken) return;
+
     try {
       setSplashStep("Buscando las fotos de la fiesta");
-      const data = await getEventGalleryV2(eventToken);
+      const data = await getEventGalleryV2(resolvedEventToken);
       setEventData(data.event);
       setSessions(data.sessions);
       setIsEmpty(data.sessions.length === 0);
@@ -98,10 +123,10 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   };
 
   useEffect(() => {
-    if (!eventToken) return;
+    if (!resolvedEventToken) return;
     fetchGallery();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventToken]);
+  }, [resolvedEventToken]);
 
   // Polling cuando no hay sesiones aún
   useEffect(() => {
@@ -122,17 +147,24 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
   };
 
   useEffect(() => {
-    if (!eventToken || loading || error || hasTrackedGalleryOpened.current) return;
+    if (
+      !router.isReady ||
+      !resolvedEventToken ||
+      isRoutePlaceholder(resolvedEventToken) ||
+      hasTrackedGalleryOpened.current
+    ) {
+      return;
+    }
 
     hasTrackedGalleryOpened.current = true;
-    trackEvent(AnalyticsAction.GALLERY_OPENED, eventToken, {
+    trackEvent(AnalyticsAction.GALLERY_OPENED, resolvedEventToken, {
+      source,
       metadata: {
         source,
-        sessionCount: sessions.length,
-        isEmpty,
+        surface: "fiesta_page",
       },
     });
-  }, [error, eventToken, isEmpty, loading, sessions.length, source]);
+  }, [resolvedEventToken, router.isReady, source]);
 
   const { Splash, Overview } = getExperience(eventData?.eventTheme?.key);
   const splashDate = formatSplashDate(eventData?.date);
@@ -172,7 +204,7 @@ export default function FiestaPage({ eventToken }: { eventToken: string }) {
 
   return (
     <Overview
-      eventToken={eventToken}
+      eventToken={resolvedEventToken}
       sessions={sessions}
       eventData={eventData}
       source={source}

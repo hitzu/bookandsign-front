@@ -25,6 +25,19 @@ export const appendSourceToPath = (path: string, source: GallerySource) => {
   return `${pathname}${queryString ? `?${queryString}` : ""}${hash ? `#${hash}` : ""}`;
 };
 
+const getSearchParamFromAsPath = (asPath: string | undefined, key: string) => {
+  if (!asPath) return undefined;
+
+  const [, searchWithHash = ""] = asPath.split("?");
+  if (!searchWithHash) return undefined;
+
+  const [search = ""] = searchWithHash.split("#");
+  return new URLSearchParams(search).get(key) || undefined;
+};
+
 export const readSourceFromRouter = (
-  router: Pick<NextRouter, "query">,
-): GallerySource => resolveGallerySource(router.query.source);
+  router: Pick<NextRouter, "query"> & Partial<Pick<NextRouter, "asPath">>,
+): GallerySource =>
+  resolveGallerySource(
+    router.query.source || getSearchParamFromAsPath(router.asPath, "source"),
+  );

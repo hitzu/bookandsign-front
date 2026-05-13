@@ -1,13 +1,41 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 import styles from "@assets/css/party-public.module.css";
 import logoWhite from "@assets/images/logo-white.png";
-import { EventPhoto } from "../../../interfaces";
+import { AnalyticsAction, EventPhoto } from "../../../interfaces";
+import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import { SocialMediaPlugin } from "../../booking/components/SocialMediaPlugin";
 import BrillipointShell from "../components/BrillipointShell";
 import IntroHero from "../components/IntroHero";
 import PhotoGrid from "../components/PhotoGrid";
 import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
+import { readSourceFromRouter } from "../utils/sourceTracking";
+
+type InspirationPublicPageProps = {
+  eventToken?: string;
+};
+
+const getQueryValue = (value?: string | string[]) =>
+  Array.isArray(value) ? value[0] : value;
+
+const isRoutePlaceholder = (value: string) =>
+  value.startsWith("[") && value.endsWith("]");
+
+const getEventTokenFromPath = (asPath: string) => {
+  const [pathname = ""] = asPath.split("?");
+  const segments = pathname.split("/").filter(Boolean);
+  const inspirationIndex = segments.findIndex(
+    (segment) => segment === "inspiracion" || segment === "inspiration",
+  );
+
+  if (inspirationIndex === -1) return undefined;
+
+  const token = segments[inspirationIndex + 1];
+  if (!token || isRoutePlaceholder(token)) return undefined;
+
+  return decodeURIComponent(token);
+};
 
 const INTRO_DURATION_MS = 2500;
 
@@ -25,9 +53,17 @@ const INSPIRATION_PHOTO_URLS = [
   "https://uljzbxuxzknilubykrlw.supabase.co/storage/v1/object/public/media/catalogo_poses/10.jpg",
 ];
 
-const InspirationPublicPage = () => {
+const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
+  const router = useRouter();
   const [showIntro, setShowIntro] = useState(true);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const hasTrackedInspirationView = useRef(false);
+  const source = readSourceFromRouter(router);
+  const resolvedEventToken =
+    eventToken ||
+    getQueryValue(router.query.token) ||
+    getQueryValue(router.query.eventToken) ||
+    getEventTokenFromPath(router.asPath);
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -48,6 +84,26 @@ const InspirationPublicPage = () => {
       })),
     [],
   );
+
+  useEffect(() => {
+    if (
+      !router.isReady ||
+      !resolvedEventToken ||
+      isRoutePlaceholder(resolvedEventToken) ||
+      hasTrackedInspirationView.current
+    ) {
+      return;
+    }
+
+    hasTrackedInspirationView.current = true;
+    trackEvent(AnalyticsAction.GALLERY_VIEW, resolvedEventToken, {
+      metadata: {
+        source,
+        surface: "inspiration_page",
+        photoCount: inspirationPhotos.length,
+      },
+    });
+  }, [inspirationPhotos.length, resolvedEventToken, router.isReady, source]);
 
   const eventTitle = "Ideas para tu foto";
   const inspirationDescription =
