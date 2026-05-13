@@ -6,6 +6,8 @@ type ShareUrlOptions = {
   text?: string;
 };
 
+const OBJECT_URL_REVOKE_DELAY_MS = 3000;
+
 const sanitizeSegment = (value: string) =>
   value
     .toLowerCase()
@@ -74,6 +76,13 @@ export const buildUniqueDownloadFilename = (
   return `${safePrefix}_${buildUniqueId()}.${normalizeExtension(extension)}`;
 };
 
+const scheduleObjectUrlRevoke = (objectUrl: string) => {
+  globalThis.setTimeout(
+    () => URL.revokeObjectURL(objectUrl),
+    OBJECT_URL_REVOKE_DELAY_MS,
+  );
+};
+
 export const downloadPhoto = async (url: string, filename: string) => {
   const response = await fetch(url);
   if (!response.ok) throw new Error("No se pudo descargar la foto");
@@ -86,7 +95,7 @@ export const downloadPhoto = async (url: string, filename: string) => {
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-  URL.revokeObjectURL(objectUrl);
+  scheduleObjectUrlRevoke(objectUrl);
 };
 
 export const downloadFile = (file: File, filename?: string) => {
@@ -97,7 +106,7 @@ export const downloadFile = (file: File, filename?: string) => {
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-  URL.revokeObjectURL(objectUrl);
+  scheduleObjectUrlRevoke(objectUrl);
 };
 
 export const fetchRemoteFile = async (url: string, filename?: string) => {

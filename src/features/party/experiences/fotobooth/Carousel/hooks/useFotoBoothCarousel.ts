@@ -2,9 +2,11 @@ import { PointerEvent, useRef } from "react";
 import { useRouter } from "next/router";
 import { CarouselProps } from "../../../types";
 import {
+  buildDownloadFilename,
   buildUniqueDownloadFilename,
   copyToClipboard,
   downloadFile,
+  downloadPhoto,
   fetchRemoteFile,
   getFileExtensionFromUrl,
   shareFile,
@@ -109,10 +111,9 @@ export const useFotoBoothCarousel = ({
     );
   };
 
-  const handleDownloadSuccess = (file: File) => {
+  const handleDownloadSuccess = () => {
     if (!activeItem) return;
 
-    downloadFile(file);
     trackSessionEvent(AnalyticsAction.DOWNLOAD, {
       itemIndex: index,
       itemType: activeItem.type,
@@ -171,8 +172,18 @@ export const useFotoBoothCarousel = ({
 
     setIsGeneratingAsset(true);
     try {
-      const file = await buildOriginalItemFile();
-      handleDownloadSuccess(file);
+      await downloadPhoto(
+        activeItem.src,
+        buildDownloadFilename(
+          eventData.honoreesNames,
+          activeItem.index,
+          getFileExtensionFromUrl(
+            activeItem.src,
+            activeItem.type === "gif" ? "gif" : "jpg",
+          ),
+        ),
+      );
+      handleDownloadSuccess();
     } finally {
       setIsGeneratingAsset(false);
     }
