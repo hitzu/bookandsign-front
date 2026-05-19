@@ -1840,17 +1840,17 @@
 }
 
 .btnPersonalizar {
-  background: linear-gradient(135deg, #6b5cff 0%, #1aa7ff 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #4338ca 100%);
   box-shadow:
-    0 4px 18px rgba(92, 100, 255, 0.4),
+    0 4px 18px rgba(30, 64, 175, 0.4),
     inset 0 1px 1px rgba(255, 255, 255, 0.12);
 }
 
 .btnDedicar {
   position: relative;
-  background: linear-gradient(135deg, #e04590 0%, #c23ddb 100%);
+  background: linear-gradient(135deg, #9d174d 0%, #86198f 100%);
   box-shadow:
-    0 4px 18px rgba(224, 69, 144, 0.35),
+    0 4px 18px rgba(157, 23, 77, 0.35),
     inset 0 1px 1px rgba(255, 255, 255, 0.12);
 }
 
@@ -2510,12 +2510,12 @@
   padding: 12px 32px;
   border: none;
   border-radius: 24px;
-  background: #6c63ff;
+  background: #4c1d95;
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(107, 92, 255, 0.4);
+  box-shadow: 0 4px 14px rgba(76, 29, 149, 0.4);
   transition:
     opacity 0.2s,
     transform 0.2s,
@@ -2524,7 +2524,7 @@
 
 .downloadCtaBtn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(107, 92, 255, 0.5);
+  box-shadow: 0 6px 20px rgba(76, 29, 149, 0.5);
 }
 
 .downloadCtaBtn:disabled {
