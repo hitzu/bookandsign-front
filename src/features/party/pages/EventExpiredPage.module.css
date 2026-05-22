@@ -1,0 +1,78 @@
+.page {
+  min-height: 100dvh;
+  padding: max(28px, env(safe-area-inset-top, 28px)) 16px
+    max(28px, env(safe-area-inset-bottom, 28px));
+  background:
+    radial-gradient(circle at 50% 0%, rgba(107, 92, 255, 0.28), transparent 38%),
+    linear-gradient(180deg, #111225 0%, #090a14 100%);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+}
+
+.card {
+  width: min(100%, 460px);
+  display: grid;
+  gap: 18px;
+  text-align: center;
+}
+
+.logo {
+  width: min(70vw, 220px);
+  height: auto;
+  margin: 0 auto 4px;
+  filter: drop-shadow(0 0 26px rgba(190, 198, 255, 0.28));
+}
+
+.kicker {
+  margin: 0;
+  color: rgba(218, 224, 255, 0.72);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(28px, 8vw, 42px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+}
+
+.message,
+.recoverCopy {
+  margin: 0;
+  color: rgba(235, 238, 255, 0.82);
+  font-size: 16px;
+  line-height: 1.58;
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(190, 198, 255, 0.32),
+    transparent
+  );
+}
+
+.recoverSection {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid rgba(190, 198, 255, 0.2);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 18px 44px rgba(4, 5, 18, 0.22);
+}
+
+.recoverTitle {
+  margin: 0;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+}

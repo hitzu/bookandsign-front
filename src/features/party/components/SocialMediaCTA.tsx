@@ -7,7 +7,8 @@ type Context =
   | "dedicated"
   | "eventOverview"
   | "eventBooking"
-  | "sessionPresence";
+  | "sessionPresence"
+  | "event_expired";
 type Variant = "modal" | "page" | "sheet" | "compact";
 
 interface SocialMediaCTAProps {
@@ -52,6 +53,11 @@ const COPY: Record<
     titulo: "Lleva esta experiencia a tu evento",
     subtitulo: "Pide informes o reserva por WhatsApp con Brillipoint.",
     waLabel: "Quiero informes",
+  },
+  event_expired: {
+    titulo: "¿Te encantó la experiencia?",
+    subtitulo: "Reserva Brillipoint para tu próximo evento.",
+    waLabel: "Quiero informes →",
   },
 };
 
@@ -150,7 +156,9 @@ export const SocialMediaCTA = ({
 
   const waLink = useMemo(() => {
     const mensaje =
-      context === "eventOverview" || context === "eventBooking"
+      context === "event_expired"
+        ? `Hola Brillipoint, vi su servicio en el evento de ${nombreFestejado} y me gustaría información para mi evento.`
+        : context === "eventOverview" || context === "eventBooking"
         ? `Hola, te vi en la fiesta de ${nombreFestejado} y me gustaría esto para mi fiesta`
         : `Hola, acabo de ver las fotos en el evento de ${nombreFestejado} y me encantó la experiencia. Me gustaría conocer más.`;
     return `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`;

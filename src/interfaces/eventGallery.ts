@@ -1,5 +1,17 @@
 import { EventThemes } from "./eventThemes";
 
+export const EVENT_ACCESS_STATUS = {
+  ACTIVE: "active",
+  COMPLETE: "complete",
+  FINISHED: "finished",
+} as const;
+
+export type GalleryStatus =
+  | typeof EVENT_ACCESS_STATUS.ACTIVE
+  | typeof EVENT_ACCESS_STATUS.FINISHED;
+
+export type SessionStatus = GalleryStatus | typeof EVENT_ACCESS_STATUS.COMPLETE;
+
 export interface SessionPhoto {
   url: string;
   position: number;
@@ -19,11 +31,12 @@ export interface SessionEventData {
   eventToken?: string;
   eventType?: string;
   eventTheme?: SessionEventTheme;
+  status?: GalleryStatus;
 }
 
 export interface SessionResponse {
   sessionToken: string;
-  status: "active" | "complete";
+  status: SessionStatus;
   gifUrl?: string | null;
   photos: SessionPhoto[];
   event: SessionEventData;

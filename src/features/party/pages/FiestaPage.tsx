@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { getExperience } from "../experiences";
 import {
+  EVENT_ACCESS_STATUS,
   GallerySessionItem,
   SessionEventData,
 } from "../../../interfaces/eventGallery";
@@ -21,8 +22,12 @@ import {
 } from "../../../api/services/partyPublicService";
 import { formatSplashDate } from "../utils/formatSplashDate";
 import { preloadImages } from "../utils/preloadImages";
-import { appendSourceToPath, readSourceFromRouter } from "../utils/sourceTracking";
+import {
+  appendSourceToPath,
+  readSourceFromRouter,
+} from "../utils/sourceTracking";
 import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
+import { EventExpiredPage } from "./EventExpiredPage";
 
 const SPLASH_DURATION_MS = 3200;
 const CRITICAL_COVER_COUNT = 10;
@@ -58,6 +63,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
   const [eventData, setEventData] = useState<SessionEventData | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [error, setError] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   const [isSplashReady, setIsSplashReady] = useState(false);
   const [splashStep, setSplashStep] = useState("Preparando la experiencia");
   const [allPhotos, setAllPhotos] = useState<EventPhoto[]>([]);
@@ -96,7 +102,9 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     }, READY_REVEAL_MS);
   };
 
-  const preloadGalleryCovers = async (gallerySessions: GallerySessionItem[]) => {
+  const preloadGalleryCovers = async (
+    gallerySessions: GallerySessionItem[],
+  ) => {
     const coverUrls = gallerySessions
       .map((session) => session.coverPhoto)
       .filter(Boolean);
@@ -120,6 +128,20 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
       setSplashStep("Buscando las fotos de la fiesta");
       const data = await getEventGalleryV2(resolvedEventToken);
       setEventData(data.event);
+
+      console.log("qweqwadqweasdqwe", data.event);
+
+      if (data.event.status === EVENT_ACCESS_STATUS.FINISHED) {
+        setSessions([]);
+        setIsEmpty(false);
+        setIsExpired(true);
+        setError(false);
+        setLoading(false);
+        completeSplashLoading(true);
+        return;
+      }
+
+      setIsExpired(false);
       setSessions(data.sessions);
       setIsEmpty(data.sessions.length === 0);
       setError(false);
@@ -280,10 +302,23 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     );
   }
 
+  if (isExpired && eventData) {
+    return (
+      <EventExpiredPage
+        eventName={eventData.honoreesNames}
+        eventToken={eventData.eventToken ?? resolvedEventToken}
+        eventDate={eventData.date}
+      />
+    );
+  }
+
   return (
     <>
       <Head>
-        <title>Fiesta{eventData?.honoreesNames ? ` - ${eventData.honoreesNames}` : ""}</title>
+        <title>
+          Fiesta
+          {eventData?.honoreesNames ? ` - ${eventData.honoreesNames}` : ""}
+        </title>
       </Head>
       <Overview
         eventToken={resolvedEventToken}
@@ -294,7 +329,9 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
           router.push(appendSourceToPath(`/mis-fotos/${token}`, source))
         }
         onShare={handleShare}
-        onViewAllPhotos={eventData?.eventToken ? handleViewAllPhotos : undefined}
+        onViewAllPhotos={
+          eventData?.eventToken ? handleViewAllPhotos : undefined
+        }
         isViewAllPhotosLoading={allPhotosLoading}
       />
       <PhotoViewerLightbox

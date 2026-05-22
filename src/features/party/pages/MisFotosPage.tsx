@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { axiosInstanceWithoutToken } from "../../../api/config/axiosConfig";
 import { getExperience } from "../experiences";
 import {
+  EVENT_ACCESS_STATUS,
   SessionEventData,
   SessionPhoto,
   SessionResponse,
@@ -14,8 +15,9 @@ import { buildSessionItems, getPhotoItems } from "../utils/buildSessionItems";
 import { formatSplashDate } from "../utils/formatSplashDate";
 import { SessionItem } from "../types/session";
 import { readSourceFromRouter } from "../utils/sourceTracking";
+import { EventExpiredPage } from "./EventExpiredPage";
 
-type PageState = "loading" | "ready" | "empty" | "error";
+type PageState = "loading" | "ready" | "empty" | "error" | "expired";
 const SPLASH_DURATION_MS = 3200;
 const READY_REVEAL_MS = 1800;
 
@@ -128,6 +130,16 @@ export default function MisFotosPage({
     try {
       setSplashStep("Buscando tu sesión de fotos");
       const session = await getEventGallerySessionV2(sessionToken);
+      setEventData(session?.event ?? null);
+
+      if (session.status === EVENT_ACCESS_STATUS.FINISHED) {
+        setItems([]);
+        setPhotos([]);
+        setPageState("expired");
+        completeSplashLoading(true);
+        return;
+      }
+
       const sessionItems = buildSessionItems(session);
       const orderedPhotos: SessionPhoto[] = getPhotoItems(sessionItems).map(
         (item) => ({
@@ -136,7 +148,6 @@ export default function MisFotosPage({
         }),
       );
 
-      setEventData(session?.event ?? null);
       setItems(sessionItems);
 
       if (sessionItems.length === 0) {
@@ -207,10 +218,23 @@ export default function MisFotosPage({
     );
   }
 
+  if (pageState === "expired" && eventData) {
+    return (
+      <EventExpiredPage
+        eventName={eventData.honoreesNames}
+        eventToken={eventData.eventToken ?? sessionToken}
+        eventDate={eventData.date}
+      />
+    );
+  }
+
   return (
     <>
       <Head>
-        <title>Mis Fotos{eventData?.honoreesNames ? ` - ${eventData.honoreesNames}` : ""}</title>
+        <title>
+          Mis Fotos
+          {eventData?.honoreesNames ? ` - ${eventData.honoreesNames}` : ""}
+        </title>
       </Head>
       <Carousel
         items={items}
