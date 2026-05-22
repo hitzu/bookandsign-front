@@ -1,13 +1,17 @@
 import type { NextRouter } from "next/router";
 
-export type GallerySource = "qr" | "gallery" | "direct";
+export type GallerySource = "qr" | "gallery" | "session" | "direct";
 
 export const resolveGallerySource = (
   value?: string | string[],
 ): GallerySource => {
   const normalizedValue = Array.isArray(value) ? value[0] : value;
 
-  if (normalizedValue === "qr" || normalizedValue === "gallery") {
+  if (
+    normalizedValue === "qr" ||
+    normalizedValue === "gallery" ||
+    normalizedValue === "session"
+  ) {
     return normalizedValue;
   }
 

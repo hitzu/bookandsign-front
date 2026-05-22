@@ -2,6 +2,7 @@ import { ComponentType } from "react";
 import { GallerySessionItem, SessionEventData, SessionPhoto } from "../../../interfaces/eventGallery";
 import { SessionItem } from "../types/session";
 import { GallerySource } from "../utils/sourceTracking";
+import { EventPageTheme } from "../types/eventPageTheme";
 
 export interface SplashProps {
   honoreesNames?: string;
@@ -30,11 +31,13 @@ export interface OverviewProps {
   onShare: () => void | Promise<void>;
   onViewAllPhotos?: () => void | Promise<void>;
   isViewAllPhotosLoading?: boolean;
+  theme?: EventPageTheme;
 }
 
 export interface ExperienceConfig {
   Splash: ComponentType<SplashProps>;
   Carousel: ComponentType<CarouselProps>;
   Overview: ComponentType<OverviewProps>;
+  theme: EventPageTheme;
   pageBackground: string;
 }

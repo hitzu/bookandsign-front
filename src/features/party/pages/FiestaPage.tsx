@@ -129,8 +129,6 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
       const data = await getEventGalleryV2(resolvedEventToken);
       setEventData(data.event);
 
-      console.log("qweqwadqweasdqwe", data.event);
-
       if (data.event.status === EVENT_ACCESS_STATUS.FINISHED) {
         setSessions([]);
         setIsEmpty(false);
@@ -184,12 +182,16 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
   const handleViewAllPhotos = async () => {
     if (!eventData?.eventToken || allPhotosLoading) return;
 
-    trackEvent(AnalyticsAction.GALLERY_GRID_OPENED, eventData.eventToken, {
-      metadata: {
-        source,
-        surface: "gallery_overview",
+    trackEvent(
+      AnalyticsAction.ALL_PHOTOS_GALLERY_GRID_OPENED,
+      eventData.eventToken,
+      {
+        metadata: {
+          source,
+          surface: "gallery_overview",
+        },
       },
-    });
+    );
 
     if (allPhotos.length > 0) {
       setViewerIndex(0);
@@ -255,7 +257,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     });
   }, [resolvedEventToken, router.isReady, source]);
 
-  const { Splash, Overview, pageBackground } = getExperience(
+  const { Splash, Overview, theme, pageBackground } = getExperience(
     eventData?.eventTheme?.key,
   );
   const splashDate = formatSplashDate(eventData?.date);
@@ -308,6 +310,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
         eventName={eventData.honoreesNames}
         eventToken={eventData.eventToken ?? resolvedEventToken}
         eventDate={eventData.date}
+        theme={theme}
       />
     );
   }
@@ -333,6 +336,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
           eventData?.eventToken ? handleViewAllPhotos : undefined
         }
         isViewAllPhotosLoading={allPhotosLoading}
+        theme={theme}
       />
       <PhotoViewerLightbox
         isOpen={viewerIndex !== null && allPhotos.length > 0}

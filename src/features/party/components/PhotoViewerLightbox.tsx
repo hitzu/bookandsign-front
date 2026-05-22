@@ -54,6 +54,12 @@ const PhotoViewerLightbox = ({
   }, [isOpen, activeIndex]);
 
   useEffect(() => {
+    if (isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
+
+  useEffect(() => {
     if (!showNavigationHints || typeof window === "undefined") return;
 
     const hasSeenHint = window.localStorage.getItem("gallery_hint_seen");
@@ -125,9 +131,10 @@ const PhotoViewerLightbox = ({
     } else if (window.history.state?.modal) {
       window.history.back();
     } else {
+      reset();
       onClose();
     }
-  }, [onClose, dispatch]);
+  }, [onClose, dispatch, reset]);
 
   const handlePrev = useCallback(() => {
     controllerRef.current?.prev();

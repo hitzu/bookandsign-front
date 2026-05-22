@@ -6,6 +6,7 @@ import {
   SessionEventData,
 } from "../../../../interfaces/eventGallery";
 import { OverviewProps } from "../types";
+import { buildThemeVars } from "../../utils/themeVars";
 import { parseLocalDate } from "@common/dates";
 import { AnalyticsAction } from "../../../../interfaces";
 import { trackEvent } from "../../../../api/services/eventAnalyticsService";
@@ -183,6 +184,7 @@ const FotoBoothOverview = ({
   onShare,
   onViewAllPhotos,
   isViewAllPhotosLoading = false,
+  theme,
 }: OverviewProps) => {
   const isEmpty = sessions.length === 0;
   const coverUrls = sessions
@@ -253,7 +255,7 @@ const FotoBoothOverview = ({
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={theme ? buildThemeVars(theme) : undefined}>
       {!isEmpty && (
         <section className={styles.mirrorHero}>
           {coverUrls.length > 0 ? (

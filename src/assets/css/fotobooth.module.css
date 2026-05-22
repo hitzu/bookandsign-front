@@ -188,31 +188,12 @@
 /* ── Carousel ──────────────────────────────────────────────────── */
 
 .carouselHeader {
-  padding: calc(env(safe-area-inset-top, 0px) + 14px) 20px 6px;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 2px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
-  gap: 12px;
-}
-
-.carouselBackLink {
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(236, 72, 153, 0.16);
-  background: rgba(255, 255, 255, 0.76);
-  color: rgba(190, 24, 93, 0.72);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.08);
-}
-
-.carouselBackLink:disabled {
-  opacity: 0.55;
+  gap: 8px;
 }
 
 .carouselLogo {
@@ -229,6 +210,7 @@
   filter: drop-shadow(0 4px 16px rgba(190, 24, 93, 0.16));
 }
 
+.carouselBackLink,
 .carouselCount {
   min-width: 48px;
   height: 28px;
@@ -245,11 +227,23 @@
   box-shadow: 0 4px 16px rgba(236, 72, 153, 0.08);
 }
 
+.carouselBackLink {
+  padding: 0 12px 0 10px;
+  gap: 4px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.carouselBackLink:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 /* Photo area */
 
 .photoArea {
   flex: 1;
-  padding: 0 28px;
+  padding: 0 18px 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,7 +254,7 @@
 .photoCard {
   aspect-ratio: 9 / 16;
   height: 100%;
-  max-height: 604px;
+  max-height: min(72dvh, 700px);
   max-width: 100%;
   border-radius: 8px;
   overflow: hidden;
@@ -837,7 +831,7 @@
 }
 
 .sessionInlineCta {
-  padding: 0 20px max(18px, env(safe-area-inset-bottom, 18px));
+  padding: 0 16px max(12px, env(safe-area-inset-bottom, 12px));
   flex-shrink: 0;
 }
 

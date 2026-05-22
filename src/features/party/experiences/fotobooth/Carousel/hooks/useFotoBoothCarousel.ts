@@ -73,7 +73,8 @@ export const useFotoBoothCarousel = ({
   const activeItem = normalizedItems[index] ?? null;
   const activeItemState = itemStates[index] ?? { retryCount: 0, status: "idle" };
   const canNavigate = normalizedItems.length > 1;
-  const canOpenGallery = Boolean(eventData.eventToken);
+  const resolvedEventToken = eventToken ?? eventData.eventToken;
+  const canOpenGallery = Boolean(resolvedEventToken);
   const formattedDate = eventData.date ? formatDate(eventData.date) : "";
 
   const trackSessionEvent = (
@@ -215,12 +216,10 @@ export const useFotoBoothCarousel = ({
   };
 
   const handleOpenGallery = () => {
-    if (!eventData.eventToken) return;
-    trackSessionEvent(AnalyticsAction.GALLERY_CTA_CLICKED, {
-      surface: "session_header",
-    });
+    if (!resolvedEventToken) return;
+
     void router.push(
-      appendSourceToPath(`/fiesta/${eventData.eventToken}`, "gallery"),
+      appendSourceToPath(`/fiesta/${resolvedEventToken}`, "session"),
     );
   };
 

@@ -2,16 +2,22 @@
   width: 100%;
   min-height: 50px;
   border-radius: 999px;
-  border: 1px solid rgba(190, 198, 255, 0.32);
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+  border: none;
+  background: var(
+    --ep-primary-btn-bg,
+    linear-gradient(135deg, #9d174d 0%, #6b21a8 100%)
+  );
+  color: var(--ep-primary-btn-text, #ffffff);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
   font-size: 16px;
   font-weight: 800;
-  box-shadow: 0 10px 26px rgba(4, 5, 18, 0.28);
+  box-shadow: 0 10px 26px var(--ep-accent-glow, rgba(190, 24, 93, 0.18));
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 
 .recoverBtn:active {

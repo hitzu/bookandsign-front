@@ -190,7 +190,7 @@ export default function MisFotosPage({
 
   // El eventType vendrá del backend cuando esté disponible.
   // Por ahora el factory devuelve siempre fotoBoothExperience.
-  const { Splash, Carousel } = getExperience(eventData?.eventTheme?.key);
+  const { Splash, Carousel, theme } = getExperience(eventData?.eventTheme?.key);
   const splashDate = formatSplashDate(eventData?.date);
 
   if (showSplash) {
@@ -224,6 +224,7 @@ export default function MisFotosPage({
         eventName={eventData.honoreesNames}
         eventToken={eventData.eventToken ?? sessionToken}
         eventDate={eventData.date}
+        theme={theme}
       />
     );
   }

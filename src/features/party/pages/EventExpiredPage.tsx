@@ -1,9 +1,11 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { AnalyticsAction } from "../../../interfaces";
 import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import { RecoverPhotosCTA } from "../components/RecoverPhotosCTA";
 import { SocialMediaCTA } from "../components/SocialMediaCTA";
+import { EventPageTheme } from "../types/eventPageTheme";
+import { buildThemeVars } from "../utils/themeVars";
 import logo from "@assets/images/logo-experience-white.png";
 import styles from "./EventExpiredPage.module.css";
 
@@ -11,12 +13,14 @@ interface EventExpiredPageProps {
   eventName: string;
   eventToken: string;
   eventDate: string;
+  theme?: EventPageTheme;
 }
 
 export function EventExpiredPage({
   eventName,
   eventToken,
   eventDate,
+  theme,
 }: EventExpiredPageProps) {
   useEffect(() => {
     trackEvent(AnalyticsAction.EVENT_EXPIRED_VIEW, eventToken, {
@@ -35,18 +39,21 @@ export function EventExpiredPage({
   };
 
   return (
-    <main className={styles.page}>
+    <main
+      className={styles.page}
+      style={theme ? buildThemeVars(theme) : undefined}
+    >
       <section className={styles.card}>
-        <Image
-          src={logo}
-          alt="Brillipoint Experience"
-          className={styles.logo}
-          priority
-        />
+        <div className={styles.logoBadge}>
+          <Image
+            src={logo}
+            alt="Brillipoint Experience"
+            className={styles.logo}
+            priority
+          />
+        </div>
         <p className={styles.kicker}>Evento finalizado</p>
-        <h1 className={styles.title}>
-          ✨ Gracias por acompañar a {eventName} ✨
-        </h1>
+        <h1 className={styles.title}>Gracias por acompañar a {eventName}</h1>
         <p className={styles.message}>
           Las fotos de este evento ya no están disponibles porque han pasado 30
           días desde la celebración.

@@ -9,6 +9,7 @@ import {
 test("resolveGallerySource accepts known sources and defaults unknown values", () => {
   assert.equal(resolveGallerySource("qr"), "qr");
   assert.equal(resolveGallerySource("gallery"), "gallery");
+  assert.equal(resolveGallerySource("session"), "session");
   assert.equal(resolveGallerySource("anything-else"), "direct");
   assert.equal(resolveGallerySource(undefined), "direct");
 });
@@ -27,5 +28,16 @@ test("readSourceFromRouter falls back to asPath query", () => {
       asPath: "/inspiracion/abc?source=qr",
     }),
     "qr",
+  );
+});
+
+test("readSourceFromRouter accepts session source", () => {
+  assert.equal(
+    readSourceFromRouter({
+      query: {
+        source: "session",
+      },
+    }),
+    "session",
   );
 });
