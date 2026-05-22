@@ -28,10 +28,13 @@ export interface OverviewProps {
   source: GallerySource;
   onSelectSession: (token: string) => void;
   onShare: () => void | Promise<void>;
+  onViewAllPhotos?: () => void | Promise<void>;
+  isViewAllPhotosLoading?: boolean;
 }
 
 export interface ExperienceConfig {
   Splash: ComponentType<SplashProps>;
   Carousel: ComponentType<CarouselProps>;
   Overview: ComponentType<OverviewProps>;
+  pageBackground: string;
 }

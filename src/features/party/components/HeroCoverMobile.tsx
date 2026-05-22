@@ -31,10 +31,11 @@ const HeroCoverMobile = ({
   const kickerText = normalizedDescription || "Tu momento tu brillo";
 
   const nameParts = useMemo(() => {
-    const parts = rawEventName
-      ?.split(/\s*&\s*/)
-      .map((s) => s.trim())
-      .filter(Boolean) ?? [];
+    const parts =
+      rawEventName
+        ?.split(/\s*&\s*/)
+        .map((s) => s.trim())
+        .filter(Boolean) ?? [];
     return parts;
   }, [rawEventName]);
   const nombre1 = nameParts[0] ?? "";
@@ -68,7 +69,9 @@ const HeroCoverMobile = ({
   const activeCoverUrl = availableCovers[activeCoverIndex] || null;
 
   return (
-    <section className={[styles.mobileHero, className].filter(Boolean).join(" ")}>
+    <section
+      className={[styles.mobileHero, className].filter(Boolean).join(" ")}
+    >
       <motion.div
         className={styles.mobileHeroMedia}
         initial={{ opacity: 0, y: 10 }}
@@ -112,7 +115,7 @@ const HeroCoverMobile = ({
 
       <div className={styles.mobileHeroContent}>
         <p className={styles.mobileHeroMirrorKicker}>{kickerText}</p>
-        {(hasTwoNames || rawEventName) ? (
+        {hasTwoNames || rawEventName ? (
           <div className={styles.mobileHeroMirrorNames}>
             {hasTwoNames ? (
               <>

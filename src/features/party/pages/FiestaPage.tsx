@@ -6,14 +6,23 @@ import {
   GallerySessionItem,
   SessionEventData,
 } from "../../../interfaces/eventGallery";
-import { AnalyticsAction } from "../../../interfaces";
+import { AnalyticsAction, EventPhoto } from "../../../interfaces";
 import { trackEvent } from "../../../api/services/eventAnalyticsService";
-import { shareUrl } from "../utils/mediaActions";
+import {
+  buildDownloadFilename,
+  downloadPhoto,
+  sharePhoto,
+  shareUrl,
+} from "../utils/mediaActions";
 import styles from "@assets/css/fotobooth-overview.module.css";
-import { getEventGalleryV2 } from "../../../api/services/partyPublicService";
+import {
+  getEventGalleryV2,
+  getPublicPhotosByEventToken,
+} from "../../../api/services/partyPublicService";
 import { formatSplashDate } from "../utils/formatSplashDate";
 import { preloadImages } from "../utils/preloadImages";
 import { appendSourceToPath, readSourceFromRouter } from "../utils/sourceTracking";
+import PhotoViewerLightbox from "../components/PhotoViewerLightbox";
 
 const SPLASH_DURATION_MS = 3200;
 const CRITICAL_COVER_COUNT = 10;
@@ -51,6 +60,9 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
   const [error, setError] = useState(false);
   const [isSplashReady, setIsSplashReady] = useState(false);
   const [splashStep, setSplashStep] = useState("Preparando la experiencia");
+  const [allPhotos, setAllPhotos] = useState<EventPhoto[]>([]);
+  const [allPhotosLoading, setAllPhotosLoading] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   const splashDone = useRef(false);
   const assetsReady = useRef(false);
@@ -147,6 +159,60 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     await shareUrl(url, eventData?.honoreesNames ?? "Evento");
   };
 
+  const handleViewAllPhotos = async () => {
+    if (!eventData?.eventToken || allPhotosLoading) return;
+
+    trackEvent(AnalyticsAction.GALLERY_GRID_OPENED, eventData.eventToken, {
+      metadata: {
+        source,
+        surface: "gallery_overview",
+      },
+    });
+
+    if (allPhotos.length > 0) {
+      setViewerIndex(0);
+      return;
+    }
+
+    try {
+      setAllPhotosLoading(true);
+      const photos = await getPublicPhotosByEventToken(eventData.eventToken);
+      const ordered = [...photos].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+      setAllPhotos(ordered);
+      if (ordered.length > 0) {
+        setViewerIndex(0);
+      }
+    } catch {
+      // swallow; lightbox simply won't open
+    } finally {
+      setAllPhotosLoading(false);
+    }
+  };
+
+  const handleDownloadPhoto = async (photo: EventPhoto) => {
+    const photoIndex = Math.max(
+      0,
+      allPhotos.findIndex((item) => item.id === photo.id),
+    );
+    const title = eventData?.honoreesNames ?? "Brillipoint";
+    try {
+      await downloadPhoto(
+        photo.publicUrl,
+        buildDownloadFilename(title, photoIndex),
+      );
+    } catch {
+      // noop
+    }
+  };
+
+  const handleSharePhoto = async (photo: EventPhoto) => {
+    const title = eventData?.honoreesNames ?? "Brillipoint";
+    await sharePhoto(photo.publicUrl, `Brillipoint - ${title}`);
+  };
+
   useEffect(() => {
     if (
       !router.isReady ||
@@ -167,7 +233,9 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     });
   }, [resolvedEventToken, router.isReady, source]);
 
-  const { Splash, Overview } = getExperience(eventData?.eventTheme?.key);
+  const { Splash, Overview, pageBackground } = getExperience(
+    eventData?.eventTheme?.key,
+  );
   const splashDate = formatSplashDate(eventData?.date);
 
   if (showSplash) {
@@ -226,6 +294,22 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
           router.push(appendSourceToPath(`/mis-fotos/${token}`, source))
         }
         onShare={handleShare}
+        onViewAllPhotos={eventData?.eventToken ? handleViewAllPhotos : undefined}
+        isViewAllPhotosLoading={allPhotosLoading}
+      />
+      <PhotoViewerLightbox
+        isOpen={viewerIndex !== null && allPhotos.length > 0}
+        photos={allPhotos}
+        activeIndex={viewerIndex}
+        eventTitle={eventData?.honoreesNames ?? "Brillipoint"}
+        onClose={() => setViewerIndex(null)}
+        onActiveIndexChange={setViewerIndex}
+        onDownload={handleDownloadPhoto}
+        onShare={handleSharePhoto}
+        nombreFestejado={eventData?.honoreesNames ?? ""}
+        eventToken={resolvedEventToken}
+        showNavigationHints
+        backdropColor={pageBackground}
       />
     </>
   );

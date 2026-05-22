@@ -3,7 +3,7 @@
 .page {
   background: #fff5f7;
   min-height: 100dvh;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   color: #1a0a12;
   overflow-x: hidden;
 }
@@ -16,7 +16,7 @@
   gap: 1rem;
   text-align: center;
   padding: 2rem;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
 }
 
 .centerPage p {
@@ -45,12 +45,18 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
 }
 
-.retryBtn:hover { background: #fce7f3; }
+.retryBtn:hover {
+  background: #fce7f3;
+}
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ─── Hero Header ────────────────────────────────────────────────────────── */
 
@@ -71,7 +77,7 @@
 }
 
 .eventName {
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   font-size: clamp(36px, 10vw, 52px);
   font-weight: 700;
   background: linear-gradient(135deg, #be185d, #9333ea);
@@ -123,7 +129,12 @@
   inset: 0;
   z-index: 2;
   background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.2) 36%, rgba(0, 0, 0, 0.7) 100%),
+    linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.42),
+      rgba(0, 0, 0, 0.2) 36%,
+      rgba(0, 0, 0, 0.7) 100%
+    ),
     rgba(0, 0, 0, 0.18);
   pointer-events: none;
 }
@@ -156,7 +167,7 @@
   max-width: min(800px, 92vw);
   margin: 0;
   color: #fff;
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   font-size: clamp(72px, 17vw, 142px);
   font-weight: 700;
   letter-spacing: 0;
@@ -182,6 +193,41 @@
   flex-direction: column;
   gap: 14px;
   margin-top: 46px;
+}
+
+.mirrorScrollHint {
+  position: relative;
+  z-index: 5;
+  align-self: center;
+  margin-top: 40px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.98);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: mirrorScrollBounce 1.8s infinite ease-in-out;
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.mirrorScrollHint:active {
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes mirrorScrollBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
 }
 
 .mirrorActions .btnPrimary {
@@ -232,34 +278,20 @@
   z-index: 2;
   pointer-events: none;
   background:
-    linear-gradient(to right, rgba(255,245,247,0.35) 0%, transparent 18%, transparent 82%, rgba(255,245,247,0.35) 100%),
-    linear-gradient(to bottom, rgba(255,245,247,0.15) 0%, transparent 20%, transparent 80%, rgba(255,245,247,0.2) 100%);
-}
-
-.carouselDots {
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  z-index: 6;
-}
-
-.dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  transition: all 0.4s;
-}
-
-.dotActive {
-  width: 14px;
-  background: white;
-  border-radius: 3px;
-  box-shadow: 0 0 6px rgba(236, 72, 153, 0.5);
+    linear-gradient(
+      to right,
+      rgba(255, 245, 247, 0.35) 0%,
+      transparent 18%,
+      transparent 82%,
+      rgba(255, 245, 247, 0.35) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(255, 245, 247, 0.15) 0%,
+      transparent 20%,
+      transparent 80%,
+      rgba(255, 245, 247, 0.2) 100%
+    );
 }
 
 /* ─── Action Buttons ─────────────────────────────────────────────────────── */
@@ -279,13 +311,15 @@
   border-radius: 16px;
   background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
   border: none;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: white;
   cursor: pointer;
   box-shadow: 0 8px 28px rgba(236, 72, 153, 0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -303,7 +337,7 @@
   border-radius: 16px;
   background: transparent;
   border: 2px solid #fbcfe8;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 15px;
   font-weight: 600;
   color: #ec4899;
@@ -315,7 +349,9 @@
   transition: background 0.15s;
 }
 
-.btnSecondary:active { background: #fce7f3; }
+.btnSecondary:active {
+  background: #fce7f3;
+}
 
 /* ─── Share toast ────────────────────────────────────────────────────────── */
 
@@ -335,12 +371,14 @@
   font-weight: 600;
   color: #be185d;
   opacity: 0;
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
   pointer-events: none;
   white-space: nowrap;
   z-index: 300;
   box-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
 }
 
 .shareToastVisible {
@@ -384,6 +422,30 @@
   letter-spacing: 0.04em;
 }
 
+.viewAllBtn {
+  width: 100%;
+  min-height: 50px;
+  margin: 0 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #be185d 0%, #7e22ce 100%);
+  color: #ffffff;
+  font-family: "DM Sans", "Public Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  box-shadow: 0 10px 28px rgba(190, 24, 93, 0.24);
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.viewAllBtn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 12px rgba(190, 24, 93, 0.18);
+}
+
 /* ─── Sessions grid ──────────────────────────────────────────────────────── */
 
 .sessionsGrid {
@@ -399,8 +461,12 @@
   aspect-ratio: 3 / 4;
   cursor: pointer;
   background: #fce7f3;
-  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.12), 0 1px 4px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow:
+    0 4px 20px rgba(236, 72, 153, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   border: none;
   padding: 0;
   display: block;
@@ -431,7 +497,11 @@
   left: 0;
   right: 0;
   height: 90px;
-  background: linear-gradient(to top, rgba(255, 245, 247, 0.95) 0%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(255, 245, 247, 0.95) 0%,
+    transparent 100%
+  );
   z-index: 2;
 }
 
@@ -492,7 +562,9 @@
   border-radius: 65px / 85px;
   border: 2px solid #fbcfe8;
   background: linear-gradient(160deg, #fff0f5 0%, #f5e6ff 100%);
-  box-shadow: 0 4px 28px rgba(236, 72, 153, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 4px 28px rgba(236, 72, 153, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   overflow: hidden;
 }
 
@@ -543,12 +615,19 @@
 }
 
 @keyframes sparklePop {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 0.8; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
 }
 
 .emptyTitle {
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   font-size: 28px;
   font-weight: 700;
   background: linear-gradient(135deg, #be185d, #9333ea);
@@ -579,7 +658,7 @@
 
 .emptyEventName {
   margin: 0;
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   font-size: clamp(44px, 13vw, 72px);
   font-weight: 700;
   line-height: 0.95;
@@ -620,8 +699,12 @@
   animation: emptyPulse 1.8s ease-in-out infinite;
 }
 
-.emptyDot:nth-child(2) { animation-delay: 0.3s; }
-.emptyDot:nth-child(3) { animation-delay: 0.6s; }
+.emptyDot:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.emptyDot:nth-child(3) {
+  animation-delay: 0.6s;
+}
 
 .emptyActions {
   position: relative;
@@ -629,8 +712,16 @@
 }
 
 @keyframes emptyPulse {
-  0%, 100% { background: #fbcfe8; transform: scale(1); }
-  50% { background: #ec4899; transform: scale(1.35); box-shadow: 0 0 8px rgba(236, 72, 153, 0.3); }
+  0%,
+  100% {
+    background: #fbcfe8;
+    transform: scale(1);
+  }
+  50% {
+    background: #ec4899;
+    transform: scale(1.35);
+    box-shadow: 0 0 8px rgba(236, 72, 153, 0.3);
+  }
 }
 
 /* ─── Brand CTA ──────────────────────────────────────────────────────────── */
@@ -655,7 +746,7 @@
 }
 
 .brandCtaTitle {
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   font-size: 22px;
   font-weight: 700;
   color: #be185d;
@@ -682,7 +773,7 @@
   border-radius: 16px;
   background: linear-gradient(135deg, #16a34a, #22c55e);
   border: none;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: #fff;
@@ -697,7 +788,9 @@
   text-decoration: none;
 }
 
-.btnWa:active { transform: scale(0.97); }
+.btnWa:active {
+  transform: scale(0.97);
+}
 
 .socialRow {
   display: flex;
@@ -711,7 +804,7 @@
   border-radius: 10px;
   padding: 0 16px;
   border: none;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -722,7 +815,9 @@
   text-decoration: none;
 }
 
-.btnSocial:active { transform: scale(0.95); }
+.btnSocial:active {
+  transform: scale(0.95);
+}
 
 .btnIg {
   background: linear-gradient(135deg, #f9a8d4, #c084fc);

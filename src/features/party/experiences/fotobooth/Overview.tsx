@@ -12,22 +12,6 @@ import { trackEvent } from "../../../../api/services/eventAnalyticsService";
 
 // ─── Icons (solo los que usa Overview directamente) ──────────────────────────
 
-const IconEye = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-
 const IconShare = () => (
   <svg
     width="15"
@@ -44,6 +28,21 @@ const IconShare = () => (
     <circle cx="18" cy="19" r="3" />
     <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+  </svg>
+);
+
+const IconChevronDown = () => (
+  <svg
+    width="40"
+    height="40"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.6"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 
@@ -182,6 +181,8 @@ const FotoBoothOverview = ({
   source,
   onSelectSession,
   onShare,
+  onViewAllPhotos,
+  isViewAllPhotosLoading = false,
 }: OverviewProps) => {
   const isEmpty = sessions.length === 0;
   const coverUrls = sessions
@@ -280,32 +281,14 @@ const FotoBoothOverview = ({
             </h1>
             {dateLabel && <p className={styles.mirrorDate}>{dateLabel}</p>}
           </div>
-          {coverUrls.length > 1 && (
-            <div className={styles.carouselDots}>
-              {coverUrls.map((_, i) => (
-                <div
-                  key={i}
-                  className={`${styles.dot} ${i === activeSlide ? styles.dotActive : ""}`}
-                />
-              ))}
-            </div>
-          )}
-          <div className={styles.mirrorActions}>
-            <button className={styles.btnPrimary} onClick={handleVerFotos}>
-              <IconEye />
-              Ver fotos
-            </button>
-            <button className={styles.btnSecondary} onClick={handleShare}>
-              <IconShare />
-              Compartir enlace
-            </button>
-            <div
-              className={`${styles.shareToast} ${showToast ? styles.shareToastVisible : ""}`}
-            >
-              <IconCheck />
-              Enlace copiado ✦
-            </div>
-          </div>
+          <button
+            type="button"
+            className={styles.mirrorScrollHint}
+            onClick={handleVerFotos}
+            aria-label="Desliza para ver las fotos"
+          >
+            <IconChevronDown />
+          </button>
         </section>
       )}
 
@@ -347,6 +330,19 @@ const FotoBoothOverview = ({
                 {sessions.length === 1 ? "sesión" : "sesiones"} en este evento
               </p>
             </div>
+            {onViewAllPhotos && (
+              <button
+                type="button"
+                className={styles.viewAllBtn}
+                onClick={onViewAllPhotos}
+                disabled={isViewAllPhotosLoading}
+                aria-busy={isViewAllPhotosLoading}
+              >
+                {isViewAllPhotosLoading
+                  ? "Cargando fotos…"
+                  : "Ver todas las fotos del evento"}
+              </button>
+            )}
             <div className={styles.sessionsGrid}>
               {sessions.map((session, sessionIndex) => (
                 <SessionCard

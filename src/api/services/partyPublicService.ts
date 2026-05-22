@@ -113,7 +113,7 @@ export const getPublicPhotosByEventToken = async (
   signal?: AbortSignal,
 ): Promise<EventPhoto[]> => {
   const response = await getEventPhotosPage(token, {
-    limit: 200,
+    limit: 100,
     signal,
   });
   return response.items;

@@ -1894,6 +1894,22 @@
   padding: 0;
 }
 
+/* Solid variant for light backdrops — matches the fotobooth `btnPrimary` gradient */
+.btnIconSolid {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+  color: #fff;
+  box-shadow: 0 8px 22px rgba(236, 72, 153, 0.38);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btnIconSolid:active {
+  transform: scale(0.95);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.28);
+}
+
 .modalEndState {
   display: flex;
   flex-direction: column;
