@@ -38,6 +38,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     items,
     setGifHintVisible,
     shareFallbackPreviewUrl,
+    successCtaSource,
   } = useFotoBoothCarousel(props);
 
   useFotoBoothCarouselEffects({
@@ -89,6 +90,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         eventName={props.eventData.honoreesNames}
         isOpen={isSuccessCtaOpen}
         onClose={closeSuccessCta}
+        source={successCtaSource}
       />
 
       {isShareFallbackOpen && shareFallbackPreviewUrl && (

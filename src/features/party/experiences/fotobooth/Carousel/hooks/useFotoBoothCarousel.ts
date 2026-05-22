@@ -48,6 +48,7 @@ export const useFotoBoothCarousel = ({
     gifHintVisible,
     isGeneratingAsset,
     isSuccessCtaOpen,
+    successCtaSource,
     shareFallbackFile,
     shareFallbackPreviewUrl,
     isShareFallbackOpen,
@@ -119,7 +120,7 @@ export const useFotoBoothCarousel = ({
       effectName: activeEffect,
       variant: "original",
     });
-    openSuccessCta();
+    openSuccessCta("download");
   };
 
   const handleShareSuccess = async (file: File) => {
@@ -136,7 +137,7 @@ export const useFotoBoothCarousel = ({
         variant: "original",
         surface: "session_carousel",
       });
-      openSuccessCta();
+      openSuccessCta("share");
       return;
     }
 
@@ -204,7 +205,7 @@ export const useFotoBoothCarousel = ({
 
     downloadFile(shareFallbackFile);
     closeShareFallback();
-    openSuccessCta();
+    openSuccessCta("download");
   };
 
   const handleCopySessionLink = async (): Promise<boolean> => {
@@ -251,5 +252,6 @@ export const useFotoBoothCarousel = ({
     items: normalizedItems,
     setGifHintVisible,
     shareFallbackPreviewUrl,
+    successCtaSource,
   };
 };

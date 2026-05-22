@@ -1,17 +1,18 @@
-import React from "react";
 import styles from "@assets/css/fotobooth.module.css";
-import { SocialMediaCTA } from "../../../../components/SocialMediaCTA";
+import { PostActionConfirmation } from "../../../../components/PostActionConfirmation";
+import { CtaSource } from "../types";
 
 type SuccessCtaModalProps = {
   eventName: string;
   isOpen: boolean;
   onClose: () => void;
+  source: CtaSource;
 };
 
 const SuccessCtaModal = ({
-  eventName,
   isOpen,
   onClose,
+  source,
 }: SuccessCtaModalProps) => {
   if (!isOpen) return null;
 
@@ -23,12 +24,7 @@ const SuccessCtaModal = ({
       }}
     >
       <div className={styles.successCtaModal}>
-        <SocialMediaCTA
-          context="download"
-          variant="sheet"
-          nombreFestejado={eventName}
-          onClose={onClose}
-        />
+        <PostActionConfirmation onClose={onClose} source={source} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { EffectName } from "../../../../types/session";
-import { ItemLoadState } from "../types";
+import { CtaSource, ItemLoadState } from "../types";
 
 type FotoBoothCarouselState = {
   index: number;
@@ -8,6 +8,7 @@ type FotoBoothCarouselState = {
   gifHintVisible: boolean;
   isGeneratingAsset: boolean;
   isSuccessCtaOpen: boolean;
+  successCtaSource: CtaSource;
   shareFallbackFile: File | null;
   shareFallbackPreviewUrl: string | null;
   isShareFallbackOpen: boolean;
@@ -15,7 +16,7 @@ type FotoBoothCarouselState = {
   setIndex: (index: number) => void;
   setActiveEffect: (effect: EffectName) => void;
   setIsGeneratingAsset: (isGeneratingAsset: boolean) => void;
-  openSuccessCta: () => void;
+  openSuccessCta: (source: CtaSource) => void;
   closeSuccessCta: () => void;
   openShareFallback: (file: File, previewUrl: string) => void;
   closeShareFallback: () => void;
@@ -32,6 +33,7 @@ const initialState = {
   gifHintVisible: false,
   isGeneratingAsset: false,
   isSuccessCtaOpen: false,
+  successCtaSource: "download" as CtaSource,
   shareFallbackFile: null as File | null,
   shareFallbackPreviewUrl: null as string | null,
   isShareFallbackOpen: false,
@@ -54,15 +56,17 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
       }),
     setActiveEffect: (activeEffect) => set({ activeEffect }),
     setIsGeneratingAsset: (isGeneratingAsset) => set({ isGeneratingAsset }),
-    openSuccessCta: () =>
+    openSuccessCta: (successCtaSource) =>
       set({
         isSuccessCtaOpen: true,
+        successCtaSource,
         isShareFallbackOpen: false,
         shareFallbackFile: null,
         shareFallbackPreviewUrl: null,
         isGeneratingAsset: false,
       }),
-    closeSuccessCta: () => set({ isSuccessCtaOpen: false }),
+    closeSuccessCta: () =>
+      set({ isSuccessCtaOpen: false, successCtaSource: "download" }),
     openShareFallback: (shareFallbackFile, shareFallbackPreviewUrl) =>
       set({
         isShareFallbackOpen: true,

@@ -5,8 +5,8 @@ import { EventPhoto, AnalyticsAction } from "../../../interfaces";
 import styles from "@assets/css/party-public.module.css";
 import { sharePhoto } from "../utils/mediaActions";
 import { trackEvent } from "../../../api/services/eventAnalyticsService";
-import { SocialMediaCTA } from "./SocialMediaCTA";
 import { useModalStateMachine } from "../hooks/useModalStateMachine";
+import { PostActionConfirmation } from "./PostActionConfirmation";
 
 type PhotoViewerLightboxProps = {
   isOpen: boolean;
@@ -36,7 +36,6 @@ const PhotoViewerLightbox = ({
   onShare,
   onPersonalize,
   onDedicate,
-  nombreFestejado = "",
   eventToken,
   showMediaActions = true,
   showNavigationHints = false,
@@ -271,9 +270,7 @@ const PhotoViewerLightbox = ({
 
                     {modalState === "post-download" && (
                       <div className={styles.modalEndState}>
-                        <SocialMediaCTA
-                          context="download"
-                          nombreFestejado={nombreFestejado}
+                        <PostActionConfirmation
                           onClose={() =>
                             dispatch({ type: "RETURN_TO_GALLERY" })
                           }
@@ -295,16 +292,14 @@ const PhotoViewerLightbox = ({
                             ✕
                           </button>
                           <p className={styles.endStateTitulo}>
-                            Comparte tu foto ✨ Etiquétanos como{" "}
+                            Comparte tu foto y etiqueta a{" "}
                             <span className={styles.shareHighlight}>
                               @brillipoint
-                            </span>{" "}
-                            en Instagram, Facebook o{" "}
-                            <span className={styles.shareHighlight}>
-                              @brillipoint.glitterbar
-                            </span>{" "}
-                            en TikTok para recibir un regalo en tu próximo
-                            evento 🎁
+                            </span>
+                          </p>
+                          <p className={styles.endStateSubtitulo}>
+                            Si nos etiquetas en tus redes, recibes un descuento
+                            en tu próximo servicio.
                           </p>
                           <button
                             type="button"

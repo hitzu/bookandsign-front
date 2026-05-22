@@ -12,6 +12,7 @@ const SessionInlineCta = ({ eventName }: SessionInlineCtaProps) => (
       context="sessionPresence"
       variant="compact"
       nombreFestejado={eventName}
+      rewardNote="Etiqueta a @brillipoint en tus redes y recibe un descuento en tu próximo servicio."
     />
   </div>
 );
