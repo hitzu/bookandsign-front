@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "@assets/css/fotobooth.module.css";
 import { CarouselProps } from "../../types";
 import { useFotoBoothCarousel } from "./hooks/useFotoBoothCarousel";
@@ -6,11 +6,16 @@ import { useFotoBoothCarouselEffects } from "./hooks/useFotoBoothCarouselEffects
 import ActionBar from "./ui/ActionBar";
 import CarouselHeader from "./ui/CarouselHeader";
 import ItemStage from "./ui/ItemStage";
+import { rewardPromoCopy } from "./rewardPromoCopy";
+import RewardPromoBadge from "./ui/RewardPromoBadge";
+import RewardPromoModal from "./ui/RewardPromoModal";
 import SessionInlineCta from "./ui/SessionInlineCta";
 import ShareFallbackModal from "./ui/ShareFallbackModal";
 import SuccessCtaModal from "./ui/SuccessCtaModal";
+import { buildThemeVars } from "../../../utils/themeVars";
 
 const FotoBoothCarousel = (props: CarouselProps) => {
+  const [isRewardPromoOpen, setIsRewardPromoOpen] = useState(false);
   const {
     activeEffect,
     activeItem,
@@ -26,6 +31,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     handleItemError,
     handleItemLoad,
     handleOpenGallery,
+    handleOpenRewardPromo,
     handlePointerEnd,
     handlePointerStart,
     handleRetry,
@@ -55,7 +61,10 @@ const FotoBoothCarousel = (props: CarouselProps) => {
   });
 
   return (
-    <div className={styles.screen}>
+    <div
+      className={styles.screen}
+      style={props.theme ? buildThemeVars(props.theme) : undefined}
+    >
       <CarouselHeader
         canOpenGallery={canOpenGallery}
         currentIndex={index}
@@ -78,6 +87,16 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         onRetry={handleRetry}
       />
 
+      <div className={styles.rewardPromoSlot}>
+        <RewardPromoBadge
+          copy={rewardPromoCopy}
+          onClick={() => {
+            handleOpenRewardPromo();
+            setIsRewardPromoOpen(true);
+          }}
+        />
+      </div>
+
       <ActionBar
         isBusy={isGeneratingAsset}
         onSave={handleSave}
@@ -91,6 +110,12 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         isOpen={isSuccessCtaOpen}
         onClose={closeSuccessCta}
         source={successCtaSource}
+      />
+
+      <RewardPromoModal
+        copy={rewardPromoCopy}
+        isOpen={isRewardPromoOpen}
+        onClose={() => setIsRewardPromoOpen(false)}
       />
 
       {isShareFallbackOpen && shareFallbackPreviewUrl && (

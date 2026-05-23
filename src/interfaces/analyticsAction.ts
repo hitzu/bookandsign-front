@@ -16,6 +16,7 @@ export enum AnalyticsAction {
   EVENT_EXPIRED_VIEW = "event_expired_view",
   IMAGINA_CTA_CLICKED = "imagina_cta_clicked",
   RECOVER_PHOTOS_CTA_CLICKED = "recover_photos_cta_clicked",
+  REWARD_PROMO_OPENED = "reward_promo_opened",
   SESSION_VIEW = "session_view",
   SESSION_OPENED = "session_opened",
   PHOTO_VIEW = "photo_view",

@@ -4,7 +4,23 @@ import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
 const outDir = join(tmpdir(), "bookandsign-party-tests");
-const compiledTestsDir = join(outDir, "__tests__");
+
+const collectTestFiles = async (directory) => {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nestedFiles = await Promise.all(
+    entries.map(async (entry) => {
+      const entryPath = join(directory, entry.name);
+
+      if (entry.isDirectory()) {
+        return collectTestFiles(entryPath);
+      }
+
+      return entry.name.endsWith(".test.js") ? [entryPath] : [];
+    }),
+  );
+
+  return nestedFiles.flat();
+};
 
 const run = (command, args) => {
   const result = spawnSync(command, args, {
@@ -43,17 +59,17 @@ try {
     "false",
     "--outDir",
     outDir,
+    "src/features/party/utils/eventStatus.ts",
     "src/features/party/utils/mediaActions.ts",
     "src/features/party/utils/sessionShare.ts",
     "src/features/party/utils/sourceTracking.ts",
+    "src/features/party/utils/__tests__/eventStatus.test.ts",
     "src/features/party/utils/__tests__/mediaActions.test.ts",
     "src/features/party/utils/__tests__/sessionShare.test.ts",
     "src/features/party/utils/__tests__/sourceTracking.test.ts",
   ]);
 
-  const testFiles = (await readdir(compiledTestsDir))
-    .filter((file) => file.endsWith(".test.js"))
-    .map((file) => join(compiledTestsDir, file));
+  const testFiles = await collectTestFiles(outDir);
 
   run("node", ["--test", ...testFiles]);
 } finally {

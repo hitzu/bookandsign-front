@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { axiosInstanceWithoutToken } from "../../../api/config/axiosConfig";
 import { getExperience } from "../experiences";
 import {
-  EVENT_ACCESS_STATUS,
   SessionEventData,
   SessionPhoto,
   SessionResponse,
@@ -12,6 +11,10 @@ import {
 import styles from "@assets/css/party-public.module.css";
 import { getEventGallerySessionV2 } from "../../../api/services/partyPublicService";
 import { buildSessionItems, getPhotoItems } from "../utils/buildSessionItems";
+import {
+  isExpiredEventStatus,
+  isExpiredSessionStatus,
+} from "../utils/eventStatus";
 import { formatSplashDate } from "../utils/formatSplashDate";
 import { SessionItem } from "../types/session";
 import { readSourceFromRouter } from "../utils/sourceTracking";
@@ -132,7 +135,10 @@ export default function MisFotosPage({
       const session = await getEventGallerySessionV2(sessionToken);
       setEventData(session?.event ?? null);
 
-      if (session.status === EVENT_ACCESS_STATUS.FINISHED) {
+      if (
+        isExpiredSessionStatus(session.status) ||
+        isExpiredEventStatus(session.event?.status)
+      ) {
         setItems([]);
         setPhotos([]);
         setPageState("expired");
@@ -244,6 +250,7 @@ export default function MisFotosPage({
         eventToken={eventData?.eventToken}
         sessionToken={sessionToken}
         source={source}
+        theme={theme}
       />
     </>
   );

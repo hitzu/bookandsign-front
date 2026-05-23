@@ -15,7 +15,6 @@ interface SocialMediaCTAProps {
   context: Context;
   variant?: Variant;
   nombreFestejado?: string;
-  rewardNote?: string;
   onWAClick?: () => void;
   onClose?: () => void;
 }
@@ -143,7 +142,6 @@ export const SocialMediaCTA = ({
   context,
   variant = "modal",
   nombreFestejado = "",
-  rewardNote,
   onWAClick,
   onClose,
 }: SocialMediaCTAProps) => {
@@ -284,9 +282,6 @@ export const SocialMediaCTA = ({
         <div className={styles.compactCopy}>
           <p className={styles.compactTitulo}>{titulo}</p>
           <p className={styles.compactSubtitulo}>{subtitulo}</p>
-          {rewardNote ? (
-            <p className={styles.compactRewardNote}>{rewardNote}</p>
-          ) : null}
         </div>
         <div className={styles.compactActions}>
           <a

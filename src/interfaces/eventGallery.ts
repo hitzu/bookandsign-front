@@ -4,11 +4,13 @@ export const EVENT_ACCESS_STATUS = {
   ACTIVE: "active",
   COMPLETE: "complete",
   FINISHED: "finished",
+  FINALIZED: "finalized",
 } as const;
 
 export type GalleryStatus =
   | typeof EVENT_ACCESS_STATUS.ACTIVE
-  | typeof EVENT_ACCESS_STATUS.FINISHED;
+  | typeof EVENT_ACCESS_STATUS.FINISHED
+  | typeof EVENT_ACCESS_STATUS.FINALIZED;
 
 export type SessionStatus = GalleryStatus | typeof EVENT_ACCESS_STATUS.COMPLETE;
 

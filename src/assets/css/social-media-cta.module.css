@@ -367,13 +367,6 @@
   line-height: 1.4;
 }
 
-.compactRewardNote {
-  margin: 4px 0 0;
-  color: rgba(157, 23, 77, 0.72);
-  font-size: 11px;
-  line-height: 1.45;
-}
-
 .compactWaBtn {
   flex-shrink: 0;
   height: 40px;

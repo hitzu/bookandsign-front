@@ -3,7 +3,6 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import { getExperience } from "../experiences";
 import {
-  EVENT_ACCESS_STATUS,
   GallerySessionItem,
   SessionEventData,
 } from "../../../interfaces/eventGallery";
@@ -21,6 +20,7 @@ import {
   getPublicPhotosByEventToken,
 } from "../../../api/services/partyPublicService";
 import { formatSplashDate } from "../utils/formatSplashDate";
+import { isExpiredEventStatus } from "../utils/eventStatus";
 import { preloadImages } from "../utils/preloadImages";
 import {
   appendSourceToPath,
@@ -129,7 +129,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
       const data = await getEventGalleryV2(resolvedEventToken);
       setEventData(data.event);
 
-      if (data.event.status === EVENT_ACCESS_STATUS.FINISHED) {
+      if (isExpiredEventStatus(data.event.status)) {
         setSessions([]);
         setIsEmpty(false);
         setIsExpired(true);

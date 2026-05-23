@@ -20,6 +20,7 @@ export interface CarouselProps {
   eventToken?: string;
   sessionToken?: string;
   source?: GallerySource;
+  theme?: EventPageTheme;
 }
 
 export interface OverviewProps {

@@ -223,6 +223,13 @@ export const useFotoBoothCarousel = ({
     );
   };
 
+  const handleOpenRewardPromo = () => {
+    trackSessionEvent(AnalyticsAction.REWARD_PROMO_OPENED, {
+      surface: "session_reward_promo",
+      entrypoint: "floating_gift",
+    });
+  };
+
   return {
     activeEffect,
     activeItem,
@@ -239,6 +246,7 @@ export const useFotoBoothCarousel = ({
     handleItemError: markItemError,
     handleItemLoad: markItemLoaded,
     handleOpenGallery,
+    handleOpenRewardPromo,
     handlePointerEnd,
     handlePointerStart,
     handleRetry: retryItem,
