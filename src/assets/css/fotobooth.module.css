@@ -252,10 +252,10 @@
 }
 
 .photoCard {
-  aspect-ratio: 9 / 16;
-  height: 100%;
+  aspect-ratio: 3 / 4;
+  width: min(100%, calc(min(72dvh, 700px) * 0.75));
+  height: auto;
   max-height: min(72dvh, 700px);
-  max-width: 100%;
   border-radius: 8px;
   overflow: hidden;
   position: relative;
@@ -286,6 +286,9 @@
   height: 100%;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(180deg, #fff7fb 0%, #fce7f3 100%);
 }
 
@@ -412,7 +415,7 @@
 .photoImg {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   user-select: none;
   pointer-events: none;
