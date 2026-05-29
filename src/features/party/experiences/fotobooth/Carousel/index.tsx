@@ -4,18 +4,17 @@ import { CarouselProps } from "../../types";
 import { useFotoBoothCarousel } from "./hooks/useFotoBoothCarousel";
 import { useFotoBoothCarouselEffects } from "./hooks/useFotoBoothCarouselEffects";
 import ActionBar from "./ui/ActionBar";
+import BenefitBanner from "./ui/BenefitBanner";
 import CarouselHeader from "./ui/CarouselHeader";
+import GiftModal from "./ui/GiftModal";
 import ItemStage from "./ui/ItemStage";
-import { rewardPromoCopy } from "./rewardPromoCopy";
-import RewardPromoBadge from "./ui/RewardPromoBadge";
-import RewardPromoModal from "./ui/RewardPromoModal";
 import SessionInlineCta from "./ui/SessionInlineCta";
 import ShareFallbackModal from "./ui/ShareFallbackModal";
 import SuccessCtaModal from "./ui/SuccessCtaModal";
 import { buildThemeVars } from "../../../utils/themeVars";
 
 const FotoBoothCarousel = (props: CarouselProps) => {
-  const [isRewardPromoOpen, setIsRewardPromoOpen] = useState(false);
+  const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const {
     activeEffect,
     activeItem,
@@ -87,20 +86,19 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         onRetry={handleRetry}
       />
 
-      <div className={styles.rewardPromoSlot}>
-        <RewardPromoBadge
-          copy={rewardPromoCopy}
-          onClick={() => {
-            handleOpenRewardPromo();
-            setIsRewardPromoOpen(true);
-          }}
-        />
-      </div>
-
       <ActionBar
         isBusy={isGeneratingAsset}
         onSave={handleSave}
         onShare={handleShare}
+      />
+
+      <BenefitBanner
+        titulo="Beneficio especial"
+        subtitulo="Comparte y gana un regalo"
+        onPress={() => {
+          handleOpenRewardPromo();
+          setIsGiftModalOpen(true);
+        }}
       />
 
       <SessionInlineCta eventName={props.eventData.honoreesNames} />
@@ -112,10 +110,13 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         source={successCtaSource}
       />
 
-      <RewardPromoModal
-        copy={rewardPromoCopy}
-        isOpen={isRewardPromoOpen}
-        onClose={() => setIsRewardPromoOpen(false)}
+      <GiftModal
+        visible={isGiftModalOpen}
+        onClose={() => setIsGiftModalOpen(false)}
+        onShare={() => {
+          setIsGiftModalOpen(false);
+          void handleShare();
+        }}
       />
 
       {isShareFallbackOpen && shareFallbackPreviewUrl && (

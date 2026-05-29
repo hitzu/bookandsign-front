@@ -55,7 +55,6 @@ const ActionBar = ({ isBusy = false, onSave, onShare }: ActionBarProps) => (
       </svg>
       {isBusy ? "Procesando..." : "Compartir"}
     </button>
-
   </div>
 );
 

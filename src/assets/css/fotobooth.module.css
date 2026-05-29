@@ -11,7 +11,9 @@
   flex-direction: column;
   background: #fff5f7;
   font-family: "Public Sans", sans-serif;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ── Splash ────────────────────────────────────────────────────── */
@@ -242,20 +244,17 @@
 /* Photo area */
 
 .photoArea {
-  flex: 1;
+  flex: 0 0 auto;
   padding: 0 18px 6px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   position: relative;
-  min-height: 0;
 }
 
 .photoCard {
-  aspect-ratio: 3 / 4;
-  width: min(100%, calc(min(72dvh, 700px) * 0.75));
-  height: auto;
-  max-height: min(72dvh, 700px);
+  width: min(100%, 700px);
+  min-height: min(72dvh, calc(min(100vw - 36px, 700px) * 4 / 3));
   border-radius: 8px;
   overflow: hidden;
   position: relative;
@@ -271,24 +270,22 @@
 }
 
 .viewerTrack {
-  height: 100%;
+  height: auto;
   display: flex;
+  align-items: flex-start;
   transition: transform 0.28s ease;
 }
 
 .viewerSlide {
   min-width: 100%;
-  height: 100%;
+  height: auto;
 }
 
 .viewerMediaFrame {
   width: 100%;
-  height: 100%;
+  height: auto;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: linear-gradient(180deg, #fff7fb 0%, #fce7f3 100%);
 }
 
@@ -414,8 +411,7 @@
 
 .photoImg {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
   display: block;
   user-select: none;
   pointer-events: none;
@@ -770,13 +766,7 @@
   padding: 8px 20px 10px;
   display: flex;
   gap: 10px;
-  flex-shrink: 0;
-}
-
-.rewardPromoSlot {
-  padding: 0 18px 2px;
-  display: flex;
-  justify-content: flex-end;
+  align-items: center;
   flex-shrink: 0;
 }
 
@@ -840,100 +830,66 @@
   box-shadow: 0 6px 24px rgba(236, 72, 153, 0.2);
 }
 
+.benefitBanner {
+  margin: 0 20px 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #f4c0d1;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fff0f5 0%, #ffe0ec 100%);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.benefitBanner:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(212, 83, 126, 0.12);
+}
+
+.benefitBanner:active {
+  transform: scale(0.99);
+}
+
+.benefitBannerIcon {
+  flex: 0 0 auto;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.benefitBannerCopy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.benefitBannerTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: #72243e;
+  line-height: 1.25;
+}
+
+.benefitBannerSubtitle {
+  font-size: 11px;
+  color: #993556;
+  line-height: 1.3;
+}
+
+.benefitBannerChevron {
+  flex: 0 0 auto;
+  font-size: 16px;
+  color: #d4537e;
+}
+
 .sessionInlineCta {
   padding: 0 16px max(12px, env(safe-area-inset-bottom, 12px));
   flex-shrink: 0;
-}
-
-.rewardPromoBadge {
-  position: relative;
-  width: 68px;
-  height: 68px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  appearance: none;
-  isolation: isolate;
-  transition:
-    transform 0.2s ease,
-    filter 0.2s ease;
-}
-
-.rewardPromoBadge::before {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border-radius: 999px;
-  background: var(
-    --ep-surface-bg,
-    linear-gradient(180deg, #fff8fb 0%, #ffffff 100%)
-  );
-  border: 1px solid var(--ep-surface-border, rgba(236, 72, 153, 0.14));
-  box-shadow:
-    0 12px 28px var(--ep-accent-glow, rgba(236, 72, 153, 0.2)),
-    inset 0 1px 0 rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(10px);
-  z-index: 0;
-}
-
-.rewardPromoBadge::after {
-  content: "";
-  position: absolute;
-  inset: 1px;
-  border-radius: 999px;
-  border: 1px solid color-mix(
-    in srgb,
-    var(--ep-surface-border, rgba(236, 72, 153, 0.14)) 70%,
-    transparent
-  );
-  opacity: 0.9;
-  z-index: 0;
-}
-
-.rewardPromoBadge:hover {
-  transform: translateY(-1px);
-  filter: drop-shadow(
-    0 14px 24px var(--ep-accent-glow, rgba(236, 72, 153, 0.22))
-  );
-}
-
-.rewardPromoBadge:active {
-  transform: scale(0.96);
-}
-
-.rewardPromoBadgeIcon {
-  position: relative;
-  z-index: 1;
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  background:
-    radial-gradient(
-      circle at 30% 25%,
-      rgba(255, 255, 255, 0.92),
-      transparent 38%
-    ),
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--ep-accent, #ec4899) 16%, white),
-      color-mix(in srgb, var(--ep-primary-btn-bg, #a855f7) 12%, white)
-    );
-  border: 1px solid
-    color-mix(in srgb, var(--ep-accent, #ec4899) 18%, white);
-  box-shadow:
-    0 10px 18px var(--ep-accent-glow, rgba(236, 72, 153, 0.18)),
-    0 0 0 6px
-      color-mix(in srgb, var(--ep-accent, #ec4899) 8%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.34);
-  animation: rewardIconBounce 1.8s ease-in-out infinite;
 }
 
 /* ── Success CTA ───────────────────────────────────────────────── */
@@ -959,34 +915,36 @@
   box-shadow: 0 20px 60px rgba(88, 28, 63, 0.22);
 }
 
-.rewardPromoModal {
-  width: min(100%, 390px);
-  min-height: 280px;
-  background: var(
-    --ep-surface-bg,
-    linear-gradient(180deg, #fff8fb 0%, #ffffff 100%)
-  );
-  border-radius: 28px;
-  padding: 32px 24px 24px;
-  position: relative;
-  border: 1px solid var(--ep-surface-border, rgba(236, 72, 153, 0.12));
-  box-shadow: 0 20px 60px var(--ep-accent-glow, rgba(88, 28, 63, 0.22));
+.giftModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  z-index: 140;
+  padding: 16px;
 }
 
-.rewardPromoCloseBtn {
+.giftModalCard {
+  width: min(100%, 320px);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px 16px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(88, 28, 63, 0.18);
+}
+
+.giftModalCloseBtn {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 32px;
-  height: 32px;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: none;
-  background: color-mix(in srgb, var(--ep-accent, #ec4899) 12%, white);
-  color: var(--ep-accent, #db2777);
+  border: 0.5px solid #f4c0d1;
+  background: #fff0f5;
+  color: #993556;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -994,94 +952,103 @@
   cursor: pointer;
 }
 
-.rewardPromoInner {
-  width: 100%;
-  max-width: 302px;
+.giftModalHero {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd6e8, #ffadd2);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 18px;
-  position: relative;
+  justify-content: center;
 }
 
-.rewardPromoEyebrow {
+.giftModalHeroEmoji {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.giftModalBadge {
+  display: table;
+  margin: 0 auto 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #ffe8ef;
+  color: #72243e;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+}
+
+.giftModalTitle {
+  margin: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #1a1a1a;
+}
+
+.giftModalSteps {
+  margin: 10px 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.giftModalStep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.giftModalStepNumber {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffe8ef;
+  color: #993556;
+  font-size: 10px;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid var(--ep-surface-border, rgba(236, 72, 153, 0.16));
-  background: color-mix(
-    in srgb,
-    var(--ep-accent, #ec4899) 10%,
-    white
-  );
-  color: var(--ep-accent, #be185d);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
 }
 
-.rewardPromoCopyBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.rewardPromoLead,
-.rewardPromoSupport,
-.rewardPromoClosing {
+.giftModalStepText {
   margin: 0;
-  color: var(--ep-text, #831843);
-  letter-spacing: -0.03em;
+  font-size: 11px;
+  color: #444;
+  line-height: 1.4;
 }
 
-.rewardPromoLead {
-  font-size: 30px;
-  line-height: 1.02;
-  font-weight: 800;
-}
-
-.rewardPromoSupport {
-  font-size: 18px;
-  line-height: 1.34;
-  font-weight: 500;
-}
-
-.rewardPromoClosing {
-  font-size: 21px;
-  line-height: 1.28;
+.giftModalStepStrong {
+  color: #8b2252;
   font-weight: 700;
 }
 
-.rewardPromoEmphasisStrong {
-  color: var(--ep-text, #5b2148);
-  font-weight: 800;
+.giftModalStepHandle {
+  color: #d4537e;
+  font-weight: 700;
 }
 
-.rewardPromoEmphasisAccent {
-  color: var(--ep-accent, #be185d);
-  font-weight: 800;
+.giftModalShareBtn {
+  width: 100%;
+  border: none;
+  border-radius: 22px;
+  background: #8b2252;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 10px 0;
 }
 
-.rewardPromoEmphasisReward {
-  color: var(--ep-text, #5b2148);
-  font-weight: 800;
-}
-
-.rewardPromoDivider {
-  width: 88px;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    var(--ep-divider, rgba(236, 72, 153, 0.42)),
-    transparent
-  );
-  opacity: 0.9;
+.giftModalDisclaimer {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 10px;
+  color: #aaaaaa;
 }
 
 /* ── Download toast ────────────────────────────────────────────── */
@@ -1230,44 +1197,13 @@
 }
 
 @media (max-width: 480px) {
-  .rewardPromoSlot {
-    padding: 0 18px 0;
+  .benefitBanner {
+    margin-left: 16px;
+    margin-right: 16px;
   }
 
-  .rewardPromoBadge {
-    width: 64px;
-    height: 64px;
-  }
-
-  .rewardPromoBadgeIcon {
-    width: 46px;
-    height: 46px;
-    font-size: 24px;
-  }
-
-  .rewardPromoModal {
-    width: min(100%, 352px);
-    min-height: 240px;
-    padding: 28px 18px 20px;
-  }
-
-  .rewardPromoInner {
-    max-width: 264px;
-    gap: 16px;
-  }
-
-  .rewardPromoLead {
-    font-size: 24px;
-    line-height: 1.06;
-  }
-
-  .rewardPromoSupport {
-    font-size: 16px;
-  }
-
-  .rewardPromoClosing {
-    font-size: 18px;
-    line-height: 1.32;
+  .giftModalCard {
+    width: min(100%, 320px);
   }
 }
 
