@@ -79,7 +79,7 @@ const EventList = () => {
     }
   }, []);
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr?: string) => {
     if (!dateStr) return "-";
     const d = new Date(dateStr);
     return d.toLocaleDateString("es-MX", {
@@ -91,11 +91,6 @@ const EventList = () => {
 
   const columns = useMemo(
     () => [
-      {
-        header: "Nombre",
-        accessorKey: "name",
-        enableColumnFilter: false,
-      },
       {
         header: "Key",
         accessorKey: "key",

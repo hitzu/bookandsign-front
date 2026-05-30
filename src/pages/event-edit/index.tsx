@@ -33,7 +33,7 @@ const EventEditIndex = () => {
     const term = searchTerm.trim().toLowerCase();
     if (term.length < 2) return [];
     return allEvents
-      .filter((e) => e.name?.toLowerCase().includes(term))
+      .filter((e) => e.honoreesNames?.toLowerCase().includes(term))
       .slice(0, 50);
   }, [allEvents, searchTerm]);
 
@@ -52,10 +52,10 @@ const EventEditIndex = () => {
             </Card.Header>
             <Card.Body>
               <Form.Group style={{ position: "relative" }}>
-                <Form.Label>Buscar evento por nombre</Form.Label>
+                <Form.Label>Buscar evento por festejados</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Escriba el nombre del evento..."
+                  placeholder="Escribí los nombres de los festejados..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -90,11 +90,11 @@ const EventEditIndex = () => {
                           e.currentTarget.style.backgroundColor = "white";
                         }}
                       >
-                        <strong>{event.name}</strong>
+                        <strong>{event.honoreesNames}</strong>
                         <br />
                         <small className="text-muted">
                           {eventTypes.find((et) => et.id === event.eventTypeId)?.name || "Sin tipo"} -{" "}
-                          {event.honoreesNames}
+                          {event.key}
                         </small>
                       </div>
                     ))}
@@ -113,9 +113,9 @@ const EventEditIndex = () => {
                       marginTop: "4px",
                       width: "100%",
                     }}
-                  >
+                    >
                     <small className="text-muted">
-                      No se encontraron eventos con ese nombre
+                      No se encontraron eventos con esos festejados
                     </small>
                   </div>
                 )}

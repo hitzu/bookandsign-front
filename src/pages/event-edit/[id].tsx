@@ -6,6 +6,9 @@ import { Card, Col, Form, Row, Toast, Button } from "react-bootstrap";
 import { useFormik } from "formik";
 import {
   Event,
+  EventPrintTemplate,
+  GetEventServiceTypesResponse,
+  EventThemes,
   UpdateEventPayload,
   GetEventTypesResponse,
 } from "../../interfaces";
@@ -14,14 +17,16 @@ import {
   getEvents,
   updateEventById,
 } from "../../api/services/eventsService";
+import { getEventServiceTypes } from "../../api/services/eventServiceTypesService";
 import { getEventTypes } from "../../api/services/eventTypesService";
+import { getEventThemes } from "../../api/services/eventThemesService";
 import * as yup from "yup";
 
 interface EventFormValues {
-  name: string;
-  description: string;
   key: string;
   eventType: string;
+  serviceTypeId: string;
+  eventThemeId: string;
   honoreesNames: string;
   albumPhrase: string;
   venueName: string;
@@ -30,28 +35,108 @@ interface EventFormValues {
   serviceEndsAt: string;
   delegateName: string;
   photoCount: string;
-  printTemplate: string;
-  decorativeIcon: string;
+  printTemplates: string;
 }
 
+const PHOTO_COUNT_OPTIONS = ["1", "2", "3", "4", "5"];
+
+const parsePrintTemplates = (
+  value: string,
+): EventPrintTemplate[] | undefined => {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) return undefined;
+
+  const parsedValue: unknown = JSON.parse(trimmedValue);
+
+  if (!Array.isArray(parsedValue)) {
+    throw new Error("Las plantillas deben ser un arreglo JSON");
+  }
+
+  return parsedValue.map((item, index) => {
+    if (!item || typeof item !== "object") {
+      throw new Error(`La plantilla #${index + 1} debe ser un objeto`);
+    }
+
+    const template = item as Record<string, unknown>;
+
+    if (typeof template.type !== "string" || !template.type.trim()) {
+      throw new Error(`La plantilla #${index + 1} requiere un campo "type"`);
+    }
+
+    if (
+      typeof template.template !== "string" ||
+      !template.template.trim()
+    ) {
+      throw new Error(
+        `La plantilla #${index + 1} requiere un campo "template"`,
+      );
+    }
+
+    if (template.icon != null && typeof template.icon !== "string") {
+      throw new Error(
+        `La plantilla #${index + 1} tiene un "icon" inválido`,
+      );
+    }
+
+    if (template.border != null && typeof template.border !== "string") {
+      throw new Error(
+        `La plantilla #${index + 1} tiene un "border" inválido`,
+      );
+    }
+
+    return {
+      type: template.type.trim(),
+      template: template.template.trim(),
+      ...(typeof template.icon === "string" && template.icon.trim()
+        ? { icon: template.icon.trim() }
+        : {}),
+      ...(typeof template.border === "string" && template.border.trim()
+        ? { border: template.border.trim() }
+        : {}),
+    };
+  });
+};
+
+const formatPrintTemplates = (
+  printTemplates?: EventPrintTemplate[],
+): string =>
+  printTemplates?.length ? JSON.stringify(printTemplates, null, 2) : "";
+
 const validationSchema = yup.object().shape({
-  name: yup.string().required("El nombre del evento es requerido"),
-  description: yup.string().optional(),
   key: yup.string().required("La clave del evento es requerida"),
   eventType: yup.string().required("El tipo de evento es requerido"),
-  honoreesNames: yup.string().required("Los nombres de los festejados son requeridos"),
+  serviceTypeId: yup.string().required("El tipo de servicio es requerido"),
+  eventThemeId: yup.string().optional(),
+  honoreesNames: yup
+    .string()
+    .required("Los nombres de los festejados son requeridos"),
   albumPhrase: yup.string().optional(),
-  venueName: yup.string().required("El nombre del salon es requerido"),
+  venueName: yup.string().optional(),
   serviceLocationUrl: yup.string().url("Debe ser una URL valida").optional(),
-  serviceStartsAt: yup.string().required("La fecha de inicio es requerida"),
-  serviceEndsAt: yup.string().required("La fecha de fin es requerida"),
+  serviceStartsAt: yup.string().optional(),
+  serviceEndsAt: yup.string().optional(),
   delegateName: yup.string().optional(),
-  photoCount: yup.number().integer().min(1).optional(),
-  printTemplate: yup.string().optional(),
-  decorativeIcon: yup.string().optional(),
+  photoCount: yup.number().integer().min(1).max(5).optional(),
+  printTemplates: yup
+    .string()
+    .test(
+      "valid-print-templates",
+      "Las plantillas deben ser un JSON válido",
+      (value) => {
+        if (!value?.trim()) return true;
+
+        try {
+          parsePrintTemplates(value);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+    ),
 });
 
-const toLocalDatetimeValue = (isoStr: string) => {
+const toLocalDatetimeValue = (isoStr?: string) => {
   if (!isoStr) return "";
   const d = new Date(isoStr);
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -66,16 +151,20 @@ const EventEdit = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [toastVariant, setToastVariant] = useState<"success" | "danger">("success");
   const [eventTypes, setEventTypes] = useState<GetEventTypesResponse[]>([]);
+  const [eventServiceTypes, setEventServiceTypes] = useState<
+    GetEventServiceTypesResponse[]
+  >([]);
+  const [eventThemes, setEventThemes] = useState<EventThemes[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [allEvents, setAllEvents] = useState<Event[]>([]);
 
   const formik = useFormik<EventFormValues>({
     initialValues: {
-      name: "",
-      description: "",
       key: "",
       eventType: "",
+      serviceTypeId: "",
+      eventThemeId: "",
       honoreesNames: "",
       albumPhrase: "",
       venueName: "",
@@ -83,30 +172,44 @@ const EventEdit = () => {
       serviceStartsAt: "",
       serviceEndsAt: "",
       delegateName: "",
-      photoCount: "",
-      printTemplate: "",
-      decorativeIcon: "",
+      photoCount: "2",
+      printTemplates: "",
     },
     validationSchema,
     onSubmit: async (values) => {
-      const payload: UpdateEventPayload = {
-        name: values.name,
-        description: values.description,
-        key: values.key,
-        eventTypeId: Number(values.eventType),
-        honoreesNames: values.honoreesNames,
-        albumPhrase: values.albumPhrase,
-        venueName: values.venueName,
-        serviceLocationUrl: values.serviceLocationUrl,
-        serviceStartsAt: new Date(values.serviceStartsAt).toISOString(),
-        serviceEndsAt: new Date(values.serviceEndsAt).toISOString(),
-        delegateName: values.delegateName,
-        ...(values.photoCount ? { photoCount: Number(values.photoCount) } : {}),
-        ...(values.printTemplate ? { printTemplate: values.printTemplate } : {}),
-        ...(values.decorativeIcon ? { decorativeIcon: values.decorativeIcon } : {}),
-      };
-
       try {
+        const payload: UpdateEventPayload = {
+          key: values.key,
+          eventTypeId: Number(values.eventType),
+          serviceTypeId: Number(values.serviceTypeId),
+          ...(values.eventThemeId
+            ? { eventThemeId: Number(values.eventThemeId) }
+            : {}),
+          honoreesNames: values.honoreesNames,
+          albumPhrase: values.albumPhrase,
+          ...(values.venueName.trim() ? { venueName: values.venueName } : {}),
+          ...(values.serviceLocationUrl.trim()
+            ? { serviceLocationUrl: values.serviceLocationUrl }
+            : {}),
+          ...(values.serviceStartsAt
+            ? {
+                serviceStartsAt: new Date(
+                  values.serviceStartsAt,
+                ).toISOString(),
+              }
+            : {}),
+          ...(values.serviceEndsAt
+            ? { serviceEndsAt: new Date(values.serviceEndsAt).toISOString() }
+            : {}),
+          ...(values.delegateName.trim()
+            ? { delegateName: values.delegateName }
+            : {}),
+          ...(values.photoCount ? { photoCount: Number(values.photoCount) } : {}),
+          ...(values.printTemplates.trim()
+            ? { printTemplates: parsePrintTemplates(values.printTemplates) }
+            : {}),
+        };
+
         await updateEventById(Number(id), payload);
         setToastMessage("Evento actualizado exitosamente");
         setToastVariant("success");
@@ -114,7 +217,9 @@ const EventEdit = () => {
       } catch (error: any) {
         console.error("Error updating event:", error);
         const msg =
-          error?.response?.data?.message || "Error al actualizar el evento";
+          error instanceof SyntaxError
+            ? "Las plantillas deben ser un JSON válido"
+            : error?.response?.data?.message || "Error al actualizar el evento";
         setToastMessage(msg);
         setToastVariant("danger");
         setShowToast(true);
@@ -128,10 +233,11 @@ const EventEdit = () => {
         try {
           const event = await getEventById(Number(id));
           formik.setValues({
-            name: event.name || "",
-            description: event.description || "",
             key: event.key || "",
             eventType: String(event.eventTypeId || ""),
+            serviceTypeId: String(event.serviceTypeId || ""),
+            eventThemeId:
+              event.eventThemeId != null ? String(event.eventThemeId) : "",
             honoreesNames: event.honoreesNames || "",
             albumPhrase: event.albumPhrase || "",
             venueName: event.venueName || "",
@@ -139,9 +245,8 @@ const EventEdit = () => {
             serviceStartsAt: toLocalDatetimeValue(event.serviceStartsAt),
             serviceEndsAt: toLocalDatetimeValue(event.serviceEndsAt),
             delegateName: event.delegateName || "",
-            photoCount: event.photoCount != null ? String(event.photoCount) : "",
-            printTemplate: event.printTemplate || "",
-            decorativeIcon: event.decorativeIcon || "",
+            photoCount: event.photoCount != null ? String(event.photoCount) : "2",
+            printTemplates: formatPrintTemplates(event.printTemplates),
           });
         } catch (error) {
           console.error("Error fetching event:", error);
@@ -158,12 +263,16 @@ const EventEdit = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [eventsRes, eventTypesRes] = await Promise.all([
+        const [eventsRes, eventTypesRes, eventServiceTypesRes, eventThemesRes] = await Promise.all([
           getEvents(),
           getEventTypes(),
+          getEventServiceTypes(),
+          getEventThemes(),
         ]);
         setAllEvents(eventsRes);
         setEventTypes(eventTypesRes);
+        setEventServiceTypes(eventServiceTypesRes);
+        setEventThemes(eventThemesRes);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -175,7 +284,7 @@ const EventEdit = () => {
     const term = searchTerm.trim().toLowerCase();
     if (term.length < 2) return [];
     return allEvents
-      .filter((e) => e.name?.toLowerCase().includes(term))
+      .filter((e) => e.honoreesNames?.toLowerCase().includes(term))
       .slice(0, 50);
   }, [allEvents, searchTerm]);
 
@@ -222,10 +331,10 @@ const EventEdit = () => {
             </Card.Header>
             <Card.Body>
               <Form.Group>
-                <Form.Label>Buscar evento por nombre</Form.Label>
+                <Form.Label>Buscar evento por festejados</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Escriba el nombre del evento..."
+                  placeholder="Escribí los nombres de los festejados..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -260,10 +369,10 @@ const EventEdit = () => {
                           e.currentTarget.style.backgroundColor = "white";
                         }}
                       >
-                        <strong>{event.name}</strong>
+                        <strong>{event.honoreesNames}</strong>
                         <br />
                         <small className="text-muted">
-                          {eventTypes.find((et) => et.id === event.eventTypeId)?.name || "Sin tipo"} - {event.honoreesNames}
+                          {eventTypes.find((et) => et.id === event.eventTypeId)?.name || "Sin tipo"} - {event.key}
                         </small>
                       </div>
                     ))}
@@ -284,7 +393,7 @@ const EventEdit = () => {
                     }}
                   >
                     <small className="text-muted">
-                      No se encontraron eventos con ese nombre
+                      No se encontraron eventos con esos festejados
                     </small>
                   </div>
                 )}
@@ -299,24 +408,7 @@ const EventEdit = () => {
             <Card.Body>
               <Form onSubmit={formik.handleSubmit}>
                 <Row>
-                  <Col md={6}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Nombre del evento</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Nombre del evento"
-                        name="name"
-                        value={formik.values.name}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur("name")}
-                        isInvalid={formik.touched.name && !!formik.errors.name}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.name}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
+                  <Col md={12}>
                     <Form.Group className="mb-3">
                       <Form.Label>Clave del evento</Form.Label>
                       <Form.Control
@@ -360,6 +452,49 @@ const EventEdit = () => {
                   </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
+                      <Form.Label>Tema del evento</Form.Label>
+                      <Form.Select
+                        name="eventThemeId"
+                        value={formik.values.eventThemeId}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("eventThemeId")}
+                      >
+                        <option value="">Sin tema...</option>
+                        {eventThemes.map((theme) => (
+                          <option key={theme.id} value={theme.id}>
+                            {theme.name}
+                          </option>
+                        ))}
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Tipo de servicio</Form.Label>
+                      <Form.Select
+                        name="serviceTypeId"
+                        value={formik.values.serviceTypeId}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("serviceTypeId")}
+                        isInvalid={formik.touched.serviceTypeId && !!formik.errors.serviceTypeId}
+                      >
+                        <option value="">Seleccionar tipo de servicio...</option>
+                        {eventServiceTypes.map((serviceType) => (
+                          <option key={serviceType.id} value={serviceType.id}>
+                            {serviceType.name}
+                          </option>
+                        ))}
+                      </Form.Select>
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.serviceTypeId}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
                       <Form.Label>Nombres de festejados</Form.Label>
                       <Form.Control
                         type="text"
@@ -376,23 +511,6 @@ const EventEdit = () => {
                     </Form.Group>
                   </Col>
                 </Row>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Descripcion</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    placeholder="Descripcion del evento"
-                    name="description"
-                    value={formik.values.description}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur("description")}
-                    isInvalid={formik.touched.description && !!formik.errors.description}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.description}
-                  </Form.Control.Feedback>
-                </Form.Group>
 
                 <Form.Group className="mb-3">
                   <Form.Label>Frase del album</Form.Label>
@@ -499,59 +617,45 @@ const EventEdit = () => {
                 </Form.Group>
 
                 <Row>
-                  <Col md={4}>
+                  <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label>Numero de fotos</Form.Label>
-                      <Form.Control
-                        type="number"
-                        placeholder="Ej: 3"
+                      <Form.Label>Número de fotos</Form.Label>
+                      <Form.Select
                         name="photoCount"
-                        min={1}
                         value={formik.values.photoCount}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur("photoCount")}
                         isInvalid={formik.touched.photoCount && !!formik.errors.photoCount}
-                      />
+                      >
+                        {PHOTO_COUNT_OPTIONS.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </Form.Select>
                       <Form.Control.Feedback type="invalid">
                         {formik.errors.photoCount}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                  <Col md={4}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Plantilla de impresion</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Ej: polaroid_2"
-                        name="printTemplate"
-                        value={formik.values.printTemplate}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur("printTemplate")}
-                        isInvalid={formik.touched.printTemplate && !!formik.errors.printTemplate}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.printTemplate}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
-                  <Col md={4}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Icono decorativo</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Ej: rings"
-                        name="decorativeIcon"
-                        value={formik.values.decorativeIcon}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur("decorativeIcon")}
-                        isInvalid={formik.touched.decorativeIcon && !!formik.errors.decorativeIcon}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.decorativeIcon}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Col>
                 </Row>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Plantillas de impresión (JSON)</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={6}
+                    placeholder='[{"type":"polaroid","template":"polaroid_rc_2","icon":"rings","border":"led"}]'
+                    name="printTemplates"
+                    value={formik.values.printTemplates}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur("printTemplates")}
+                    isInvalid={formik.touched.printTemplates && !!formik.errors.printTemplates}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {formik.errors.printTemplates}
+                  </Form.Control.Feedback>
+                </Form.Group>
 
                 <Button
                   type="submit"

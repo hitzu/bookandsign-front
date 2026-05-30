@@ -1,24 +1,42 @@
 import { EventThemes } from "./eventThemes";
 
+export interface EventPrintTemplate {
+  type: string;
+  template: string;
+  icon?: string;
+  border?: string;
+}
+
+export interface GetEventServiceTypesResponse {
+  id: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  name: string;
+  description: string;
+  rank: number;
+}
+
 export interface Event {
   id: number;
-  name: string;
+  name?: string;
   key: string;
-  description: string;
+  description?: string;
   token: string;
   contractId: number;
   eventTypeId: number;
   eventThemeId?: number;
   honoreesNames: string;
   albumPhrase: string;
-  venueName: string;
-  serviceLocationUrl: string;
-  serviceStartsAt: string;
-  serviceEndsAt: string;
-  delegateName: string;
+  venueName?: string;
+  serviceLocationUrl?: string;
+  serviceStartsAt?: string;
+  serviceEndsAt?: string;
+  delegateName?: string;
   photoCount?: number;
-  printTemplate?: string;
-  decorativeIcon?: string;
+  serviceTypeId?: number;
+  serviceType?: string;
+  printTemplates?: EventPrintTemplate[];
   createdAt: string;
   updatedAt: string;
   eventTheme?: EventThemes;
@@ -26,28 +44,25 @@ export interface Event {
 
 export interface CreateEventPayload {
   contractId: number;
-  name: string;
-  description: string;
   key: string;
   eventTypeId: number;
+  serviceTypeId: number;
   eventThemeId?: number;
   honoreesNames: string;
   albumPhrase: string;
-  venueName: string;
-  serviceLocationUrl: string;
-  serviceStartsAt: string;
-  serviceEndsAt: string;
-  delegateName: string;
+  venueName?: string;
+  serviceLocationUrl?: string;
+  serviceStartsAt?: string;
+  serviceEndsAt?: string;
+  delegateName?: string;
   photoCount?: number;
-  printTemplate?: string;
-  decorativeIcon?: string;
+  printTemplates?: EventPrintTemplate[];
 }
 
 export interface UpdateEventPayload {
-  name?: string;
-  description?: string;
   key?: string;
   eventTypeId?: number;
+  serviceTypeId?: number;
   eventThemeId?: number;
   honoreesNames?: string;
   albumPhrase?: string;
@@ -57,8 +72,7 @@ export interface UpdateEventPayload {
   serviceEndsAt?: string;
   delegateName?: string;
   photoCount?: number;
-  printTemplate?: string;
-  decorativeIcon?: string;
+  printTemplates?: EventPrintTemplate[];
 }
 
 export type EventPhraseResponse = {
