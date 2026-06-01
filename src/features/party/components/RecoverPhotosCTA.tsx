@@ -1,17 +1,15 @@
-import { AnalyticsAction } from "../../../interfaces";
-import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import styles from "./RecoverPhotosCTA.module.css";
 
 interface RecoverPhotosCTAProps {
   eventName: string;
   eventDate: string;
-  eventToken: string;
+  onRecover?: () => void;
 }
 
 export function RecoverPhotosCTA({
   eventName,
   eventDate,
-  eventToken,
+  onRecover,
 }: RecoverPhotosCTAProps) {
   const phone = (
     process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "5212215775211"
@@ -27,13 +25,7 @@ export function RecoverPhotosCTA({
       target="_blank"
       rel="noopener noreferrer"
       className={styles.recoverBtn}
-      onClick={() =>
-        trackEvent(AnalyticsAction.RECOVER_PHOTOS_CTA_CLICKED, eventToken, {
-          metadata: {
-            surface: "event_expired",
-          },
-        })
-      }
+      onClick={onRecover}
     >
       Recuperar fotos →
     </a>

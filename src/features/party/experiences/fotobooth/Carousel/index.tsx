@@ -35,6 +35,8 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     handlePointerStart,
     handleRetry,
     handleSave,
+    handleSessionSocialClick,
+    handleSessionWhatsAppClick,
     handleShare,
     index,
     isGeneratingAsset,
@@ -49,7 +51,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
   useFotoBoothCarouselEffects({
     activeItem,
     activeItemStatus: activeItemState.status,
-    eventToken: props.eventToken,
+    eventToken: props.eventToken ?? props.eventData.eventToken,
     index,
     items,
     photos: props.photos,
@@ -101,7 +103,11 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         }}
       />
 
-      <SessionInlineCta eventName={props.eventData.honoreesNames} />
+      <SessionInlineCta
+        eventName={props.eventData.honoreesNames}
+        onWAClick={handleSessionWhatsAppClick}
+        onSocialClick={handleSessionSocialClick}
+      />
 
       <SuccessCtaModal
         eventName={props.eventData.honoreesNames}

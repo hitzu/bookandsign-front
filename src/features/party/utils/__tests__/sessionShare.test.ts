@@ -11,10 +11,10 @@ test("buildSessionShareUrl keeps the session route and adds source", () => {
   const url = buildSessionShareUrl({
     origin: "https://brillipoint.mx",
     sessionToken: "abc123",
-    source: "qr",
+    source: "qr_session",
   });
 
-  assert.equal(url, "https://brillipoint.mx/mis-fotos/abc123?source=qr");
+  assert.equal(url, "https://brillipoint.mx/mis-fotos/abc123?source=qr_session");
 });
 
 test("buildSessionShareText includes the event name without duplicating the url", () => {

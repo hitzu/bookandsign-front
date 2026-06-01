@@ -227,6 +227,15 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
         photo.publicUrl,
         buildDownloadFilename(title, photoIndex),
       );
+      if (eventData?.eventToken) {
+        trackEvent(AnalyticsAction.FIESTA_PHOTO_DOWNLOADED, eventData.eventToken, {
+          surface: "fiesta_page",
+          metadata: {
+            source,
+            itemIndex: photoIndex,
+          },
+        });
+      }
     } catch {
       // noop
     }
@@ -310,6 +319,9 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
         eventName={eventData.honoreesNames}
         eventToken={eventData.eventToken ?? resolvedEventToken}
         eventDate={eventData.date}
+        surface="fiesta_expired"
+        sessionId={null}
+        path={`/fiesta/${resolvedEventToken}`}
         theme={theme}
       />
     );
@@ -329,7 +341,9 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
         eventData={eventData}
         source={source}
         onSelectSession={(token) =>
-          router.push(appendSourceToPath(`/mis-fotos/${token}`, source))
+          router.push(
+            appendSourceToPath(`/mis-fotos/${token}`, "fiesta_to_session"),
+          )
         }
         onShare={handleShare}
         onViewAllPhotos={

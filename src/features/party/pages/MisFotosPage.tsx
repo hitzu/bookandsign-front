@@ -230,6 +230,9 @@ export default function MisFotosPage({
         eventName={eventData.honoreesNames}
         eventToken={eventData.eventToken ?? sessionToken}
         eventDate={eventData.date}
+        surface="session_expired"
+        sessionId={sessionToken}
+        path={`/mis-fotos/${sessionToken}`}
         theme={theme}
       />
     );
