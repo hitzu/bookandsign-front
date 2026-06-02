@@ -43,3 +43,6 @@ coverage/
 
 docs/features/
 certificates
+
+# SDD / agent artifacts
+.atl/.skill-registry.cache.json
