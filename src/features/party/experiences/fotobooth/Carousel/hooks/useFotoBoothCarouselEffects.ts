@@ -47,6 +47,7 @@ export const useFotoBoothCarouselEffects = ({
     hasTrackedSessionView.current = true;
     trackEvent(AnalyticsAction.SESSION_OPENED, eventToken, {
       sessionId: sessionToken,
+      surface: "session_page",
       metadata: {
         source,
         session_id: sessionToken,
@@ -63,6 +64,7 @@ export const useFotoBoothCarouselEffects = ({
     viewedItemIndexes.current.add(index);
     trackEvent(AnalyticsAction.PHOTO_VIEW, eventToken, {
       sessionId: sessionToken,
+      surface: "session_page",
       metadata: {
         source,
         itemIndex: index,

@@ -4,17 +4,30 @@ import { axiosInstanceWithoutToken } from "../config/axiosConfig";
 type TrackEventOptions = {
   sessionId?: string | null;
   source?: string | null;
+  surface?: string | null;
   metadata?: Record<string, unknown>;
 };
+
+const readStringField = (
+  metadata: Record<string, unknown> | undefined,
+  key: string,
+): string | null =>
+  typeof metadata?.[key] === "string" ? (metadata[key] as string) : null;
 
 export const trackEvent = async (
   action: AnalyticsAction,
   eventToken: string,
   options: TrackEventOptions = {},
 ): Promise<void> => {
-  const metadataSource =
-    typeof options.metadata?.source === "string" ? options.metadata.source : null;
-  const source = options.source ?? metadataSource;
+  const source = options.source ?? readStringField(options.metadata, "source");
+  const surface =
+    options.surface ?? readStringField(options.metadata, "surface");
+
+  // surface and source are first-class fields, never nested in metadata
+  const metadata = { ...(options.metadata ?? {}) };
+  delete metadata.surface;
+  delete metadata.source;
+  const hasMetadata = Object.keys(metadata).length > 0;
 
   try {
     await axiosInstanceWithoutToken.post("/event-analytics/track", {
@@ -22,7 +35,8 @@ export const trackEvent = async (
       eventToken,
       sessionId: options.sessionId ?? null,
       ...(source ? { source } : {}),
-      ...(options.metadata ? { metadata: options.metadata } : {}),
+      ...(surface ? { surface } : {}),
+      ...(hasMetadata ? { metadata } : {}),
     });
   } catch {
     // fire-and-forget — never block the UI

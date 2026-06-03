@@ -15,6 +15,7 @@ import { trackEvent } from "../../../../../../api/services/eventAnalyticsService
 import { useFotoBoothCarouselStore } from "../stores/useFotoBoothCarouselStore";
 import { buildFallbackItems } from "../types";
 import { appendSourceToPath } from "../../../../utils/sourceTracking";
+import { SocialPlatform } from "../../../../components/SocialMediaCTA";
 
 const SWIPE_THRESHOLD_PX = 40;
 
@@ -81,9 +82,9 @@ export const useFotoBoothCarousel = ({
     action: AnalyticsAction,
     metadata: Record<string, unknown> = {},
   ) => {
-    if (!eventToken) return;
+    if (!resolvedEventToken) return;
 
-    trackEvent(action, eventToken, {
+    trackEvent(action, resolvedEventToken, {
       sessionId: sessionToken,
       metadata: {
         source,
@@ -116,6 +117,7 @@ export const useFotoBoothCarousel = ({
     if (!activeItem) return;
 
     trackSessionEvent(AnalyticsAction.DOWNLOAD, {
+      surface: "session_page",
       itemIndex: index,
       itemType: activeItem.type,
       effectName: activeEffect,
@@ -219,7 +221,7 @@ export const useFotoBoothCarousel = ({
     if (!resolvedEventToken) return;
 
     void router.push(
-      appendSourceToPath(`/fiesta/${resolvedEventToken}`, "session"),
+      appendSourceToPath(`/fiesta/${resolvedEventToken}`, "session_to_fiesta"),
     );
   };
 
@@ -227,6 +229,19 @@ export const useFotoBoothCarousel = ({
     trackSessionEvent(AnalyticsAction.REWARD_PROMO_OPENED, {
       surface: "session_reward_promo",
       entrypoint: "floating_gift",
+    });
+  };
+
+  const handleSessionWhatsAppClick = () => {
+    trackSessionEvent(AnalyticsAction.SESSION_WHATSAPP_CLICKED, {
+      surface: "session_page",
+    });
+  };
+
+  const handleSessionSocialClick = (platform: SocialPlatform) => {
+    trackSessionEvent(AnalyticsAction.SESSION_SOCIAL_CLICKED, {
+      surface: "session_page",
+      platform,
     });
   };
 
@@ -251,6 +266,8 @@ export const useFotoBoothCarousel = ({
     handlePointerStart,
     handleRetry: retryItem,
     handleSave,
+    handleSessionSocialClick,
+    handleSessionWhatsAppClick,
     handleShare,
     index,
     isGeneratingAsset,

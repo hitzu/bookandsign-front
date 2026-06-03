@@ -1,11 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
-import { AnalyticsAction } from "../../../interfaces";
 import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import { RecoverPhotosCTA } from "../components/RecoverPhotosCTA";
 import { SocialMediaCTA } from "../components/SocialMediaCTA";
 import { EventPageTheme } from "../types/eventPageTheme";
 import { buildThemeVars } from "../utils/themeVars";
+import {
+  expiredEventFor,
+  ExpiredIntent,
+  ExpiredSurface,
+} from "../utils/expiredAnalytics";
 import logo from "@assets/images/logo-experience-white.png";
 import styles from "./EventExpiredPage.module.css";
 
@@ -13,6 +17,9 @@ interface EventExpiredPageProps {
   eventName: string;
   eventToken: string;
   eventDate: string;
+  surface: ExpiredSurface;
+  sessionId: string | null;
+  path: string;
   theme?: EventPageTheme;
 }
 
@@ -20,23 +27,32 @@ export function EventExpiredPage({
   eventName,
   eventToken,
   eventDate,
+  surface,
+  sessionId,
+  path,
   theme,
 }: EventExpiredPageProps) {
-  useEffect(() => {
-    trackEvent(AnalyticsAction.EVENT_EXPIRED_VIEW, eventToken, {
-      metadata: {
-        surface: "event_expired",
-      },
-    });
-  }, [eventToken]);
+  const hasTrackedView = useRef(false);
 
-  const handleInfoClick = () => {
-    trackEvent(AnalyticsAction.IMAGINA_CTA_CLICKED, eventToken, {
+  const trackExpiredEvent = (intent: ExpiredIntent) => {
+    trackEvent(expiredEventFor(surface, intent), eventToken, {
+      sessionId,
+      surface,
       metadata: {
-        surface: "event_expired",
+        path,
       },
     });
   };
+
+  useEffect(() => {
+    if (hasTrackedView.current) return;
+    hasTrackedView.current = true;
+    trackExpiredEvent("viewed");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventToken, surface, path]);
+
+  const handleMessageClick = () => trackExpiredEvent("message_clicked");
+  const handleRecoveryClick = () => trackExpiredEvent("recovery_requested");
 
   return (
     <main
@@ -65,7 +81,7 @@ export function EventExpiredPage({
           context="event_expired"
           variant="page"
           nombreFestejado={eventName}
-          onWAClick={handleInfoClick}
+          onWAClick={handleMessageClick}
         />
 
         <div className={styles.recoverSection}>
@@ -76,7 +92,7 @@ export function EventExpiredPage({
           <RecoverPhotosCTA
             eventName={eventName}
             eventDate={eventDate}
-            eventToken={eventToken}
+            onRecover={handleRecoveryClick}
           />
         </div>
       </section>

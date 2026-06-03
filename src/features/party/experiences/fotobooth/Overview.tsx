@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "@assets/css/fotobooth-overview.module.css";
-import { SocialMediaCTA } from "../../components/SocialMediaCTA";
+import { SocialMediaCTA, SocialPlatform } from "../../components/SocialMediaCTA";
 import {
   GallerySessionItem,
   SessionEventData,
@@ -254,6 +254,16 @@ const FotoBoothOverview = ({
     });
   };
 
+  const handleGallerySocialClick = (platform: SocialPlatform) => {
+    trackEvent(AnalyticsAction.FIESTA_SOCIAL_CLICKED, eventToken, {
+      surface: "fiesta_page",
+      metadata: {
+        source,
+        platform,
+      },
+    });
+  };
+
   return (
     <div className={styles.page} style={theme ? buildThemeVars(theme) : undefined}>
       {!isEmpty && (
@@ -377,6 +387,7 @@ const FotoBoothOverview = ({
           variant="page"
           nombreFestejado={eventData?.honoreesNames ?? ""}
           onWAClick={handleGalleryWaClick}
+          onSocialClick={handleGallerySocialClick}
         />
       </div>
     </div>

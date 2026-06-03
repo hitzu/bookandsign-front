@@ -103,7 +103,7 @@ const EventList = () => {
         cell: (cellProps: any) => {
           return (
             <Link
-              href={`/fiesta/${cellProps.row.original.token}`}
+              href={`/fiesta/${cellProps.row.original.token}?source=admin_page`}
               target="_blank"
             >
               {cellProps.row.original.token}

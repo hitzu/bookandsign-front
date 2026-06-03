@@ -11,11 +11,14 @@ type Context =
   | "event_expired";
 type Variant = "modal" | "page" | "sheet" | "compact";
 
+export type SocialPlatform = "instagram" | "tiktok" | "facebook";
+
 interface SocialMediaCTAProps {
   context: Context;
   variant?: Variant;
   nombreFestejado?: string;
   onWAClick?: () => void;
+  onSocialClick?: (platform: SocialPlatform) => void;
   onClose?: () => void;
 }
 
@@ -143,6 +146,7 @@ export const SocialMediaCTA = ({
   variant = "modal",
   nombreFestejado = "",
   onWAClick,
+  onSocialClick,
   onClose,
 }: SocialMediaCTAProps) => {
   const phone = useMemo(() => {
@@ -189,6 +193,7 @@ export const SocialMediaCTA = ({
             href="https://www.instagram.com/brillipoint"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onSocialClick?.("instagram")}
             className={`${styles.pageSocialBtn} ${styles.pageSocialBtnIg}`}
           >
             <IconIG /> Instagram
@@ -197,6 +202,7 @@ export const SocialMediaCTA = ({
             href="https://www.tiktok.com/@brillipoint.glitterbar"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onSocialClick?.("tiktok")}
             className={`${styles.pageSocialBtn} ${styles.pageSocialBtnTt}`}
           >
             <IconTT /> TikTok
@@ -205,6 +211,7 @@ export const SocialMediaCTA = ({
             href="https://www.facebook.com/profile.php?id=61579380963496"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onSocialClick?.("facebook")}
             className={`${styles.pageSocialBtn} ${styles.pageSocialBtnFb}`}
           >
             <IconFB /> Facebook
@@ -248,6 +255,7 @@ export const SocialMediaCTA = ({
             href="https://www.instagram.com/brillipoint"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onSocialClick?.("instagram")}
             aria-label="Instagram"
             className={styles.sheetSocialBtn}
           >
@@ -257,6 +265,7 @@ export const SocialMediaCTA = ({
             href="https://www.tiktok.com/@brillipoint.glitterbar"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onSocialClick?.("tiktok")}
             aria-label="TikTok"
             className={styles.sheetSocialBtn}
           >
@@ -266,6 +275,7 @@ export const SocialMediaCTA = ({
             href="https://www.facebook.com/profile.php?id=61579380963496"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => onSocialClick?.("facebook")}
             aria-label="Facebook"
             className={styles.sheetSocialBtn}
           >
@@ -299,6 +309,7 @@ export const SocialMediaCTA = ({
               href="https://www.instagram.com/brillipoint"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => onSocialClick?.("instagram")}
               aria-label="Instagram"
               className={styles.compactSocialBtn}
             >
@@ -308,6 +319,7 @@ export const SocialMediaCTA = ({
               href="https://www.tiktok.com/@brillipoint.glitterbar"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => onSocialClick?.("tiktok")}
               aria-label="TikTok"
               className={styles.compactSocialBtn}
             >
@@ -317,6 +329,7 @@ export const SocialMediaCTA = ({
               href="https://www.facebook.com/profile.php?id=61579380963496"
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => onSocialClick?.("facebook")}
               aria-label="Facebook"
               className={styles.compactSocialBtn}
             >
@@ -364,6 +377,7 @@ export const SocialMediaCTA = ({
           href="https://www.instagram.com/brillipoint"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => onSocialClick?.("instagram")}
           aria-label="Instagram"
           className={styles.red}
         >
@@ -373,6 +387,7 @@ export const SocialMediaCTA = ({
           href="https://www.tiktok.com/@brillipoint.glitterbar"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => onSocialClick?.("tiktok")}
           aria-label="TikTok"
           className={styles.red}
         >
@@ -382,6 +397,7 @@ export const SocialMediaCTA = ({
           href="https://www.facebook.com/profile.php?id=61579380963496"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => onSocialClick?.("facebook")}
           aria-label="Facebook"
           className={styles.red}
         >

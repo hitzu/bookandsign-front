@@ -1,18 +1,33 @@
 import type { NextRouter } from "next/router";
 
-export type GallerySource = "qr" | "gallery" | "session" | "direct";
+export type GallerySource =
+  | "qr_fiesta"
+  | "qr_inspiracion"
+  | "qr_session"
+  | "qr_printed"
+  | "fiesta_to_session"
+  | "session_to_fiesta"
+  | "admin_page"
+  | "direct";
+
+const KNOWN_SOURCES: ReadonlySet<GallerySource> = new Set<GallerySource>([
+  "qr_fiesta",
+  "qr_inspiracion",
+  "qr_session",
+  "qr_printed",
+  "fiesta_to_session",
+  "session_to_fiesta",
+  "admin_page",
+  "direct",
+]);
 
 export const resolveGallerySource = (
   value?: string | string[],
 ): GallerySource => {
   const normalizedValue = Array.isArray(value) ? value[0] : value;
 
-  if (
-    normalizedValue === "qr" ||
-    normalizedValue === "gallery" ||
-    normalizedValue === "session"
-  ) {
-    return normalizedValue;
+  if (normalizedValue && KNOWN_SOURCES.has(normalizedValue as GallerySource)) {
+    return normalizedValue as GallerySource;
   }
 
   return "direct";
