@@ -211,6 +211,22 @@ const menuItems = [
       },
     ],
   },
+  {
+    type: "HASHMENU",
+    id: 8,
+    label: "Expos",
+    icon: "ph-duotone ph-calendar-blank",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "ExpoBebe",
+        label: "Expo tu bebe",
+        link: "/expo-bebe",
+        dataPage: "expo-bebe",
+      },
+    ],
+  },
 ];
 
 export { menuItems };
