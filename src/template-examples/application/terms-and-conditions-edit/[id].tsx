@@ -9,6 +9,7 @@ import {
   GetBrandsResponse,
   GetPackagesResponse,
   GetTermsResponse,
+  TermScope,
 } from "../../../interfaces";
 import { getBrands } from "../../../api/services/brandService";
 import {
@@ -22,7 +23,7 @@ import { getPackages } from "../../../api/services/packageService";
 import { multiSelectStyles } from "@common/reactSelectStyles";
 
 interface TermsAndConditionsFormValues {
-  scope: "global" | "package";
+  scope: TermScope;
   title: string;
   content: string;
 }
@@ -51,12 +52,13 @@ const TermsAndConditionsEdit = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<GetTermsResponse[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [scope, setScope] = useState<"global" | "package">("global");
+  const [scope, setScope] = useState<TermScope>("global");
   const [brandId, setBrandId] = useState<number | null>(null);
 
   const termScopes = [
     { value: "global", label: "Globales" },
     { value: "package", label: "Paquetes" },
+    { value: "brand", label: "Marcas" },
   ];
 
   const formik = useFormik<TermsAndConditionsFormValues>({
@@ -238,7 +240,7 @@ const TermsAndConditionsEdit = () => {
                   name="scope"
                   value={scope}
                   onChange={(e) => {
-                    setScope(e.target.value as "global" | "package");
+                    setScope(e.target.value as TermScope);
                   }}
                 >
                   {termScopes.map((scope) => (
@@ -333,7 +335,7 @@ const TermsAndConditionsEdit = () => {
                     onChange={(e) => {
                       formik.setFieldValue(
                         "scope",
-                        e.target.value as "global" | "package"
+                        e.target.value as TermScope
                       );
                     }}
                     onBlur={formik.handleBlur("scope")}

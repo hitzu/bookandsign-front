@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import React, { ReactElement, useState } from "react";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import { Card, Col, Form, Row } from "react-bootstrap";
-import { GetTermsResponse } from "../../../interfaces";
+import { GetTermsResponse, TermScope } from "../../../interfaces";
 import { getTerms } from "src/api/services/termsService";
 
 const TermsAndConditionsEditIndex = () => {
@@ -11,11 +11,12 @@ const TermsAndConditionsEditIndex = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<GetTermsResponse[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [scope, setScope] = useState<"global" | "package">("global");
+  const [scope, setScope] = useState<TermScope>("global");
 
   const termScopes = [
     { value: "global", label: "Globales" },
     { value: "package", label: "Paquetes" },
+    { value: "brand", label: "Marcas" },
   ];
 
   const handleSearch = async (term: string) => {
@@ -62,7 +63,7 @@ const TermsAndConditionsEditIndex = () => {
                   name="scope"
                   value={scope}
                   onChange={(e) => {
-                    setScope(e.target.value as "global" | "package");
+                    setScope(e.target.value as TermScope);
                   }}
                 >
                   {termScopes.map((scope) => (

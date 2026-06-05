@@ -1,11 +1,14 @@
+import { GetBrandsResponse } from "./brands";
 import { GetPackagesResponse } from "./packages";
+
+export type TermScope = "global" | "package" | "brand";
 
 export interface Terms {
   id: number;
   code: string;
   title: string;
   content: string;
-  scope: "global" | "package";
+  scope: TermScope;
 }
 
 export interface GetTermsResponse {
@@ -13,8 +16,9 @@ export interface GetTermsResponse {
   code: string;
   title: string;
   content: string;
-  scope: "global" | "package";
+  scope: TermScope;
   packageTerms?: GetPackageTermsResponse[];
+  brandTerms?: GetBrandTermsResponse[];
 }
 
 export interface GetPackageTermsResponse {
@@ -24,14 +28,21 @@ export interface GetPackageTermsResponse {
   package: Omit<GetPackagesResponse, "brand" | "packageProducts">;
 }
 
+export interface GetBrandTermsResponse {
+  id: number;
+  brandId: number;
+  termId: number;
+  brand: GetBrandsResponse;
+}
+
 export interface CreateTermPayload {
-  scope: "global" | "package";
+  scope: TermScope;
   title: string;
   content: string;
 }
 
 export interface UpdateTermsPayload {
-  scope: "global" | "package";
+  scope: TermScope;
   title: string;
   content: string;
 }

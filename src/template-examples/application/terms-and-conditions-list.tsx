@@ -23,6 +23,7 @@ const TermsAndConditionsList = () => {
   const termScopes = [
     { value: "global", label: "Globales" },
     { value: "package", label: "Paquetes" },
+    { value: "brand", label: "Marcas" },
   ];
 
   useEffect(() => {

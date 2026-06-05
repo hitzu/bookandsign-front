@@ -8,6 +8,7 @@ import {
   CreateTermPayload,
   GetBrandsResponse,
   GetPackagesResponse,
+  TermScope,
 } from "../../interfaces";
 import * as yup from "yup";
 import { getPackages } from "../../api/services/packageService";
@@ -18,7 +19,7 @@ import {
 import { getBrands } from "../../api/services/brandService";
 
 interface TermsAndConditionsFormValues {
-  scope: "global" | "package";
+  scope: TermScope;
   title: string;
   content: string;
 }
@@ -26,6 +27,7 @@ interface TermsAndConditionsFormValues {
 const termScopes = [
   { value: "global", label: "Globales" },
   { value: "package", label: "Paquetes" },
+  { value: "brand", label: "Marcas" },
 ];
 
 const validationSchema = yup.object().shape({
@@ -167,7 +169,7 @@ const TermsAndConditionsAdd = () => {
                     onChange={(e) => {
                       formik.setFieldValue(
                         "scope",
-                        e.target.value as "global" | "package"
+                        e.target.value as TermScope
                       );
                     }}
                     onBlur={formik.handleBlur("brandId")}

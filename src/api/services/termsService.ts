@@ -2,6 +2,7 @@ import {
   GetTermsResponse,
   CreateTermPayload,
   UpdateTermsPayload,
+  TermScope,
 } from "../../interfaces";
 
 import {
@@ -48,6 +49,20 @@ export const getPackageTerms = async (
   }
 };
 
+export const getBrandTerms = async (
+  brandId: number
+): Promise<GetTermsResponse[]> => {
+  try {
+    const response = await axiosInstanceWithToken.get(
+      `/terms/brands/${brandId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching brand terms:", error);
+    throw error;
+  }
+};
+
 export const deleteTermById = async (id: number): Promise<void> => {
   try {
     await axiosInstanceWithToken.delete(`/terms/${id}`);
@@ -90,6 +105,45 @@ export const uploadTermsPackagesInBulk = async (
   }
 };
 
+export const uploadTermsBrandsInBulk = async (
+  idTerm: number,
+  brands: number[]
+): Promise<void> => {
+  try {
+    const payload = {
+      brandIds: brands,
+    };
+    await axiosInstanceWithToken.post(`/terms/${idTerm}/brands/bulk`, payload);
+  } catch (error) {
+    console.error("Error uploading brands:", error);
+    throw error;
+  }
+};
+
+export const addTermToBrand = async (payload: {
+  brandId: number;
+  termId: number;
+}): Promise<void> => {
+  try {
+    await axiosInstanceWithToken.post("/terms/brands", payload);
+  } catch (error) {
+    console.error("Error attaching term to brand:", error);
+    throw error;
+  }
+};
+
+export const removeTermFromBrand = async (payload: {
+  brandId: number;
+  termId: number;
+}): Promise<void> => {
+  try {
+    await axiosInstanceWithToken.delete("/terms/brands", { data: payload });
+  } catch (error) {
+    console.error("Error detaching term from brand:", error);
+    throw error;
+  }
+};
+
 export const updateTermsById = async (
   id: number,
   payload: UpdateTermsPayload
@@ -116,7 +170,7 @@ export const getTermById = async (id: number): Promise<GetTermsResponse> => {
 
 export const getPublicTerms = async (params: {
   targetId?: number;
-  scope: string;
+  scope: TermScope;
 }): Promise<GetTermsResponse[]> => {
   try {
     const { targetId, scope } = params;

@@ -6,24 +6,24 @@ import React, {
   useState,
 } from "react";
 import Layout from "@layout/index";
-import { GetTermsResponse, GetPackageTermsResponse } from "../interfaces";
+import {
+  GetBrandTermsResponse,
+  GetPackageTermsResponse,
+  GetTermsResponse,
+} from "../interfaces";
 import TableContainer from "@common/TableContainer";
 import Link from "next/link";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import { Card, Col, Row } from "react-bootstrap";
 import DeleteModal from "@common/DeleteModal";
 import { deleteTermById, getTerms } from "../api/services/termsService";
+import { termScopes } from "../features/terms/constants";
 
 const TermsAndConditionsList = () => {
   const [terms, setTerms] = useState<GetTermsResponse[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [termScopeSelected, setTermScopeSelected] = useState<string>("global");
   const [deleteId, setDeleteId] = useState<number>(0);
-
-  const termScopes = [
-    { value: "global", label: "Globales" },
-    { value: "package", label: "Paquetes" },
-  ];
 
   useEffect(() => {
     const fetchTerms = async () => {
@@ -96,6 +96,24 @@ const TermsAndConditionsList = () => {
         },
       },
       {
+        header: "Marcas",
+        accessorKey: "brandTerms",
+        enableColumnFilter: false,
+        cell: (cellProps: any) => {
+          return (
+            <div>
+              <ul>
+                {cellProps.row.original.brandTerms?.map(
+                  (brandTerm: GetBrandTermsResponse) => (
+                    <li key={brandTerm.id}>{brandTerm.brand.name}</li>
+                  )
+                )}
+              </ul>
+            </div>
+          );
+        },
+      },
+      {
         header: "Acciones",
         enableColumnFilter: false,
         cell: (cellProps: any) => {
@@ -133,7 +151,7 @@ const TermsAndConditionsList = () => {
         },
       },
     ],
-    []
+    [handleDelete]
   );
 
   return (
