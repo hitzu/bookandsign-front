@@ -20,3 +20,8 @@ export interface CalendarSlotsByMonthResponse {
   date: string;
   slots: CalendarDaySlots;
 }
+
+export interface CalendarSlotsByMonthPayload {
+  risk: boolean;
+  days: CalendarSlotsByMonthResponse[];
+}

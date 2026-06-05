@@ -68,6 +68,7 @@ export interface GenerateContractItem {
 export interface GenerateContractPayload {
   userId: number;
   slotId: number;
+  brandId?: number;
   sku: string;
   clientName: string;
   clientPhone: string | null;

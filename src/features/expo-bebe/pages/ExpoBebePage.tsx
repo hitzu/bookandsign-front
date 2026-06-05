@@ -1,21 +1,93 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "@assets/css/expo-bebe.module.css";
+import { useRouter } from "next/router";
 import { CalendarView } from "../components/CalendarView";
 import { ContractView } from "../components/ContractView";
 import { ServiceDetail } from "../components/ServiceDetail";
 import { Tabs } from "../components/Tabs";
 import { EXTRAS, SERVICES } from "../data/serviceCatalog";
-import type { CatalogMode, ContentTabKey, TabKey } from "../types";
+import { getExpoBebeCarousel } from "../services/carousels";
+import type {
+  CatalogMode,
+  ContentTabKey,
+  ExpoBebeBrandKey,
+  ServiceItem,
+  TabKey,
+} from "../types";
+import { getBrandId, getBrandKeyById, parseExpoBebeBrand } from "../utils/brand";
+import { getBrandById } from "../../../api/services/brandService";
 
 export function ExpoBebePage() {
+  const router = useRouter();
   const [tab, setTab] = useState<ContentTabKey>("cal");
   const [catalogMode, setCatalogMode] = useState<CatalogMode | null>(null);
   const [detailIndex, setDetailIndex] = useState(0);
+  const [services, setServices] = useState<ServiceItem[]>(SERVICES);
+  const [extras, setExtras] = useState<ServiceItem[]>(EXTRAS);
 
+  const [minAmountHoldSlot, setMinAmountHoldSlot] = useState<number | null>(null);
+  const [expoMonthlyRiskEnabled, setExpoMonthlyRiskEnabled] = useState(false);
+  const [brandName, setBrandName] = useState<string | null>(null);
+
+  const brandId = useMemo<number>(() => {
+    const raw = router.query.brandId ?? router.query.brand;
+    const asNumber = Number(Array.isArray(raw) ? raw[0] : raw);
+    if (!isNaN(asNumber) && asNumber > 0) return asNumber;
+    // fallback: resolve from string key
+    return getBrandId(parseExpoBebeBrand(raw));
+  }, [router.query.brandId, router.query.brand]);
+
+  const brand = useMemo<ExpoBebeBrandKey>(
+    () => getBrandKeyById(brandId),
+    [brandId]
+  );
   const catalogItems =
-    catalogMode === "extras" ? EXTRAS : catalogMode === "servicios" ? SERVICES : [];
+    catalogMode === "extras"
+      ? extras
+      : catalogMode === "servicios"
+        ? services
+        : [];
   const activeMenu: TabKey =
     catalogMode === "extras" ? "ext" : catalogMode === "servicios" ? "srv" : tab;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCarousel = async (
+      section: "services" | "extras",
+      fallback: ServiceItem[],
+      setter: (items: ServiceItem[]) => void
+    ) => {
+      try {
+        const items = await getExpoBebeCarousel({ brandId, section });
+        if (cancelled) return;
+        setter(items.length > 0 ? items : fallback);
+      } catch {
+        if (cancelled) return;
+        setter(fallback);
+      }
+    };
+
+    const loadBrand = async () => {
+      try {
+        const data = await getBrandById(brandId);
+        if (cancelled) return;
+        setBrandName(data.name);
+        setExpoMonthlyRiskEnabled(Boolean(data.expoMonthlyRiskEnabled));
+        setMinAmountHoldSlot(data.minAmountHoldSlot);
+      } catch {
+        // keep null — ContractView falls back to its own default
+      }
+    };
+
+    loadCarousel("services", SERVICES, setServices);
+    loadCarousel("extras", EXTRAS, setExtras);
+    loadBrand();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [brandId]);
 
   const openCatalog = (mode: CatalogMode) => {
     setCatalogMode(mode);
@@ -51,8 +123,16 @@ export function ExpoBebePage() {
         <div className={styles.content}>
           <Tabs value={activeMenu} onChange={handleMenuChange} />
 
-          {tab === "cal" && <CalendarView />}
-          {tab === "ctr" && <ContractView />}
+          {tab === "cal" && <CalendarView brandId={brandId} />}
+          {tab === "ctr" && (
+            <ContractView
+              brand={brand}
+              brandId={brandId}
+              brandName={brandName}
+              minAmountHoldSlot={minAmountHoldSlot}
+              expoMonthlyRiskEnabled={expoMonthlyRiskEnabled}
+            />
+          )}
 
           {tab !== "ctr" && (
             <footer className={styles.footer}>

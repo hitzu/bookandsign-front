@@ -681,7 +681,7 @@ const CalendarPage = () => {
           selectedMonth + 1,
           selectedYear
         );
-        setMonthData(data);
+        setMonthData(Array.isArray(data?.days) ? data.days : []);
       } catch (e) {
         console.error(e);
         setMonthData([]);

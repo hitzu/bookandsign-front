@@ -9,13 +9,14 @@ import { YEARS } from "../data/serviceCatalog";
 import { MONTHS, buildWeekendRows, toYMD } from "../utils/calendar";
 import { IconChevronLeft, IconChevronRight } from "./Icons";
 
-export function CalendarView() {
+export function CalendarView({ brandId }: { brandId: number }) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [monthIdx, setMonthIdx] = useState(today.getMonth());
   const [monthData, setMonthData] = useState<CalendarSlotsByMonthResponse[]>(
     [],
   );
+  const [monthHasReservedDate, setMonthHasReservedDate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,10 +26,16 @@ export function CalendarView() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getSlotsByMonthAndYear(monthIdx + 1, year);
-        if (!cancelled) setMonthData(Array.isArray(data) ? data : []);
+        const data = await getSlotsByMonthAndYear(monthIdx + 1, year, brandId);
+        if (!cancelled) {
+          setMonthData(Array.isArray(data?.days) ? data.days : []);
+          setMonthHasReservedDate(Boolean(data?.risk));
+        }
       } catch {
-        if (!cancelled) setError("No se pudo cargar la disponibilidad.");
+        if (!cancelled) {
+          setError("No se pudo cargar la disponibilidad.");
+          setMonthHasReservedDate(false);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -37,7 +44,7 @@ export function CalendarView() {
     return () => {
       cancelled = true;
     };
-  }, [year, monthIdx]);
+  }, [brandId, year, monthIdx]);
 
   const availMap = useMemo(() => {
     const map = new Map<
@@ -151,6 +158,14 @@ export function CalendarView() {
             </option>
           ))}
         </select>
+
+        {monthHasReservedDate && (
+          <span
+            className={styles.riskDot}
+            aria-label="Requiere validación"
+            title="Requiere validación"
+          />
+        )}
 
         <button
           className={styles.monthArrow}

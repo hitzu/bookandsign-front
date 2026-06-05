@@ -37,6 +37,18 @@ const menuItems = [
         link: "/contracts-add",
         dataPage: "contracts-add",
       },
+      {
+        id: "expo-bebe-experiences",
+        label: "Expo tu bebe Experiences",
+        link: "/expo-bebe?brand=3",
+        dataPage: "expo-bebe",
+      },
+      {
+        id: "expo-bebe-lusso",
+        label: "Expo tu bebe Lusso",
+        link: "/expo-bebe?brand=4",
+        dataPage: "expo-bebe",
+      },
     ],
   },
   {

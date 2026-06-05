@@ -1,19 +1,25 @@
 import {
+  CalendarSlotsByMonthPayload,
   CalendarSlotsByMonthResponse,
   GetSlotResponse,
   Slot,
 } from "../../interfaces";
+import type { ExpoBebeBrandKey } from "../../features/expo-bebe/types";
 
 import {
   axiosInstanceWithoutToken,
   axiosInstanceWithToken,
 } from "../config/axiosConfig";
 
-export const getSlots = async (date: string): Promise<GetSlotResponse[]> => {
+export const getSlots = async (
+  date: string,
+  brand?: ExpoBebeBrandKey
+): Promise<GetSlotResponse[]> => {
   try {
     const queryParams = new URLSearchParams();
 
     queryParams.append("date", date);
+    if (brand) queryParams.append("brand", brand);
 
     const url = `/slots?${queryParams.toString()}`;
     const response = await axiosInstanceWithToken.get(url);
@@ -82,13 +88,34 @@ export const updateLeadInfo = async (
 
 export const getSlotsByMonthAndYear = async (
   month: number,
-  year: number
-): Promise<CalendarSlotsByMonthResponse[]> => {
+  year: number,
+  brandId?: number
+): Promise<CalendarSlotsByMonthPayload> => {
   try {
+    const queryParams = new URLSearchParams({
+      year: String(year),
+      month: String(month),
+    });
+    if (brandId) queryParams.append("brandId", String(brandId));
+
     const response = await axiosInstanceWithoutToken.get(
-      `/slots/calendar?year=${year}&month=${month}`
+      `/slots/calendar?${queryParams.toString()}`
     );
-    return response.data;
+    const data = response.data;
+
+    if (Array.isArray(data)) {
+      return {
+        risk: false,
+        days: data as CalendarSlotsByMonthResponse[],
+      };
+    }
+
+    return {
+      risk: Boolean(data?.risk),
+      days: Array.isArray(data?.days)
+        ? (data.days as CalendarSlotsByMonthResponse[])
+        : [],
+    };
   } catch (error) {
     console.error("Error fetching slots by month and year:", error);
     throw error;

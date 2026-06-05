@@ -388,6 +388,15 @@
   padding: 12px 0;
 }
 
+.riskDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #d39b3f;
+  box-shadow: 0 0 0 3px rgba(211, 155, 63, 0.14);
+  flex: 0 0 auto;
+}
+
 .day {
   background: #fff;
   border: 1px solid var(--eb-line);
@@ -830,16 +839,6 @@
   overflow: hidden;
 }
 
-.detailPhotoStripeOverlay {
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.38) 0 18px,
-    rgba(255, 255, 255, 0.14) 18px 36px
-  );
-}
-
 .detailPhotoLabelOverlay {
   position: relative;
   font-family: "DM Sans", monospace;
@@ -995,16 +994,6 @@
   height: 58px;
   overflow: hidden;
   border-radius: 12px;
-}
-
-.detailThumbStripe {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.4) 0 10px,
-    rgba(255, 255, 255, 0.14) 10px 20px
-  );
 }
 
 .detailThumbText {
@@ -1288,6 +1277,31 @@
   box-shadow: 0 0 0 3px rgba(201, 184, 220, 0.22);
 }
 
+.cfDateInput {
+  min-height: 46px;
+  color-scheme: light;
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+
+.cfDateInput::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.cfDateInput::-webkit-datetime-edit {
+  color: var(--eb-ink);
+  padding: 0;
+}
+
+.cfDateInput::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+.cfDateInput::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.88;
+}
+
 .cfSelect {
   appearance: none;
   -webkit-appearance: none;
@@ -1534,6 +1548,13 @@
   font-size: 13px;
   font-weight: 600;
   margin: 8px 0 4px;
+}
+
+.cfLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 /* Summary */

@@ -10,6 +10,7 @@ export function DateSlotSection({ vm }: { vm: ContractFormVM }) {
     period,
     setPeriod,
     availabilityByPeriod,
+    monthHasReservedDate,
     selectedUserId,
     setSelectedUserId,
     users,
@@ -39,14 +40,23 @@ export function DateSlotSection({ vm }: { vm: ContractFormVM }) {
       <SectionHead n="01" text="fecha de la" accent="reserva" />
 
       <div>
-        <label className={styles.cfLabel}>
-          Selecciona la fecha <span className={styles.cfRequired}>✦</span>
-        </label>
+        <div className={styles.cfLabelRow}>
+          <label className={styles.cfLabel}>
+            Selecciona la fecha <span className={styles.cfRequired}>✦</span>
+          </label>
+          {monthHasReservedDate && (
+            <span
+              className={styles.riskDot}
+              aria-label="Requiere validación"
+              title="Requiere validación"
+            />
+          )}
+        </div>
         <input
           type="date"
           value={fecha}
           onChange={(e) => setFecha(e.target.value)}
-          className={styles.cfInput}
+          className={`${styles.cfInput} ${styles.cfDateInput}`}
           disabled={isLocked}
         />
       </div>

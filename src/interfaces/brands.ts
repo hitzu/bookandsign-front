@@ -11,4 +11,18 @@ export interface GetBrandsResponse {
   phoneNumber: string | null;
   email: string | null;
   theme: BrandTheme | null;
+  minAmountHoldSlot: number | null;
+}
+
+export interface GetBrandByIdResponse {
+  id: number;
+  name: string;
+  logoUrl: string | null;
+  phoneNumber: string | null;
+  email: string | null;
+  expoMonthlyRiskEnabled: boolean;
+  minAmountHoldSlot: number | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }

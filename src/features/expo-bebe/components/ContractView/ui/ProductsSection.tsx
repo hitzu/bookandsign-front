@@ -9,6 +9,8 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
     packages,
     selectedBrandId,
     setSelectedBrandId,
+    selectedBrandName,
+    isBrandSelectionLocked,
     selectedPackageId,
     setSelectedPackageId,
     items,
@@ -26,21 +28,30 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
       <div className={styles.cfGrid2} style={{ marginBottom: 10 }}>
         <div>
           <label className={styles.cfLabel}>Marca</label>
-          <select
-            className={styles.cfSelect}
-            value={selectedBrandId}
-            onChange={(e) =>
-              setSelectedBrandId(e.target.value ? Number(e.target.value) : "")
-            }
-            disabled={isLocked}
-          >
-            <option value="">Selecciona…</option>
-            {brands.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
+          {isBrandSelectionLocked ? (
+            <input
+              className={styles.cfInput}
+              value={selectedBrandName || ""}
+              disabled
+              readOnly
+            />
+          ) : (
+            <select
+              className={styles.cfSelect}
+              value={selectedBrandId}
+              onChange={(e) =>
+                setSelectedBrandId(e.target.value ? Number(e.target.value) : "")
+              }
+              disabled={isLocked}
+            >
+              <option value="">Selecciona…</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div>
           <label className={styles.cfLabel}>Paquete</label>

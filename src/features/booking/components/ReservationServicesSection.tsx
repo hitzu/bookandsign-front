@@ -34,9 +34,7 @@ export const ReservationServicesSection = ({
           </button>
           <div className={styles.sectionBody}>
             {items.length === 0 ? (
-              <div
-                style={{ color: "rgba(255,255,255,0.75)", lineHeight: 1.55 }}
-              >
+              <div className={styles.emptySubText}>
                 Aún no hay servicios vinculados a este contrato.
               </div>
             ) : (

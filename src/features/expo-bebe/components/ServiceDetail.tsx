@@ -24,7 +24,7 @@ export function ServiceDetail({
 }) {
   const [controlsVisible, setControlsVisible] = useState(true);
   const touchStart = useRef<{ x: number; y: number; time: number } | null>(
-    null
+    null,
   );
   const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
   const service = items[currentIndex] ?? null;
@@ -101,6 +101,16 @@ export function ServiceDetail({
     setControlsVisible((visible) => !visible);
   };
 
+  const photoStyle = service?.imageUrl
+    ? {
+        backgroundColor: "#f8f3ec",
+        backgroundImage: `url(${service.imageUrl})`,
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }
+    : { background: service?.bg };
+
   return (
     <div
       className={`${styles.detailOverlay} ${isOpen ? styles.detailOverlayOpen : ""}`}
@@ -112,16 +122,11 @@ export function ServiceDetail({
         <>
           <div
             className={styles.detailPhotoArea}
-            style={{ background: service.bg }}
+            style={photoStyle}
             onDoubleClick={toggleControls}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
-          >
-            <div className={styles.detailPhotoStripeOverlay} />
-            <div className={styles.detailPhotoLabelOverlay}>
-              {service.label}
-            </div>
-          </div>
+          />
 
           <button
             className={`${styles.detailClose} ${
@@ -186,9 +191,18 @@ export function ServiceDetail({
                 >
                   <span
                     className={styles.detailThumbImage}
-                    style={{ background: item.bg }}
+                    style={
+                      item.imageUrl
+                        ? {
+                            backgroundColor: "#f8f3ec",
+                            backgroundImage: `url(${item.imageUrl})`,
+                            backgroundSize: "contain",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                          }
+                        : { background: item.bg }
+                    }
                   >
-                    <span className={styles.detailThumbStripe} />
                   </span>
                   <span className={styles.detailThumbText}>
                     {item.title.join(" ")}

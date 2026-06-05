@@ -3,6 +3,7 @@ import type { GetPackagesResponse, Promotion } from "../../interfaces";
 export type TabKey = "cal" | "srv" | "ext" | "ctr";
 export type ContentTabKey = "cal" | "ctr";
 export type CatalogMode = "servicios" | "extras";
+export type ExpoBebeBrandKey = "lusso" | "photobooth";
 
 export type PackageLineItem = {
   pkg: GetPackagesResponse;
@@ -25,6 +26,7 @@ export interface ServiceItem {
   bg: string;
   label: string;
   includes: ServiceIncludeItem[];
+  imageUrl?: string | null;
 }
 
 /**

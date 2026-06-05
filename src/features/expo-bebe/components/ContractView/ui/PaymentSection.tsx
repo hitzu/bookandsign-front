@@ -12,6 +12,7 @@ export function PaymentSection({ vm }: { vm: ContractFormVM }) {
     formaPago,
     setFormaPago,
     isLocked,
+    requiredMinAmountHoldSlot,
     fmtPrice,
   } = vm;
 
@@ -61,7 +62,7 @@ export function PaymentSection({ vm }: { vm: ContractFormVM }) {
                 marginTop: 2,
               }}
             >
-              MÍN. $500
+              MÍN. ${fmtPrice(requiredMinAmountHoldSlot)}
             </div>
           </div>
           <div className={styles.cfAnticipoField}>

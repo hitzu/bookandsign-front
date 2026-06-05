@@ -17,8 +17,13 @@ import { generateContract } from "../../../../../api/services/contractService";
 import { createPayment } from "../../../../../api/services/paymentService";
 import { createNote } from "../../../../../api/services/notesService";
 import { getPromotionsByBrandId } from "../../../../../api/services/promotionsService";
-import { getSlots, holdSlot } from "../../../../../api/services/slotsService";
+import {
+  getSlots,
+  getSlotsByMonthAndYear,
+  holdSlot,
+} from "../../../../../api/services/slotsService";
 import type { PackageLineItem } from "../../../types";
+import type { ExpoBebeBrandKey } from "../../../types";
 import { formatSkuDate, normalizeSkuText } from "../../../utils/sku";
 import {
   LUSSO_BRAND_ID,
@@ -28,8 +33,23 @@ import {
 import { getBookedBrandIdsByMonth } from "../../../services/monthBrandUsage";
 
 const pad = (n: number) => String(n).padStart(2, "0");
+const DEFAULT_MIN_AMOUNT_HOLD_SLOT = 500;
 
-export function useContractForm() {
+interface UseContractFormOptions {
+  brandKey?: ExpoBebeBrandKey;
+  lockedBrandId?: number | null;
+  lockedBrandName?: string;
+  minAmountHoldSlot?: number | null;
+  expoMonthlyRiskEnabled?: boolean;
+}
+
+export function useContractForm({
+  brandKey,
+  lockedBrandId,
+  lockedBrandName,
+  minAmountHoldSlot,
+  expoMonthlyRiskEnabled,
+}: UseContractFormOptions = {}) {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
@@ -41,6 +61,7 @@ export function useContractForm() {
   const [slotAvailability, setSlotAvailability] = useState<GetSlotResponse[]>(
     [],
   );
+  const [monthHasReservedDate, setMonthHasReservedDate] = useState(false);
   // Brand ids already booked in the selected date's month (Lusso rule).
   const [bookedBrandIds, setBookedBrandIds] = useState<number[]>([]);
 
@@ -65,6 +86,14 @@ export function useContractForm() {
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
 
   const isLocked = !!contract;
+  const isBrandSelectionLocked = !!lockedBrandId;
+  const requiredMinAmountHoldSlot =
+    minAmountHoldSlot ?? DEFAULT_MIN_AMOUNT_HOLD_SLOT;
+
+  // Sync anticipo with minAmountHoldSlot once it resolves from the API
+  useEffect(() => {
+    setAnticipo(String(requiredMinAmountHoldSlot));
+  }, [requiredMinAmountHoldSlot]);
 
   // Load brands
   useEffect(() => {
@@ -72,10 +101,21 @@ export function useContractForm() {
       .then((data) => {
         const arr = Array.isArray(data) ? (data as GetBrandsResponse[]) : [];
         setBrands(arr);
-        if (arr.length > 0) setSelectedBrandId(arr[0].id);
+        if (arr.length === 0) return;
+
+        if (lockedBrandId) {
+          setSelectedBrandId(lockedBrandId);
+          return;
+        }
+
+        const matchedBrand = brandKey
+          ? arr.find((brand) => brand.key?.toLowerCase() === brandKey)
+          : null;
+
+        setSelectedBrandId(matchedBrand?.id ?? arr[0].id);
       })
       .catch(() => setBrands([]));
-  }, []);
+  }, [brandKey, lockedBrandId]);
 
   // Load packages when brand changes
   useEffect(() => {
@@ -102,10 +142,40 @@ export function useContractForm() {
   useEffect(() => {
     if (!fecha) return;
     setPeriod(null);
-    getSlots(fecha)
+    getSlots(fecha, brandKey)
       .then((data) => setSlotAvailability(Array.isArray(data) ? data : []))
       .catch(() => setSlotAvailability([]));
-  }, [fecha]);
+  }, [brandKey, fecha]);
+
+  useEffect(() => {
+    if (!fecha || !selectedBrandId) {
+      setMonthHasReservedDate(false);
+      return;
+    }
+
+    const [yearStr, monthStr] = fecha.split("-");
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+
+    if (!year || !month) {
+      setMonthHasReservedDate(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    getSlotsByMonthAndYear(month, year, Number(selectedBrandId))
+      .then((data) => {
+        if (!cancelled) setMonthHasReservedDate(Boolean(data?.risk));
+      })
+      .catch(() => {
+        if (!cancelled) setMonthHasReservedDate(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fecha, selectedBrandId]);
 
   // Load users
   useEffect(() => {
@@ -136,6 +206,13 @@ export function useContractForm() {
   const subtotal = useMemo(
     () => items.reduce((s, it) => s + it.pkg.basePrice * it.quantity, 0),
     [items],
+  );
+  const selectedBrandName = useMemo(
+    () =>
+      lockedBrandName ||
+      brands.find((brand) => brand.id === selectedBrandId)?.name ||
+      "",
+    [brands, lockedBrandName, selectedBrandId]
   );
   const discountTotal = useMemo(
     () =>
@@ -202,8 +279,10 @@ export function useContractForm() {
       setErrorMsg("Ingresa el nombre del cliente.");
       return;
     }
-    if (anticipoNum < 500) {
-      setErrorMsg("El anticipo mínimo es de $500.");
+    if (anticipoNum < requiredMinAmountHoldSlot) {
+      setErrorMsg(
+        `El anticipo mínimo es de $${fmtPrice(requiredMinAmountHoldSlot)}.`
+      );
       return;
     }
     if (items.length === 0) {
@@ -219,6 +298,7 @@ export function useContractForm() {
       const payload: GenerateContractPayload = {
         userId: Number(selectedUserId),
         slotId: held.id,
+        brandId: Number(selectedBrandId),
         sku,
         clientName: nombre.trim(),
         clientPhone: telefono || null,
@@ -279,7 +359,7 @@ export function useContractForm() {
     setTelefono("");
     setSelectedPackageId("");
     setItems([]);
-    setAnticipo("500");
+    setAnticipo(String(requiredMinAmountHoldSlot));
     setFormaPago("cash");
     setNotas("");
     setErrorMsg(null);
@@ -311,6 +391,8 @@ export function useContractForm() {
     setTelefono,
     selectedBrandId,
     setSelectedBrandId,
+    selectedBrandName,
+    isBrandSelectionLocked,
     selectedPackageId,
     setSelectedPackageId,
     items,
@@ -328,6 +410,9 @@ export function useContractForm() {
     setHasCopiedLink,
     // derived
     isLocked,
+    expoMonthlyRiskEnabled,
+    monthHasReservedDate,
+    requiredMinAmountHoldSlot,
     availabilityByPeriod,
     subtotal,
     discountTotal,

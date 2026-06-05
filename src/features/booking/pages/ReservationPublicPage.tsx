@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { Container, Row, Col, Nav, Offcanvas } from "react-bootstrap";
-import logoWhite from "@assets/images/logo-white.png";
+import logoDark from "@assets/images/logo-experience-black.png";
 import styles from "@assets/css/contract-public.module.css";
 import { getContractByToken } from "../../../api/services/contractService";
 import { getPublicTerms } from "../../../api/services/termsService";
@@ -115,7 +115,6 @@ const ReservationPublicPage = ({ token }: Props) => {
       if (!data?.contract?.id) return;
       const loadTermsAndNotes = async () => {
         try {
-          const terms = await getPublicTerms({ scope: "global" });
           const notes = await getPublicNotes(data?.contract?.id, "contract");
           setNotes([...notes]);
           if (
@@ -130,9 +129,9 @@ const ReservationPublicPage = ({ token }: Props) => {
               }),
             );
             const packageTerms = await Promise.all(promises);
-            setTerms([...terms, ...packageTerms.flat()]);
+            setTerms(packageTerms.flat());
           } else {
-            setTerms(terms);
+            setTerms([]);
           }
         } catch (error) {
           console.error("Error loading terms and notes:", error);
@@ -359,7 +358,7 @@ const ReservationPublicPage = ({ token }: Props) => {
 
             <div className={styles.headerTitleRow}>
               <Image
-                src={logoWhite}
+                src={logoDark}
                 alt="Brillipoint"
                 width={36}
                 height={36}

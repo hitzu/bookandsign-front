@@ -20,3 +20,4 @@ export * from "./sessions";
 export * from "./analyticsAction";
 export * from "./eventThemes";
 export * from "./eventGallery";
+export * from "./carousels";
