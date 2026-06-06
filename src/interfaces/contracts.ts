@@ -1,3 +1,4 @@
+import { Extra } from "./extras";
 import { Package } from "./packages";
 import { Payment } from "./payments";
 import { Promotion } from "./promotions";
@@ -30,6 +31,17 @@ export interface ContractPackages {
   promotion: Promotion | null;
 }
 
+export interface ContractExtra {
+  id: number;
+  contractId: number;
+  extraId: number;
+  quantity: number;
+  nameSnapshot: string;
+  basePriceSnapshot: number;
+  extra: Extra;
+  promotion: Promotion | null;
+}
+
 export interface ContractSlot {
   id: number;
   purpose: string;
@@ -42,6 +54,7 @@ export interface GetContractByIdResponse {
   contract: Contract;
   slots?: Slot[];
   packages: ContractPackages[];
+  extras: ContractExtra[];
   payments: Payment[];
   paidAmount: number;
   contractSlots: ContractSlot[];
@@ -53,6 +66,7 @@ export interface ContractCompleteResponse {
   contract: Contract;
   slots?: Slot[];
   packages: ContractPackages[];
+  extras: ContractExtra[];
   payments: Payment[];
   paidAmount: number;
   contractSlots: ContractSlot[];
@@ -63,6 +77,13 @@ export interface GenerateContractItem {
   packageId: number;
   quantity: number;
   source?: string;
+}
+
+export interface GenerateContractExtra {
+  extraId: number;
+  quantity: number;
+  promotionId?: number;
+  basePriceSnapshot: number;
 }
 
 export interface GenerateContractPayload {
@@ -77,4 +98,5 @@ export interface GenerateContractPayload {
   discountTotal: number;
   total: number;
   packages: GenerateContractItem[];
+  extras?: GenerateContractExtra[];
 }

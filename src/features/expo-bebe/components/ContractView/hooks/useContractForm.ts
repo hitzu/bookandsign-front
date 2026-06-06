@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Contract,
+  Extra,
   GenerateContractPayload,
   GetBrandsResponse,
   GetPackagesResponse,
@@ -12,6 +13,7 @@ import {
 import type { GetSlotResponse } from "../../../../../interfaces/slots";
 import { getBrands } from "../../../../../api/services/brandService";
 import { getPackages } from "../../../../../api/services/packageService";
+import { getExtras } from "../../../../../api/services/extrasService";
 import { getUsers } from "../../../../../api/services/usersService";
 import { generateContract } from "../../../../../api/services/contractService";
 import { createPayment } from "../../../../../api/services/paymentService";
@@ -22,7 +24,7 @@ import {
   getSlotsByMonthAndYear,
   holdSlot,
 } from "../../../../../api/services/slotsService";
-import type { PackageLineItem } from "../../../types";
+import type { ExtraLineItem, PackageLineItem } from "../../../types";
 import type { ExpoBebeBrandKey } from "../../../types";
 import type { ContractPeriod } from "../../../utils/calendar";
 import { formatSkuDate, normalizeSkuText } from "../../../utils/sku";
@@ -69,6 +71,7 @@ export function useContractForm({
   // API data
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
   const [packages, setPackages] = useState<GetPackagesResponse[]>([]);
+  const [extrasCatalog, setExtrasCatalog] = useState<Extra[]>([]);
   const [users, setUsers] = useState<UserInfo[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [slotAvailability, setSlotAvailability] = useState<GetSlotResponse[]>(
@@ -90,6 +93,8 @@ export function useContractForm({
   const [selectedBrandId, setSelectedBrandId] = useState<number | "">("");
   const [selectedPackageId, setSelectedPackageId] = useState<number | "">("");
   const [items, setItems] = useState<PackageLineItem[]>([]);
+  const [selectedExtraId, setSelectedExtraId] = useState<number | "">("");
+  const [extraItems, setExtraItems] = useState<ExtraLineItem[]>([]);
   const [anticipo, setAnticipo] = useState("500");
   const [formaPago, setFormaPago] = useState("cash");
   const [notas, setNotas] = useState("");
@@ -143,6 +148,19 @@ export function useContractForm({
     getPackages({ brandId: Number(selectedBrandId) })
       .then((data) => setPackages(Array.isArray(data) ? data : []))
       .catch(() => setPackages([]));
+  }, [selectedBrandId]);
+
+  // Load extras catalog when brand changes
+  useEffect(() => {
+    if (!selectedBrandId) {
+      setExtrasCatalog([]);
+      setSelectedExtraId("");
+      return;
+    }
+    setSelectedExtraId("");
+    getExtras({ brandId: Number(selectedBrandId) })
+      .then((data) => setExtrasCatalog(Array.isArray(data) ? data : []))
+      .catch(() => setExtrasCatalog([]));
   }, [selectedBrandId]);
 
   // Load promotions when brand changes
@@ -227,9 +245,26 @@ export function useContractForm({
     return out;
   }, [slotAvailability]);
 
+  const extrasSubtotal = useMemo(
+    () =>
+      extraItems.reduce((s, it) => s + it.extra.price * it.quantity, 0),
+    [extraItems],
+  );
+  const extrasDiscountTotal = useMemo(
+    () =>
+      extraItems.reduce(
+        (s, it) =>
+          s +
+          (it.extra.price * it.quantity * (it.promotion?.value ?? 0)) / 100,
+        0,
+      ),
+    [extraItems],
+  );
   const subtotal = useMemo(
-    () => items.reduce((s, it) => s + it.pkg.basePrice * it.quantity, 0),
-    [items],
+    () =>
+      items.reduce((s, it) => s + it.pkg.basePrice * it.quantity, 0) +
+      extrasSubtotal,
+    [items, extrasSubtotal],
   );
   const selectedBrandName = useMemo(
     () =>
@@ -245,8 +280,8 @@ export function useContractForm({
           s +
           (it.pkg.basePrice * it.quantity * (it.promotion?.value ?? 0)) / 100,
         0,
-      ),
-    [items],
+      ) + extrasDiscountTotal,
+    [items, extrasDiscountTotal],
   );
   const anticipoNum = Math.max(
     0,
@@ -270,6 +305,41 @@ export function useContractForm({
     });
     setSelectedPackageId("");
   };
+
+  const handleAgregarExtra = () => {
+    if (isLocked || !selectedExtraId) return;
+    const extra = extrasCatalog.find((e) => e.id === Number(selectedExtraId));
+    if (!extra) return;
+    setExtraItems((prev) => {
+      const idx = prev.findIndex((x) => x.extra.id === extra.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], quantity: copy[idx].quantity + 1 };
+        return copy;
+      }
+      const promo =
+        promotions.find((p) => p.brandId === extra.brandId) ?? null;
+      return [...prev, { extra, quantity: 1, promotion: promo }];
+    });
+    setSelectedExtraId("");
+  };
+
+  const incExtraItem = (id: number) =>
+    setExtraItems((prev) =>
+      prev.map((it) =>
+        it.extra.id === id ? { ...it, quantity: it.quantity + 1 } : it,
+      ),
+    );
+  const decExtraItem = (id: number) =>
+    setExtraItems((prev) =>
+      prev.map((it) =>
+        it.extra.id === id
+          ? { ...it, quantity: Math.max(1, it.quantity - 1) }
+          : it,
+      ),
+    );
+  const removeExtraItem = (id: number) =>
+    setExtraItems((prev) => prev.filter((it) => it.extra.id !== id));
 
   const incItem = (id: number) =>
     setItems((prev) =>
@@ -349,6 +419,14 @@ export function useContractForm({
             it.pkg.basePrice * it.quantity -
             (it.pkg.basePrice * it.quantity * (it.promotion?.value ?? 0)) / 100,
         })),
+        extras: extraItems.map((it) => ({
+          extraId: it.extra.id,
+          quantity: it.quantity,
+          promotionId: it.promotion?.id,
+          basePriceSnapshot:
+            it.extra.price * it.quantity -
+            (it.extra.price * it.quantity * (it.promotion?.value ?? 0)) / 100,
+        })),
       };
 
       const newContract = await generateContract(payload);
@@ -394,6 +472,8 @@ export function useContractForm({
     setTelefono("");
     setSelectedPackageId("");
     setItems([]);
+    setSelectedExtraId("");
+    setExtraItems([]);
     setAnticipo(String(requiredMinAmountHoldSlot));
     setFormaPago("cash");
     setNotas("");
@@ -410,6 +490,7 @@ export function useContractForm({
     // data
     brands,
     packages,
+    extrasCatalog,
     users,
     // form state
     fecha,
@@ -431,6 +512,9 @@ export function useContractForm({
     selectedPackageId,
     setSelectedPackageId,
     items,
+    selectedExtraId,
+    setSelectedExtraId,
+    extraItems,
     anticipo,
     setAnticipo,
     formaPago,
@@ -451,6 +535,7 @@ export function useContractForm({
     availabilityByPeriod,
     subtotal,
     discountTotal,
+    extrasSubtotal,
     anticipoNum,
     fmtPrice,
     contractLink,
@@ -459,6 +544,10 @@ export function useContractForm({
     incItem,
     decItem,
     removeItem,
+    handleAgregarExtra,
+    incExtraItem,
+    decExtraItem,
+    removeExtraItem,
     handleSubmit,
     resetForm,
   };

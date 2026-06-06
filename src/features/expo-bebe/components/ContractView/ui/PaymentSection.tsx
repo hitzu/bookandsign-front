@@ -4,6 +4,8 @@ import type { ContractFormVM } from "../hooks/useContractForm";
 
 export function PaymentSection({ vm }: { vm: ContractFormVM }) {
   const {
+    items,
+    extraItems,
     subtotal,
     discountTotal,
     anticipo,
@@ -20,6 +22,73 @@ export function PaymentSection({ vm }: { vm: ContractFormVM }) {
     <section className={styles.panel}>
       <SectionHead n="04" text="resumen de" accent="pago" />
       <div className={styles.cfSummary}>
+        {(items.length > 0 || extraItems.length > 0) && (
+          <>
+            {items.map((it) => (
+              <div key={`pkg-${it.pkg.id}`} className={styles.cfSummaryRow}>
+                <span className={styles.cfSummaryLabel}>
+                  {it.pkg.name}
+                  {it.quantity > 1 && (
+                    <span style={{ fontWeight: 400, opacity: 0.7 }}>
+                      {" "}
+                      ({it.quantity}×)
+                    </span>
+                  )}
+                </span>
+                <span className={styles.cfSummaryValue}>
+                  $ {fmtPrice(it.pkg.basePrice * it.quantity)}
+                </span>
+              </div>
+            ))}
+            {items.length > 0 && extraItems.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  margin: "8px 0",
+                }}
+              >
+                <div
+                  style={{ flex: 1, height: 1, background: "var(--eb-line)" }}
+                />
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--eb-ink-faint)",
+                  }}
+                >
+                  Extras
+                </span>
+                <div
+                  style={{ flex: 1, height: 1, background: "var(--eb-line)" }}
+                />
+              </div>
+            )}
+            {extraItems.map((it) => (
+              <div key={`extra-${it.extra.id}`} className={styles.cfSummaryRow}>
+                <span className={styles.cfSummaryLabel}>
+                  {it.extra.name}
+                  {it.quantity > 1 && (
+                    <span style={{ fontWeight: 400, opacity: 0.7 }}>
+                      {" "}
+                      ({it.quantity}×)
+                    </span>
+                  )}
+                </span>
+                <span className={styles.cfSummaryValue}>
+                  $ {fmtPrice(it.extra.price * it.quantity)}
+                </span>
+              </div>
+            ))}
+
+            <div className={styles.cfSummaryDividerLight} />
+          </>
+        )}
+
         <div className={styles.cfSummaryRow}>
           <span className={styles.cfSummaryLabel}>Subtotal</span>
           <span className={styles.cfSummaryValue}>$ {fmtPrice(subtotal)}</span>

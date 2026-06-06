@@ -213,6 +213,28 @@ const menuItems = [
   },
   {
     type: "HASHMENU",
+    id: 9,
+    label: "Extras",
+    icon: "ph-duotone ph-gift",
+    dataPage: null,
+    link: "#",
+    submenu: [
+      {
+        id: "extras-list",
+        label: "Listado de extras",
+        link: "/extras-list",
+        dataPage: "extras-list",
+      },
+      {
+        id: "extras-add",
+        label: "Agregar extra",
+        link: "/extras-add",
+        dataPage: "extras-add",
+      },
+    ],
+  },
+  {
+    type: "HASHMENU",
     id: 8,
     label: "Expos",
     icon: "ph-duotone ph-calendar-blank",
@@ -221,13 +243,13 @@ const menuItems = [
     submenu: [
       {
         id: "expo-bebe-experiences",
-        label: "Expo tu bebe Experiences",
+        label: "Expo tu bebe Photobooth",
         link: "/expo-bebe?brand=3",
         dataPage: "expo-bebe",
       },
       {
         id: "expo-bebe-lusso",
-        label: "Expo tu bebe Lusso",
+        label: "Expo tu bebe Salon de fiestas",
         link: "/expo-bebe?brand=4",
         dataPage: "expo-bebe",
       },

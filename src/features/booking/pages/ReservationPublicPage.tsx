@@ -18,6 +18,7 @@ import TermsAndConditions from "../components/TermsAndConditions";
 import { ReservationClientSection } from "../components/ReservationClientSection";
 import { ReservationDatesSection } from "../components/ReservationDatesSection";
 import { ReservationServicesSection } from "../components/ReservationServicesSection";
+import { ReservationExtrasSection } from "../components/ReservationExtrasSection";
 import { ReservationFinanceSection } from "../components/ReservationFinanceSection";
 import { ReservationNotesSection } from "../components/ReservationNotesSection";
 import { PreparationSection } from "../components/PreparationSection";
@@ -143,6 +144,7 @@ const ReservationPublicPage = ({ token }: Props) => {
   }, [data?.contract]);
 
   const items = data?.packages ?? [];
+  const extraItems = data?.extras ?? [];
   const packagesForPrep = useMemo(() => {
     const normalized = (data?.packages ?? []).map((p) => ({
       id: p.package?.id ?? p.packageId ?? p.id,
@@ -189,8 +191,10 @@ const ReservationPublicPage = ({ token }: Props) => {
                 <ReservationClientSection contract={data.contract} />
                 <ReservationDatesSection slots={slots} />
                 <ReservationServicesSection items={items} />
+                <ReservationExtrasSection items={extraItems} />
                 <ReservationFinanceSection
                   contract={data.contract}
+                  extras={extraItems}
                   payments={data.payments ?? []}
                   paidAmount={data.paidAmount ?? 0}
                 />

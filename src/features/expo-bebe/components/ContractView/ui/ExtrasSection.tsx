@@ -3,42 +3,37 @@ import { IconPlus } from "../../Icons";
 import { SectionHead } from "../../SectionHead";
 import type { ContractFormVM } from "../hooks/useContractForm";
 
-export function ProductsSection({ vm }: { vm: ContractFormVM }) {
+export function ExtrasSection({ vm }: { vm: ContractFormVM }) {
   const {
-    brands,
-    packages,
-    selectedBrandId,
-    setSelectedBrandId,
-    selectedBrandName,
-    isBrandSelectionLocked,
-    selectedPackageId,
-    setSelectedPackageId,
-    items,
+    extrasCatalog,
+    selectedExtraId,
+    setSelectedExtraId,
+    extraItems,
     isLocked,
-    handleAgregar,
-    incItem,
-    decItem,
-    removeItem,
+    handleAgregarExtra,
+    incExtraItem,
+    decExtraItem,
+    removeExtraItem,
   } = vm;
 
   return (
     <section className={styles.panel}>
-      <SectionHead n="03" text="productos /" accent="servicios" />
+      <SectionHead n="03b" text="extras /" accent="adicionales" />
 
       <div style={{ marginBottom: 10 }}>
-        <label className={styles.cfLabel}>Paquete</label>
+        <label className={styles.cfLabel}>Extra</label>
         <select
           className={styles.cfSelect}
-          value={selectedPackageId}
+          value={selectedExtraId}
           onChange={(e) =>
-            setSelectedPackageId(e.target.value ? Number(e.target.value) : "")
+            setSelectedExtraId(e.target.value ? Number(e.target.value) : "")
           }
           disabled={isLocked}
         >
           <option value="">Selecciona…</option>
-          {packages.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} — ${p.basePrice.toLocaleString("es-MX")}
+          {extrasCatalog.map((extra) => (
+            <option key={extra.id} value={extra.id}>
+              {extra.name} — ${extra.price.toLocaleString("es-MX")}
             </option>
           ))}
         </select>
@@ -47,26 +42,26 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
       <button
         type="button"
         className={styles.cfAddBtn}
-        onClick={handleAgregar}
-        disabled={!selectedPackageId || isLocked}
+        onClick={handleAgregarExtra}
+        disabled={!selectedExtraId || isLocked}
       >
         <IconPlus /> Agregar al contrato
       </button>
 
-      {items.length === 0 ? (
-        <div className={styles.cfEmptyState}>Aún no has agregado paquetes</div>
+      {extraItems.length === 0 ? (
+        <div className={styles.cfEmptyState}>Aún no has agregado extras</div>
       ) : (
         <div className={styles.cfProductList}>
-          {items.map((it, i) => (
-            <div key={it.pkg.id} className={styles.cfProductItem}>
+          {extraItems.map((it, i) => (
+            <div key={it.extra.id} className={styles.cfProductItem}>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <span className={styles.cfProductNum}>
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <div className={styles.cfProductName}>{it.pkg.name}</div>
+                  <div className={styles.cfProductName}>{it.extra.name}</div>
                   <div className={styles.cfProductPrice}>
-                    ${(it.pkg.basePrice * it.quantity).toLocaleString("es-MX")}
+                    ${(it.extra.price * it.quantity).toLocaleString("es-MX")}
                     {it.quantity > 1 && (
                       <span style={{ fontWeight: 400, opacity: 0.7 }}>
                         {" "}
@@ -81,7 +76,7 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
                   <button
                     type="button"
                     className={styles.cfQtyBtn}
-                    onClick={() => decItem(it.pkg.id)}
+                    onClick={() => decExtraItem(it.extra.id)}
                   >
                     −
                   </button>
@@ -89,14 +84,14 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
                   <button
                     type="button"
                     className={styles.cfQtyBtn}
-                    onClick={() => incItem(it.pkg.id)}
+                    onClick={() => incExtraItem(it.extra.id)}
                   >
                     +
                   </button>
                   <button
                     type="button"
                     className={styles.cfRemoveBtn}
-                    onClick={() => removeItem(it.pkg.id)}
+                    onClick={() => removeExtraItem(it.extra.id)}
                     aria-label="Eliminar"
                   >
                     ×

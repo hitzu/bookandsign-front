@@ -5,6 +5,7 @@ import { IconDoc } from "../Icons";
 import { useContractForm } from "./hooks/useContractForm";
 import { ClientSection } from "./ui/ClientSection";
 import { DateSlotSection } from "./ui/DateSlotSection";
+import { ExtrasSection } from "./ui/ExtrasSection";
 import { NotesSection } from "./ui/NotesSection";
 import { PaymentSection } from "./ui/PaymentSection";
 import { ProductsSection } from "./ui/ProductsSection";
@@ -48,6 +49,7 @@ export function ContractView({
       <DateSlotSection vm={vm} />
       <ClientSection vm={vm} />
       <ProductsSection vm={vm} />
+      <ExtrasSection vm={vm} />
       <PaymentSection vm={vm} />
       <NotesSection vm={vm} />
 

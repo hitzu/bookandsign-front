@@ -1,4 +1,4 @@
-import type { GetPackagesResponse, Promotion } from "../../interfaces";
+import type { Extra, GetPackagesResponse, Promotion } from "../../interfaces";
 
 export type TabKey = "cal" | "srv" | "ext" | "ctr";
 export type ContentTabKey = "cal" | "ctr";
@@ -7,6 +7,12 @@ export type ExpoBebeBrandKey = "lusso" | "photobooth";
 
 export type PackageLineItem = {
   pkg: GetPackagesResponse;
+  quantity: number;
+  promotion: Promotion | null;
+};
+
+export type ExtraLineItem = {
+  extra: Extra;
   quantity: number;
   promotion: Promotion | null;
 };
