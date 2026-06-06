@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import styles from "@assets/css/expo-bebe.module.css";
 import {
   CalendarSlotsByMonthResponse,
@@ -6,10 +6,24 @@ import {
 } from "../../../interfaces";
 import { getSlotsByMonthAndYear } from "../../../api/services/slotsService";
 import { YEARS } from "../data/serviceCatalog";
-import { MONTHS, buildWeekendRows, toYMD } from "../utils/calendar";
+import {
+  ContractPeriod,
+  MONTHS,
+  SwipeDir,
+  buildWeekendRows,
+  detectSwipe,
+  slotToPeriod,
+  stepMonth,
+  toYMD,
+} from "../utils/calendar";
 import { IconChevronLeft, IconChevronRight } from "./Icons";
 
-export function CalendarView({ brandId }: { brandId: number }) {
+interface CalendarViewProps {
+  brandId: number;
+  onPickSlot?: (date: string, period: ContractPeriod) => void;
+}
+
+export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [monthIdx, setMonthIdx] = useState(today.getMonth());
@@ -19,6 +33,8 @@ export function CalendarView({ brandId }: { brandId: number }) {
   const [monthHasReservedDate, setMonthHasReservedDate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const [transitionDir, setTransitionDir] = useState<SwipeDir>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,32 +85,100 @@ export function CalendarView({ brandId }: { brandId: number }) {
   const slotIcon = (status: SlotAvailabilityStatus) =>
     status === "available" ? "✓" : "×";
 
+  const applyMonthChange = (nextYear: number, nextMonthIdx: number) => {
+    if (nextYear === year && nextMonthIdx === monthIdx) return;
+
+    const currentOrder = year * 12 + monthIdx;
+    const nextOrder = nextYear * 12 + nextMonthIdx;
+
+    setTransitionDir(nextOrder > currentOrder ? "next" : "prev");
+    setYear(nextYear);
+    setMonthIdx(nextMonthIdx);
+  };
+
   const goPrev = () => {
-    if (monthIdx === 0) {
-      const prevYear = year - 1;
-      if (prevYear >= YEARS[0]) {
-        setYear(prevYear);
-        setMonthIdx(11);
-      }
-    } else {
-      setMonthIdx(monthIdx - 1);
-    }
+    const nextState = stepMonth(
+      year,
+      monthIdx,
+      "prev",
+      YEARS[0],
+      YEARS[YEARS.length - 1],
+    );
+    if (!nextState) return;
+    applyMonthChange(nextState.year, nextState.monthIdx);
   };
 
   const goNext = () => {
-    if (monthIdx === 11) {
-      const nextYear = year + 1;
-      if (nextYear <= YEARS[YEARS.length - 1]) {
-        setYear(nextYear);
-        setMonthIdx(0);
-      }
-    } else {
-      setMonthIdx(monthIdx + 1);
-    }
+    const nextState = stepMonth(
+      year,
+      monthIdx,
+      "next",
+      YEARS[0],
+      YEARS[YEARS.length - 1],
+    );
+    if (!nextState) return;
+    applyMonthChange(nextState.year, nextState.monthIdx);
   };
 
   const isAtStart = year === YEARS[0] && monthIdx === 0;
   const isAtEnd = year === YEARS[YEARS.length - 1] && monthIdx === 11;
+  const calendarMotionClass =
+    transitionDir === "prev"
+      ? styles.calMotionPrev
+      : transitionDir === "next"
+        ? styles.calMotionNext
+        : "";
+
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    touchStartXRef.current = event.changedTouches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartXRef.current;
+    touchStartXRef.current = null;
+
+    if (startX == null) return;
+
+    const endX = event.changedTouches[0]?.clientX;
+    if (typeof endX !== "number") return;
+
+    const direction = detectSwipe(endX - startX);
+    if (direction === "prev") goPrev();
+    if (direction === "next") goNext();
+  };
+
+  const renderSlot = (
+    ymd: string,
+    slot: "morning" | "afternoon",
+    status: SlotAvailabilityStatus,
+  ) => {
+    const content = (
+      <>
+        <span className={`${styles.slotMark} ${getMarkClass(status)}`}>
+          {slotIcon(status)}
+        </span>
+        <span className={styles.slotLabel}>{slotText(status)}</span>
+        <span className={styles.slotTime}>{slot === "morning" ? "AM" : "PM"}</span>
+      </>
+    );
+
+    const className = `${styles.slot} ${getSlotClass(status)}`;
+
+    if (status !== "available") {
+      return <div className={className}>{content}</div>;
+    }
+
+    return (
+      <button
+        type="button"
+        className={`${className} ${styles.slotButton}`}
+        onClick={() => onPickSlot?.(ymd, slotToPeriod(slot))}
+        aria-label={`Seleccionar ${ymd} ${slot === "morning" ? "AM" : "PM"}`}
+      >
+        {content}
+      </button>
+    );
+  };
 
   return (
     <section className={styles.panel}>
@@ -126,7 +210,7 @@ export function CalendarView({ brandId }: { brandId: number }) {
           <button
             key={y}
             className={`${styles.yearPill} ${y === year ? styles.yearPillActive : ""}`}
-            onClick={() => setYear(y)}
+            onClick={() => applyMonthChange(y, monthIdx)}
             type="button"
           >
             {y}
@@ -149,7 +233,7 @@ export function CalendarView({ brandId }: { brandId: number }) {
         <select
           className={styles.monthSelect}
           value={monthIdx}
-          onChange={(e) => setMonthIdx(Number(e.target.value))}
+          onChange={(e) => applyMonthChange(year, Number(e.target.value))}
           aria-label="Seleccionar mes"
         >
           {MONTHS.map((m, i) => (
@@ -185,7 +269,10 @@ export function CalendarView({ brandId }: { brandId: number }) {
       )}
 
       {!loading && (
-        <>
+        <div
+          key={`${year}-${monthIdx}`}
+          className={`${styles.calMotion} ${calendarMotionClass}`}
+        >
           <div className={styles.calHead}>
             {["Viernes", "Sábado", "Domingo"].map((d) => (
               <div key={d} className={styles.calHeadCell}>
@@ -194,7 +281,11 @@ export function CalendarView({ brandId }: { brandId: number }) {
             ))}
           </div>
 
-          <div className={styles.calGrid}>
+          <div
+            className={styles.calGrid}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {weekendRows.map((row) =>
               ([row.fri, row.sat, row.sun] as (number | undefined)[]).map(
                 (day, ci) => {
@@ -228,32 +319,8 @@ export function CalendarView({ brandId }: { brandId: number }) {
                       >
                         {day}
                       </div>
-                      <div
-                        className={`${styles.slot} ${getSlotClass(morning)}`}
-                      >
-                        <span
-                          className={`${styles.slotMark} ${getMarkClass(morning)}`}
-                        >
-                          {slotIcon(morning)}
-                        </span>
-                        <span className={styles.slotLabel}>
-                          {slotText(morning)}
-                        </span>
-                        <span className={styles.slotTime}>AM</span>
-                      </div>
-                      <div
-                        className={`${styles.slot} ${getSlotClass(afternoon)}`}
-                      >
-                        <span
-                          className={`${styles.slotMark} ${getMarkClass(afternoon)}`}
-                        >
-                          {slotIcon(afternoon)}
-                        </span>
-                        <span className={styles.slotLabel}>
-                          {slotText(afternoon)}
-                        </span>
-                        <span className={styles.slotTime}>PM</span>
-                      </div>
+                      {renderSlot(ymd, "morning", morning)}
+                      {renderSlot(ymd, "afternoon", afternoon)}
                     </div>
                   );
                 },
@@ -277,7 +344,7 @@ export function CalendarView({ brandId }: { brandId: number }) {
               Hoy
             </div>
           </div>
-        </>
+        </div>
       )}
     </section>
   );

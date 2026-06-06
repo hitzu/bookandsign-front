@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "@assets/css/expo-bebe.module.css";
 import type { ServiceItem } from "../types";
-import { IconChevronLeft, IconChevronRight, IconX } from "./Icons";
+import { IconChevronLeft, IconChevronRight, IconEye, IconEyeOff, IconX } from "./Icons";
 
 export function ServiceDetail({
   isOpen,
@@ -26,7 +26,6 @@ export function ServiceDetail({
   const touchStart = useRef<{ x: number; y: number; time: number } | null>(
     null,
   );
-  const lastTap = useRef<{ x: number; y: number; time: number } | null>(null);
   const service = items[currentIndex] ?? null;
 
   useEffect(() => {
@@ -64,34 +63,11 @@ export function ServiceDetail({
   const onTouchEnd = (e: React.TouchEvent) => {
     if (touchStart.current == null) return;
 
-    const x = e.changedTouches[0].clientX;
-    const y = e.changedTouches[0].clientY;
-    const dx = x - touchStart.current.x;
-    const dy = y - touchStart.current.y;
-    const now = Date.now();
+    const dx = e.changedTouches[0].clientX - touchStart.current.x;
 
     if (Math.abs(dx) > 40) {
       if (dx < 0) onNext();
       else onPrevious();
-      touchStart.current = null;
-      lastTap.current = null;
-      return;
-    }
-
-    if (Math.abs(dx) < 16 && Math.abs(dy) < 16) {
-      const previousTap = lastTap.current;
-      const isDoubleTap =
-        previousTap &&
-        now - previousTap.time < 320 &&
-        Math.abs(x - previousTap.x) < 28 &&
-        Math.abs(y - previousTap.y) < 28;
-
-      if (isDoubleTap) {
-        setControlsVisible((visible) => !visible);
-        lastTap.current = null;
-      } else {
-        lastTap.current = { x, y, time: now };
-      }
     }
 
     touchStart.current = null;
@@ -137,6 +113,15 @@ export function ServiceDetail({
             type="button"
           >
             <IconX />
+          </button>
+
+          <button
+            className={styles.detailToggleControls}
+            onClick={toggleControls}
+            aria-label={controlsVisible ? "Ocultar controles" : "Mostrar controles"}
+            type="button"
+          >
+            {controlsVisible ? <IconEye /> : <IconEyeOff />}
           </button>
 
           {items.length > 1 && (

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildWeekendRows, toYMD } from "../calendar";
+import {
+  buildWeekendRows,
+  detectSwipe,
+  slotToPeriod,
+  stepMonth,
+  toYMD,
+} from "../calendar";
 
 describe("toYMD", () => {
   it("zero-pads month and day and shifts the 0-based month", () => {
@@ -31,5 +37,52 @@ describe("buildWeekendRows", () => {
     const rows = buildWeekendRows(2026, 0);
     const keys = rows.map((r) => r.key);
     expect(keys).toEqual([...keys].sort((a, b) => a - b));
+  });
+});
+
+describe("detectSwipe", () => {
+  it("returns prev when dragging right beyond threshold", () => {
+    expect(detectSwipe(60)).toBe("prev");
+  });
+
+  it("returns next when dragging left beyond threshold", () => {
+    expect(detectSwipe(-60)).toBe("next");
+  });
+
+  it("returns null when movement is within threshold", () => {
+    expect(detectSwipe(40)).toBeNull();
+    expect(detectSwipe(-40)).toBeNull();
+  });
+});
+
+describe("slotToPeriod", () => {
+  it("maps calendar slots to contract periods", () => {
+    expect(slotToPeriod("morning")).toBe("am_block");
+    expect(slotToPeriod("afternoon")).toBe("pm_block");
+  });
+});
+
+describe("stepMonth", () => {
+  it("moves to previous month within same year", () => {
+    expect(stepMonth(2026, 5, "prev", 2025, 2027)).toEqual({
+      year: 2026,
+      monthIdx: 4,
+    });
+  });
+
+  it("moves across year boundaries when allowed", () => {
+    expect(stepMonth(2026, 0, "prev", 2025, 2027)).toEqual({
+      year: 2025,
+      monthIdx: 11,
+    });
+    expect(stepMonth(2026, 11, "next", 2025, 2027)).toEqual({
+      year: 2027,
+      monthIdx: 0,
+    });
+  });
+
+  it("returns null when movement would exceed limits", () => {
+    expect(stepMonth(2025, 0, "prev", 2025, 2027)).toBeNull();
+    expect(stepMonth(2027, 11, "next", 2025, 2027)).toBeNull();
   });
 });

@@ -9,16 +9,18 @@ export function SuccessState({ vm }: { vm: ContractFormVM }) {
   return (
     <div className={styles.cfSuccess}>
       <div className={styles.cfSuccessIcon}>✓</div>
-      <div className={styles.cfSuccessTitle}>
-        contrato <span className={styles.cfSuccessTitleAc}>generado</span>
-      </div>
+      <div className={styles.cfSuccessTitle}>contrato generado</div>
       <p className={styles.cfSuccessText}>
         El contrato para <strong>{nombre || "el cliente"}</strong> fue creado
         exitosamente.
       </p>
       {contractLink && (
         <div
-          style={{ display: "flex", justifyContent: "center", margin: "20px 0" }}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            margin: "20px 0",
+          }}
         >
           <QRCode value={contractLink} size={200} />
         </div>

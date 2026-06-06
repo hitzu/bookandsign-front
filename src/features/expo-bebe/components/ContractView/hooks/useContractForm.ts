@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Contract,
   GenerateContractPayload,
@@ -24,12 +24,18 @@ import {
 } from "../../../../../api/services/slotsService";
 import type { PackageLineItem } from "../../../types";
 import type { ExpoBebeBrandKey } from "../../../types";
+import type { ContractPeriod } from "../../../utils/calendar";
 import { formatSkuDate, normalizeSkuText } from "../../../utils/sku";
 import {
   LUSSO_BRAND_ID,
   brandBlockedMessage,
   isBrandBlockedForMonth,
 } from "../../../utils/brandBlocking";
+import {
+  isValidEmailFormat,
+  isValidPhoneLength,
+  sanitizePhoneInput,
+} from "../../../utils/contactValidation";
 import { getBookedBrandIdsByMonth } from "../../../services/monthBrandUsage";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -41,6 +47,8 @@ interface UseContractFormOptions {
   lockedBrandName?: string;
   minAmountHoldSlot?: number | null;
   expoMonthlyRiskEnabled?: boolean;
+  initialFecha?: string;
+  initialPeriod?: ContractPeriod;
 }
 
 export function useContractForm({
@@ -49,9 +57,14 @@ export function useContractForm({
   lockedBrandName,
   minAmountHoldSlot,
   expoMonthlyRiskEnabled,
+  initialFecha,
+  initialPeriod,
 }: UseContractFormOptions = {}) {
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+  const seededPeriodRef = useRef<ContractPeriod | null>(
+    initialFecha && initialPeriod ? initialPeriod : null,
+  );
 
   // API data
   const [brands, setBrands] = useState<GetBrandsResponse[]>([]);
@@ -66,8 +79,10 @@ export function useContractForm({
   const [bookedBrandIds, setBookedBrandIds] = useState<number[]>([]);
 
   // Form fields
-  const [fecha, setFecha] = useState(todayStr);
-  const [period, setPeriod] = useState<"am_block" | "pm_block" | null>(null);
+  const [fecha, setFecha] = useState(initialFecha ?? todayStr);
+  const [period, setPeriod] = useState<ContractPeriod | null>(
+    initialPeriod ?? null,
+  );
   const [selectedUserId, setSelectedUserId] = useState<number | "">("");
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
@@ -141,11 +156,20 @@ export function useContractForm({
   // Load slots for selected date
   useEffect(() => {
     if (!fecha) return;
-    setPeriod(null);
+    setPeriod((currentPeriod) => {
+      if (seededPeriodRef.current && fecha === initialFecha) {
+        const seededPeriod = seededPeriodRef.current;
+        seededPeriodRef.current = null;
+        return seededPeriod;
+      }
+
+      return currentPeriod === null ? currentPeriod : null;
+    });
+
     getSlots(fecha, brandKey)
       .then((data) => setSlotAvailability(Array.isArray(data) ? data : []))
       .catch(() => setSlotAvailability([]));
-  }, [brandKey, fecha]);
+  }, [brandKey, fecha, initialFecha]);
 
   useEffect(() => {
     if (!fecha || !selectedBrandId) {
@@ -267,6 +291,9 @@ export function useContractForm({
   const handleSubmit = async () => {
     if (submitting || isLocked) return;
     setErrorMsg(null);
+    const normalizedEmail = email.trim();
+    const normalizedPhone = sanitizePhoneInput(telefono);
+
     if (!period) {
       setErrorMsg("Selecciona un slot horario.");
       return;
@@ -277,6 +304,14 @@ export function useContractForm({
     }
     if (!nombre.trim()) {
       setErrorMsg("Ingresa el nombre del cliente.");
+      return;
+    }
+    if (!isValidEmailFormat(normalizedEmail)) {
+      setErrorMsg("Ingresa un email válido.");
+      return;
+    }
+    if (!isValidPhoneLength(normalizedPhone)) {
+      setErrorMsg("El teléfono debe tener exactamente 10 dígitos.");
       return;
     }
     if (anticipoNum < requiredMinAmountHoldSlot) {
@@ -301,8 +336,8 @@ export function useContractForm({
         brandId: Number(selectedBrandId),
         sku,
         clientName: nombre.trim(),
-        clientPhone: telefono || null,
-        clientEmail: email || null,
+        clientPhone: normalizedPhone || null,
+        clientEmail: normalizedEmail || null,
         subtotal,
         discountTotal,
         total: subtotal - discountTotal,

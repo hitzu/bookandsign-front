@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import { Container, Row, Col, Nav, Offcanvas } from "react-bootstrap";
+import { Container, Row, Col } from "react-bootstrap";
 import logoDark from "@assets/images/logo-experience-black.png";
 import styles from "@assets/css/contract-public.module.css";
 import { getContractByToken } from "../../../api/services/contractService";
@@ -48,7 +48,6 @@ const ReservationPublicPage = ({ token }: Props) => {
   type SectionId = "resume" | "prep_bride" | "prep_social" | "terms";
 
   const [activeSectionId, setActiveSectionId] = useState<SectionId>("resume");
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const halfwayDate = (start: Date, end: Date): Date => {
     return new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
@@ -261,7 +260,6 @@ const ReservationPublicPage = ({ token }: Props) => {
 
   const selectSection = (id: SectionId) => {
     setActiveSectionId(id);
-    setShowMobileMenu(false);
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -331,31 +329,6 @@ const ReservationPublicPage = ({ token }: Props) => {
       <div className={styles.stickyHeader}>
         <div className={styles.contentMax}>
           <header className={[styles.header, styles.headerSticky].join(" ")}>
-            {showNav ? (
-              <button
-                type="button"
-                className={[styles.hamburgerBtn, "d-md-none"].join(" ")}
-                onClick={() => setShowMobileMenu(true)}
-                aria-label="Abrir menú"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M4 7h16M4 12h16M4 17h16"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            ) : null}
-
             <div className={styles.headerTitleRow}>
               <Image
                 src={logoDark}
@@ -367,33 +340,24 @@ const ReservationPublicPage = ({ token }: Props) => {
               <h1 className={styles.title}>Tu reserva</h1>
             </div>
 
+            {/* Desktop: underline tabs in header */}
             {showNav ? (
-              <div className={[styles.tabsWrap, "d-none d-md-flex"].join(" ")}>
-                <Nav
-                  variant="tabs"
-                  activeKey={safeActiveSectionId}
-                  className={styles.tabsNav}
-                >
+              <div className={styles.tabsWrap}>
+                <div className={styles.tabPillsRow}>
                   {sections.map((s) => (
-                    <Nav.Link
+                    <button
                       key={s.id}
-                      eventKey={s.id}
-                      href="#"
+                      type="button"
                       className={[
-                        styles.tabLink,
-                        safeActiveSectionId === s.id
-                          ? styles.tabLinkActive
-                          : "",
+                        styles.tabPill,
+                        safeActiveSectionId === s.id ? styles.tabPillActive : "",
                       ].join(" ")}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        selectSection(s.id);
-                      }}
+                      onClick={() => selectSection(s.id)}
                     >
                       {s.label}
-                    </Nav.Link>
+                    </button>
                   ))}
-                </Nav>
+                </div>
               </div>
             ) : null}
           </header>
@@ -414,39 +378,24 @@ const ReservationPublicPage = ({ token }: Props) => {
         />
       ) : null}
 
-      <Offcanvas
-        show={showMobileMenu}
-        onHide={() => setShowMobileMenu(false)}
-        placement="start"
-        className={styles.mobileMenu}
-      >
-        <Offcanvas.Header closeButton closeVariant="white">
-          <Offcanvas.Title>Secciones</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          <Nav className="flex-column" activeKey={safeActiveSectionId}>
-            {sections.map((s) => (
-              <Nav.Link
-                key={s.id}
-                eventKey={s.id}
-                href="#"
-                className={[
-                  styles.mobileMenuLink,
-                  safeActiveSectionId === s.id
-                    ? styles.mobileMenuLinkActive
-                    : "",
-                ].join(" ")}
-                onClick={(e) => {
-                  e.preventDefault();
-                  selectSection(s.id);
-                }}
-              >
-                {s.label}
-              </Nav.Link>
-            ))}
-          </Nav>
-        </Offcanvas.Body>
-      </Offcanvas>
+      {/* Mobile: fixed bottom nav */}
+      {showNav ? (
+        <nav className={styles.bottomNav} aria-label="Secciones">
+          {sections.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className={[
+                styles.bottomNavPill,
+                safeActiveSectionId === s.id ? styles.bottomNavPillActive : "",
+              ].join(" ")}
+              onClick={() => selectSection(s.id)}
+            >
+              {s.label}
+            </button>
+          ))}
+        </nav>
+      ) : null}
     </div>
   );
 };

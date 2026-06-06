@@ -1,5 +1,6 @@
 import styles from "@assets/css/expo-bebe.module.css";
 import type { ExpoBebeBrandKey } from "../../types";
+import type { ContractPeriod } from "../../utils/calendar";
 import { IconDoc } from "../Icons";
 import { useContractForm } from "./hooks/useContractForm";
 import { ClientSection } from "./ui/ClientSection";
@@ -15,6 +16,8 @@ interface ContractViewProps {
   brandName?: string | null;
   minAmountHoldSlot?: number | null;
   expoMonthlyRiskEnabled?: boolean;
+  initialFecha?: string;
+  initialPeriod?: ContractPeriod;
 }
 
 export function ContractView({
@@ -23,6 +26,8 @@ export function ContractView({
   brandName,
   minAmountHoldSlot,
   expoMonthlyRiskEnabled,
+  initialFecha,
+  initialPeriod,
 }: ContractViewProps) {
   const vm = useContractForm({
     brandKey: brand,
@@ -30,6 +35,8 @@ export function ContractView({
     lockedBrandName: brandName ?? "",
     minAmountHoldSlot,
     expoMonthlyRiskEnabled,
+    initialFecha,
+    initialPeriod,
   });
 
   if (vm.contract) {

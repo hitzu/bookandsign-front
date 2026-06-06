@@ -21,6 +21,47 @@ export const toYMD = (year: number, month: number, day: number) => {
   return `${year}-${m}-${d}`;
 };
 
+export type SwipeDir = "prev" | "next" | null;
+export type ContractPeriod = "am_block" | "pm_block";
+
+export function detectSwipe(deltaX: number, threshold = 50): SwipeDir {
+  if (deltaX > threshold) return "prev";
+  if (deltaX < -threshold) return "next";
+  return null;
+}
+
+export function slotToPeriod(
+  slot: "morning" | "afternoon",
+): ContractPeriod {
+  return slot === "morning" ? "am_block" : "pm_block";
+}
+
+export function stepMonth(
+  year: number,
+  monthIdx: number,
+  direction: "prev" | "next",
+  minYear: number,
+  maxYear: number,
+) {
+  if (direction === "prev") {
+    if (monthIdx === 0) {
+      const prevYear = year - 1;
+      if (prevYear < minYear) return null;
+      return { year: prevYear, monthIdx: 11 };
+    }
+
+    return { year, monthIdx: monthIdx - 1 };
+  }
+
+  if (monthIdx === 11) {
+    const nextYear = year + 1;
+    if (nextYear > maxYear) return null;
+    return { year: nextYear, monthIdx: 0 };
+  }
+
+  return { year, monthIdx: monthIdx + 1 };
+}
+
 export type WeekendRow = {
   key: number;
   fri?: number;
