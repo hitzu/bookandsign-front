@@ -1,6 +1,7 @@
 import { Col, Row } from "react-bootstrap";
 import styles from "@assets/css/contract-public.module.css";
 import { Contract, ContractExtra, Payment } from "../../../interfaces";
+import { translatePaymentMethod } from "../../../shared/constants/paymentMethods";
 import { formatLongSpanishDate } from "@common/dates";
 import { useMemo } from "react";
 
@@ -114,14 +115,20 @@ export const ReservationFinanceSection = ({
             ) : (
               <div style={{ display: "grid", gap: "0.35rem" }}>
                 {paymentsSorted.map((p, idx) => (
-                  <div key={p.id ?? idx} className={styles.financeRow}>
-                    <span>
-                      Total pagado {idx + 1}:{" "}
-                      {formatPaymentDate(p.receivedAt ?? "")}
-                    </span>
-                    <span className={styles.financeValue}>
-                      {formatMoney(p.amount ?? 0)}
-                    </span>
+                  <div key={p.id ?? idx}>
+                    <div className={styles.financeRow}>
+                      <span>
+                        Total pagado {idx + 1}:{" "}
+                        {formatPaymentDate(p.receivedAt ?? "")}
+                      </span>
+                      <span className={styles.financeValue}>
+                        {formatMoney(p.amount ?? 0)}
+                      </span>
+                    </div>
+                    <div className={styles.paymentReference}>
+                      Tipo de pago: {translatePaymentMethod(p.method)}
+                      {p.reference ? ` · Referencia: ${p.reference}` : ""}
+                    </div>
                   </div>
                 ))}
               </div>

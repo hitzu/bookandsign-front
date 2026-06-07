@@ -12,6 +12,7 @@ import BreadcrumbItem from "@common/BreadcrumbItem";
 import { Card, Col, Row, Form } from "react-bootstrap";
 import DeleteModal from "@common/DeleteModal";
 import FinalizeModal from "@common/FinalizeModal";
+import { PaymentsModal } from "../../features/contracts";
 import {
   deleteContractById,
   finalizeContract,
@@ -25,6 +26,8 @@ const ContractsListPage = () => {
   const [deleteId, setDeleteId] = useState<number>(0);
   const [showFinalizeModal, setShowFinalizeModal] = useState<boolean>(false);
   const [finalizeId, setFinalizeId] = useState<number>(0);
+  const [showPaymentsModal, setShowPaymentsModal] = useState<boolean>(false);
+  const [paymentsContractId, setPaymentsContractId] = useState<number>(0);
   const [includeFinalized, setIncludeFinalized] = useState<boolean>(false);
 
   const fetchContracts = useCallback(async () => {
@@ -82,6 +85,16 @@ const ContractsListPage = () => {
     setFinalizeId(id);
   }, []);
 
+  const handlePayments = useCallback((id: number) => {
+    setPaymentsContractId(id);
+    setShowPaymentsModal(true);
+  }, []);
+
+  const handlePaymentsClose = () => {
+    setShowPaymentsModal(false);
+    setPaymentsContractId(0);
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -126,6 +139,20 @@ const ContractsListPage = () => {
                 <li
                   className="list-inline-item align-bottom"
                   data-bs-toggle="tooltip"
+                  title="Pagos"
+                >
+                  <Link
+                    href="#!"
+                    className="avtar avtar-xs btn-link-primary btn-pc-default"
+                    onClick={() => handlePayments(cellProps.row.original.id)}
+                    aria-label="Pagos del contrato"
+                  >
+                    <i className="ti ti-cash f-18"></i>
+                  </Link>
+                </li>
+                <li
+                  className="list-inline-item align-bottom"
+                  data-bs-toggle="tooltip"
                   title="Finalizar"
                 >
                   <Link
@@ -157,7 +184,7 @@ const ContractsListPage = () => {
         },
       },
     ],
-    [handleDelete, handleFinalize],
+    [handleDelete, handleFinalize, handlePayments],
   );
 
   return (
@@ -171,6 +198,11 @@ const ContractsListPage = () => {
         show={showFinalizeModal}
         handleClose={handleFinalizeClose}
         handleConfirm={handleFinalizeConfirm}
+      />
+      <PaymentsModal
+        show={showPaymentsModal}
+        handleClose={handlePaymentsClose}
+        contractId={paymentsContractId}
       />
 
       <BreadcrumbItem mainTitle="Contratos" subTitle="Lista de contratos" />

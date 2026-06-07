@@ -15,6 +15,7 @@ import {
   GetPackagesResponse,
   GetBrandsResponse,
   Payment,
+  PaymentMethod,
   Note,
 } from "../interfaces";
 import { getSlots, holdSlot } from "../api/services/slotsService";
@@ -105,7 +106,7 @@ const ContractsAddPage = () => {
   const [items, setItems] = useState<PackageLineItem[]>([]);
 
   const [deposit, setDeposit] = useState<string>("0");
-  const [paymentMethod, setPaymentMethod] = useState<string>("cash");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [notes, setNotes] = useState<string>("");
 
   const [showToast, setShowToast] = useState(false);
@@ -992,7 +993,9 @@ const ContractsAddPage = () => {
                             <select
                               className={styles.formInput}
                               value={paymentMethod}
-                              onChange={(e) => setPaymentMethod(e.target.value)}
+                              onChange={(e) =>
+                                setPaymentMethod(e.target.value as PaymentMethod)
+                              }
                             >
                               <option value="cash">Efectivo</option>
                               <option value="card">Tarjeta</option>

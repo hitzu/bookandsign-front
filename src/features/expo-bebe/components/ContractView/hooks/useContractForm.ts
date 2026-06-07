@@ -7,6 +7,7 @@ import {
   GetPackagesResponse,
   Note,
   Payment,
+  PaymentMethod,
   Promotion,
   UserInfo,
 } from "../../../../../interfaces";
@@ -96,7 +97,7 @@ export function useContractForm({
   const [selectedExtraId, setSelectedExtraId] = useState<number | "">("");
   const [extraItems, setExtraItems] = useState<ExtraLineItem[]>([]);
   const [anticipo, setAnticipo] = useState("500");
-  const [formaPago, setFormaPago] = useState("cash");
+  const [formaPago, setFormaPago] = useState<PaymentMethod>("cash");
   const [notas, setNotas] = useState("");
 
   // Submission

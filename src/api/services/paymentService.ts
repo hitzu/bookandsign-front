@@ -13,22 +13,19 @@ export const createPayment = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error creating note:", error);
+    console.error("Error creating payment:", error);
     throw error;
   }
 };
 
-export const getPayments = async (
-  slotId: number,
-  scope: string
-): Promise<Payment[]> => {
+export const getPayments = async (contractId: number): Promise<Payment[]> => {
   try {
     const response = await axiosInstanceWithToken.get<Payment[]>(
-      `/notes/${scope}/${slotId}`
+      `/contracts/${contractId}/payments`
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching notes:", error);
+    console.error("Error fetching payments:", error);
     throw error;
   }
 };

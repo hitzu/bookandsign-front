@@ -498,6 +498,12 @@
   line-height: 1.55;
 }
 
+.paymentReference {
+  color: var(--bp-brown-2);
+  font-size: 0.85rem;
+  margin-top: -0.15rem;
+}
+
 .totalRow {
   display: flex;
   align-items: flex-end;

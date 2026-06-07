@@ -1,4 +1,5 @@
 import styles from "@assets/css/expo-bebe.module.css";
+import type { PaymentMethod } from "../../../../../interfaces";
 import { SectionHead } from "../../SectionHead";
 import type { ContractFormVM } from "../hooks/useContractForm";
 
@@ -152,7 +153,7 @@ export function PaymentSection({ vm }: { vm: ContractFormVM }) {
           <select
             className={styles.cfSelect}
             value={formaPago}
-            onChange={(e) => setFormaPago(e.target.value)}
+            onChange={(e) => setFormaPago(e.target.value as PaymentMethod)}
             style={{ width: "auto", minWidth: 148 }}
             disabled={isLocked}
           >

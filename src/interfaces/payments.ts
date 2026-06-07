@@ -1,8 +1,10 @@
+export type PaymentMethod = "cash" | "transfer" | "card";
+
 export interface Payment {
   id: number;
   contractId: number;
   amount: number;
-  method: string;
+  method: PaymentMethod;
   status?: string;
   receivedAt: string;
   note: string | null;
@@ -12,7 +14,8 @@ export interface Payment {
 export interface CreatePaymentPayload {
   contractId: number;
   amount: number;
-  method: string;
-  note: string;
+  method: PaymentMethod;
   receivedAt: string;
+  note?: string;
+  reference?: string;
 }
