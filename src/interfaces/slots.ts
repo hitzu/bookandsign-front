@@ -16,9 +16,26 @@ export type CalendarDaySlots = {
   morning: SlotAvailabilityStatus;
   afternoon: SlotAvailabilityStatus;
 };
+
+export interface ContractSlotInfo {
+  id: number;
+  status: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail: string;
+  sku: string;
+  brandId: number | null;
+}
+
+export type CalendarDayContracts = {
+  morning: ContractSlotInfo | null;
+  afternoon: ContractSlotInfo | null;
+};
+
 export interface CalendarSlotsByMonthResponse {
   date: string;
   slots: CalendarDaySlots;
+  contracts?: CalendarDayContracts;
 }
 
 export interface CalendarSlotsByMonthPayload {

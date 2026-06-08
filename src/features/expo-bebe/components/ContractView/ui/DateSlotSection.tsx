@@ -14,6 +14,7 @@ export function DateSlotSection({ vm }: { vm: ContractFormVM }) {
     selectedUserId,
     setSelectedUserId,
     users,
+    selectedBrandName,
   } = vm;
 
   const slots = [
@@ -37,7 +38,14 @@ export function DateSlotSection({ vm }: { vm: ContractFormVM }) {
 
   return (
     <section className={styles.panel}>
-      <SectionHead n="01" text="fecha de la" accent="reserva" />
+      <SectionHead
+        n="01"
+        text="fecha de la reserva"
+        accent=""
+        accentSuffix={
+          selectedBrandName ? `para ${selectedBrandName}` : undefined
+        }
+      />
 
       <div>
         <div className={styles.cfLabelRow}>

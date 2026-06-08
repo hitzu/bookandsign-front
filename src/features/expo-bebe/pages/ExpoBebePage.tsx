@@ -135,7 +135,7 @@ export function ExpoBebePage() {
           <Tabs value={activeMenu} onChange={handleMenuChange} />
 
           {tab === "cal" && (
-            <CalendarView brandId={brandId} onPickSlot={handlePickSlot} />
+            <CalendarView brandName={brandName} onPickSlot={handlePickSlot} />
           )}
           {tab === "ctr" && (
             <ContractView

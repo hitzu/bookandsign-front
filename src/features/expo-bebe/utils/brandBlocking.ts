@@ -10,6 +10,14 @@
 export const LUSSO_BRAND_ID = 4;
 
 /**
+ * Brands that occupy the whole venue for the day. If either slot of a day is
+ * booked by one of these brands, the sibling slot must also render as occupied
+ * — even if the API still reports it as available — because the venue is
+ * physically unavailable for the rest of the day.
+ */
+export const WHOLE_DAY_BLOCKING_BRAND_IDS: number[] = [LUSSO_BRAND_ID];
+
+/**
  * Returns true when the brand already has an event booked in the month and can
  * no longer be offered. `bookedBrandIds` is the set of brand ids with at least
  * one event in the target month (provided by the backend). When the data is

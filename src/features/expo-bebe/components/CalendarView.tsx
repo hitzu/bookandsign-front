@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState, type TouchEvent } from "react";
 import styles from "@assets/css/expo-bebe.module.css";
 import {
   CalendarSlotsByMonthResponse,
+  ContractSlotInfo,
   SlotAvailabilityStatus,
 } from "../../../interfaces";
-import { getSlotsByMonthAndYear } from "../../../api/services/slotsService";
+import { getCalendarV2 } from "../../../api/services/slotsService";
 import { YEARS } from "../data/serviceCatalog";
 import {
   ContractPeriod,
@@ -16,14 +17,63 @@ import {
   stepMonth,
   toYMD,
 } from "../utils/calendar";
+import { getOccupiedTintClass } from "../utils/brandColors";
+import { WHOLE_DAY_BLOCKING_BRAND_IDS } from "../utils/brandBlocking";
 import { IconChevronLeft, IconChevronRight } from "./Icons";
 
 interface CalendarViewProps {
-  brandId: number;
+  brandName?: string | null;
   onPickSlot?: (date: string, period: ContractPeriod) => void;
 }
 
-export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
+interface SlotRenderInfo {
+  status: SlotAvailabilityStatus;
+  tintClass: string;
+}
+
+const isWholeDayBlockingBrand = (brandId: number | null | undefined): boolean =>
+  brandId != null && WHOLE_DAY_BLOCKING_BRAND_IDS.includes(brandId);
+
+const buildDaySlotInfo = (
+  d: CalendarSlotsByMonthResponse,
+): { morning: SlotRenderInfo; afternoon: SlotRenderInfo } => {
+  const morningContract = d.contracts?.morning ?? null;
+  const afternoonContract = d.contracts?.afternoon ?? null;
+
+  let blockingContract: ContractSlotInfo | null = null;
+  if (morningContract && isWholeDayBlockingBrand(morningContract.brandId)) {
+    blockingContract = morningContract;
+  } else if (
+    afternoonContract &&
+    isWholeDayBlockingBrand(afternoonContract.brandId)
+  ) {
+    blockingContract = afternoonContract;
+  }
+
+  const buildSlot = (
+    status: SlotAvailabilityStatus,
+    contract: ContractSlotInfo | null,
+  ): SlotRenderInfo => {
+    if (blockingContract) {
+      return {
+        status: "reserved",
+        tintClass: getOccupiedTintClass(blockingContract.brandId),
+      };
+    }
+    return {
+      status,
+      tintClass:
+        status === "available" ? "" : getOccupiedTintClass(contract?.brandId),
+    };
+  };
+
+  return {
+    morning: buildSlot(d.slots.morning, morningContract),
+    afternoon: buildSlot(d.slots.afternoon, afternoonContract),
+  };
+};
+
+export function CalendarView({ brandName, onPickSlot }: CalendarViewProps) {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [monthIdx, setMonthIdx] = useState(today.getMonth());
@@ -42,7 +92,7 @@ export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
       setLoading(true);
       setError(null);
       try {
-        const data = await getSlotsByMonthAndYear(monthIdx + 1, year, brandId);
+        const data = await getCalendarV2(monthIdx + 1, year);
         if (!cancelled) {
           setMonthData(Array.isArray(data?.days) ? data.days : []);
           setMonthHasReservedDate(Boolean(data?.risk));
@@ -60,14 +110,14 @@ export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
     return () => {
       cancelled = true;
     };
-  }, [brandId, year, monthIdx]);
+  }, [year, monthIdx]);
 
   const availMap = useMemo(() => {
     const map = new Map<
       string,
-      { morning: SlotAvailabilityStatus; afternoon: SlotAvailabilityStatus }
+      { morning: SlotRenderInfo; afternoon: SlotRenderInfo }
     >();
-    for (const d of monthData) map.set(d.date, d.slots);
+    for (const d of monthData) map.set(d.date, buildDaySlotInfo(d));
     return map;
   }, [monthData]);
 
@@ -150,7 +200,7 @@ export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
   const renderSlot = (
     ymd: string,
     slot: "morning" | "afternoon",
-    status: SlotAvailabilityStatus,
+    { status, tintClass }: SlotRenderInfo,
   ) => {
     const content = (
       <>
@@ -162,7 +212,8 @@ export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
       </>
     );
 
-    const className = `${styles.slot} ${getSlotClass(status)}`;
+    const tintStyleClass = status !== "available" && tintClass ? styles[tintClass] : "";
+    const className = `${styles.slot} ${getSlotClass(status)} ${tintStyleClass}`;
 
     if (status !== "available") {
       return <div className={className}>{content}</div>;
@@ -300,10 +351,10 @@ export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
 
                   const ymd = toYMD(year, monthIdx, day);
                   const slots = availMap.get(ymd);
-                  const morning: SlotAvailabilityStatus =
-                    slots?.morning ?? "available";
-                  const afternoon: SlotAvailabilityStatus =
-                    slots?.afternoon ?? "available";
+                  const morning: SlotRenderInfo =
+                    slots?.morning ?? { status: "available", tintClass: "" };
+                  const afternoon: SlotRenderInfo =
+                    slots?.afternoon ?? { status: "available", tintClass: "" };
                   const isToday =
                     year === today.getFullYear() &&
                     monthIdx === today.getMonth() &&
@@ -344,6 +395,8 @@ export function CalendarView({ brandId, onPickSlot }: CalendarViewProps) {
               Hoy
             </div>
           </div>
+
+          {brandName && <div className={styles.brandTag}>Marca: {brandName}</div>}
         </div>
       )}
     </section>

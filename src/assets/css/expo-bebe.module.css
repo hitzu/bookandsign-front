@@ -622,9 +622,40 @@
   background: var(--oc-bg);
   border-color: var(--oc-bg-deep);
 }
+/* Brand-specific tints for occupied slots — same "Ocupado" semantics, just a
+   distinguishable shade of red per brandId so staff can recognize patterns. */
+.slotOcupBrand1 {
+  background: #f6e2df;
+  border-color: #e3bcb6;
+}
+.slotOcupBrand2 {
+  background: #f1d3ce;
+  border-color: #dca59d;
+}
+.slotOcupBrand3 {
+  background: #ecc7c1;
+  border-color: #d2928a;
+}
+.slotOcupBrand4 {
+  background: #e6b6ae;
+  border-color: #c47b71;
+}
+.slotOcupBrandDefault {
+  background: var(--oc-bg);
+  border-color: var(--oc-bg-deep);
+}
+
 .legendDotToday {
   background: transparent;
   border: 2px solid var(--eb-lavender-d);
+}
+
+.brandTag {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--eb-ink-faint);
+  letter-spacing: 0.04em;
 }
 
 /* ── Services section heading ─────────────────────────────────────────────── */
