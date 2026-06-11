@@ -47,6 +47,17 @@ export const ReservationExtrasSection = ({
                         <div className={styles.itemPrice}>
                           {formatMoney(it.basePriceSnapshot ?? 0)}
                         </div>
+                        {it.promotion && it.promotion.value > 0 && (
+                          <div className={styles.itemPrice}>
+                            -{" "}
+                            {formatMoney(
+                              ((it.extra?.price ?? 0) *
+                                qty *
+                                it.promotion.value) /
+                                100,
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </li>

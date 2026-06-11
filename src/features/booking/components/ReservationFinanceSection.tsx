@@ -1,18 +1,16 @@
 import { Col, Row } from "react-bootstrap";
 import styles from "@assets/css/contract-public.module.css";
-import { Contract, ContractExtra, Payment } from "../../../interfaces";
+import { Contract, Payment } from "../../../interfaces";
 import { translatePaymentMethod } from "../../../shared/constants/paymentMethods";
 import { formatLongSpanishDate } from "@common/dates";
 import { useMemo } from "react";
 
 export const ReservationFinanceSection = ({
   contract,
-  extras,
   payments,
   paidAmount,
 }: {
   contract: Contract;
-  extras?: ContractExtra[];
   payments: Payment[];
   paidAmount: number;
 }) => {
@@ -54,15 +52,6 @@ export const ReservationFinanceSection = ({
     return paymentsSorted.reduce((sum, p) => sum + (p?.amount ?? 0), 0);
   }, [paidAmount, paymentsSorted]);
 
-  const extrasTotal = useMemo(
-    () =>
-      (extras ?? []).reduce(
-        (sum, it) => sum + (it?.basePriceSnapshot ?? 0),
-        0,
-      ),
-    [extras],
-  );
-
   return (
     <Row className={`mb-4 ${styles["center-information-content"]}`}>
       <Col xs={12} md={10}>
@@ -78,15 +67,6 @@ export const ReservationFinanceSection = ({
                 {formatMoney(contract.subtotal)}
               </span>
             </div>
-
-            {extras && extras.length > 0 && (
-              <div className={styles.financeRow}>
-                <span>Extras</span>
-                <span className={styles.financeValue}>
-                  {formatMoney(extrasTotal)}
-                </span>
-              </div>
-            )}
 
             <div className={styles.financeRow}>
               <span>Descuentos</span>

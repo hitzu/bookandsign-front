@@ -90,6 +90,7 @@ const ReservationPublicPage = ({ token }: Props) => {
               status: "reserved",
             },
           },
+          /*
           {
             id: 0,
             purpose: "halfway_date",
@@ -105,6 +106,7 @@ const ReservationPublicPage = ({ token }: Props) => {
               status: "reserved",
             },
           },
+          */
           ...(res.contractSlots ?? []),
         ];
         setSlots(slotsToShow);
@@ -212,7 +214,6 @@ const ReservationPublicPage = ({ token }: Props) => {
                 <ReservationExtrasSection items={extraItems} />
                 <ReservationFinanceSection
                   contract={data.contract}
-                  extras={extraItems}
                   payments={data.payments ?? []}
                   paidAmount={data.paidAmount ?? 0}
                 />
