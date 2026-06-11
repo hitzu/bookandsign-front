@@ -5,7 +5,11 @@ import { Container, Row, Col } from "react-bootstrap";
 import logoDark from "@assets/images/logo-experience-black.png";
 import styles from "@assets/css/contract-public.module.css";
 import { getContractByToken } from "../../../api/services/contractService";
-import { getPublicTerms } from "../../../api/services/termsService";
+import {
+  getPublicBrandTerms,
+  getPublicTerms,
+  getTerms,
+} from "../../../api/services/termsService";
 import {
   ContractSlot,
   GetContractByIdResponse,
@@ -43,7 +47,11 @@ const ReservationPublicPage = ({ token }: Props) => {
   const [data, setData] = useState<GetContractByIdResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [slots, setSlots] = useState<ContractSlot[]>([]);
-  const [terms, setTerms] = useState<GetTermsResponse[]>([]);
+  const [globalTerms, setGlobalTerms] = useState<GetTermsResponse[]>([]);
+  const [brandTerms, setBrandTerms] = useState<GetTermsResponse[]>([]);
+  const [fetchedPackageTerms, setFetchedPackageTerms] = useState<
+    GetTermsResponse[]
+  >([]);
   const [notes, setNotes] = useState<Note[]>([]);
 
   type SectionId = "resume" | "prep_bride" | "prep_social" | "terms";
@@ -117,22 +125,28 @@ const ReservationPublicPage = ({ token }: Props) => {
         try {
           const notes = await getPublicNotes(data?.contract?.id, "contract");
           setNotes([...notes]);
-          if (
-            data?.packages &&
-            data?.packages.length > 0 &&
-            data?.packages[0].package.id
-          ) {
-            const promises = data?.packages.map((currentPackage) =>
-              getPublicTerms({
-                targetId: currentPackage.package.id,
-                scope: "package",
-              }),
-            );
-            const packageTerms = await Promise.all(promises);
-            setTerms(packageTerms.flat());
-          } else {
-            setTerms([]);
-          }
+          const rawBrandId = router.query.brandId ?? router.query.brand;
+          const pathBrandId = Number(
+            Array.isArray(rawBrandId) ? rawBrandId[0] : rawBrandId,
+          );
+          const brandId =
+            pathBrandId > 0 ? pathBrandId : data.packages[0]?.package?.brandId;
+
+          const packagePromises = data.packages.map((currentPackage) =>
+            getPublicTerms({
+              targetId: currentPackage.package.id,
+              scope: "package",
+            }),
+          );
+          const [globalResult, brandResult, packageResults] = await Promise.all([
+            getTerms({ termScope: "global" }).catch(() => []),
+            brandId ? getPublicBrandTerms(brandId) : Promise.resolve([]),
+            Promise.all(packagePromises),
+          ]);
+
+          setGlobalTerms(globalResult);
+          setBrandTerms(brandResult);
+          setFetchedPackageTerms(packageResults.flat());
         } catch (error) {
           console.error("Error loading terms and notes:", error);
         }
@@ -141,7 +155,7 @@ const ReservationPublicPage = ({ token }: Props) => {
     } catch (error) {
       console.error("Error loading notes:", error);
     }
-  }, [data?.contract]);
+  }, [data?.contract, data?.packages, router.query.brand, router.query.brandId]);
 
   const items = data?.packages ?? [];
   const extraItems = data?.extras ?? [];
@@ -160,6 +174,10 @@ const ReservationPublicPage = ({ token }: Props) => {
 
   const packageTerms = useMemo((): GetTermsResponse[] => {
     const dedup = new Map<number, GetTermsResponse>();
+    for (const term of fetchedPackageTerms) {
+      if (term?.id == null) continue;
+      dedup.set(term.id, term);
+    }
     for (const it of items) {
       const terms = it?.package?.terms ?? [];
       for (const t of terms) {
@@ -168,7 +186,7 @@ const ReservationPublicPage = ({ token }: Props) => {
       }
     }
     return Array.from(dedup.values());
-  }, [items]);
+  }, [fetchedPackageTerms, items]);
 
   const showNav = Boolean(!loading && !error && data);
 
@@ -242,7 +260,11 @@ const ReservationPublicPage = ({ token }: Props) => {
           label: "Términos",
           enabled: true,
           render: () => (
-            <TermsAndConditions packageTerms={packageTerms} terms={terms} />
+            <TermsAndConditions
+              globalTerms={globalTerms}
+              brandTerms={brandTerms}
+              packageTerms={packageTerms}
+            />
           ),
         },
       ] satisfies Section[])

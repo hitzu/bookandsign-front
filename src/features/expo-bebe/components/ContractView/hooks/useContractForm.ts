@@ -484,7 +484,7 @@ export function useContractForm({
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const contractLink = contract?.token
-    ? `${origin}/pages/reserva/${contract.token}`
+    ? `${origin}/reserva/${contract.token}?brandId=${Number(selectedBrandId)}`
     : "";
 
   return {

@@ -191,3 +191,18 @@ export const getPublicTerms = async (params: {
     return [];
   }
 };
+
+export const getPublicBrandTerms = async (
+  brandId: number
+): Promise<GetTermsResponse[]> => {
+  try {
+    const response = await axiosInstanceWithoutToken.get<GetTermsResponse[]>(
+      "/terms/public/brand",
+      { params: { brandId } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching public brand terms:", error);
+    return [];
+  }
+};
