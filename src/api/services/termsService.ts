@@ -27,7 +27,7 @@ export const getTerms = async ({
     }
 
     const url = `/terms?${queryParams.toString()}`;
-    const response = await axiosInstanceWithToken.get(url);
+    const response = await axiosInstanceWithoutToken.get(url);
     return response.data;
   } catch (error) {
     console.error("Error fetching terms:", error);
@@ -39,7 +39,7 @@ export const getPackageTerms = async (
   packageId: number
 ): Promise<GetTermsResponse[]> => {
   try {
-    const response = await axiosInstanceWithToken.get(
+    const response = await axiosInstanceWithoutToken.get(
       `/terms/packages/${packageId}`
     );
     return response.data;
@@ -53,7 +53,7 @@ export const getBrandTerms = async (
   brandId: number
 ): Promise<GetTermsResponse[]> => {
   try {
-    const response = await axiosInstanceWithToken.get(
+    const response = await axiosInstanceWithoutToken.get(
       `/terms/brands/${brandId}`
     );
     return response.data;

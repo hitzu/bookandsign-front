@@ -115,14 +115,14 @@ export function ServiceDetail({
             <IconX />
           </button>
 
-          <button
+          {/* <button
             className={styles.detailToggleControls}
             onClick={toggleControls}
             aria-label={controlsVisible ? "Ocultar controles" : "Mostrar controles"}
             type="button"
           >
             {controlsVisible ? <IconEye /> : <IconEyeOff />}
-          </button>
+          </button> */}
 
           {items.length > 1 && (
             <>
@@ -149,7 +149,7 @@ export function ServiceDetail({
             </>
           )}
 
-          <div
+          {/* <div
             className={`${styles.detailThumbRail} ${
               !controlsVisible ? styles.detailControlHidden : ""
             }`}
@@ -195,7 +195,7 @@ export function ServiceDetail({
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
         </>
       )}
     </div>
