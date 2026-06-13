@@ -39,7 +39,10 @@ const TermsAndConditions = ({
                   {allTerms.map((t) => (
                     <li key={`${t.group}-${t.id}`} className={styles.termsItem}>
                       <div className={styles.termTitle}>{t.title}</div>
-                      <div className={styles.termContent}>{t.content}</div>
+                      <div
+                        className={styles.termContent}
+                        dangerouslySetInnerHTML={{ __html: t.content }}
+                      />
                     </li>
                   ))}
                 </ul>
