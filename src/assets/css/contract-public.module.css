@@ -547,10 +547,8 @@
 }
 
 .termsItem {
-  border: 1px solid var(--bp-brown-4);
-  background: var(--bp-bg);
-  border-radius: var(--bp-radius-hl);
-  padding: 0.9rem 0.9rem;
+  margin: 0;
+  padding: 0;
 }
 
 .termTitle {
@@ -563,7 +561,55 @@
   margin-top: 0.45rem;
   color: var(--bp-brown-2);
   line-height: 1.6;
-  white-space: pre-wrap;
+  white-space: normal;
+}
+
+.termContent > section,
+.termContent > div,
+.termContent > p {
+  border: 1px solid var(--bp-brown-4);
+  background: var(--bp-bg);
+  border-radius: var(--bp-radius-hl);
+  margin: 0 0 0.9rem;
+  padding: 0.9rem;
+}
+
+.termContent h1,
+.termContent h2,
+.termContent h3,
+.termContent h4,
+.termContent h5,
+.termContent h6 {
+  color: var(--bp-brown-1);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0 0 0.75rem;
+}
+
+.termContent > section > strong,
+.termContent > div > strong {
+  display: block;
+  color: var(--bp-brown-1);
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
+}
+
+.termContent p {
+  margin: 0 0 0.75rem;
+}
+
+.termContent ul,
+.termContent ol {
+  margin: 0 0 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.termContent > :last-child,
+.termContent > section > :last-child,
+.termContent > div > :last-child {
+  margin-bottom: 0;
 }
 
 .ctaSticky {
