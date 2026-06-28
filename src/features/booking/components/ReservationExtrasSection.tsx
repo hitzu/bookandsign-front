@@ -27,6 +27,7 @@ export const ReservationExtrasSection = ({
             <ul className={styles.list}>
               {items.map((it) => {
                 const qty = it.quantity ?? 1;
+                const hasDiscount = (it.discountPercentageSnapshot ?? 0) > 0;
 
                 return (
                   <li key={it.id} className={styles.listItem}>
@@ -38,26 +39,25 @@ export const ReservationExtrasSection = ({
                             <span className={styles.itemQty}>×{qty}</span>
                           ) : null}
                         </div>
-                        <div className={styles.itemName}>
-                          {it.promotion?.name ?? "—"}
-                        </div>
+                        {hasDiscount && (
+                          <div className={styles.itemName}>
+                            {it.discountPercentageSnapshot}% off
+                          </div>
+                        )}
                       </div>
 
                       <div style={{ flexShrink: 0, textAlign: "right" }}>
-                        <div className={styles.itemPrice}>
-                          {formatMoney(it.basePriceSnapshot ?? 0)}
-                        </div>
-                        {it.promotion && it.promotion.value > 0 && (
-                          <div className={styles.itemPrice}>
-                            -{" "}
-                            {formatMoney(
-                              ((it.extra?.price ?? 0) *
-                                qty *
-                                it.promotion.value) /
-                                100,
-                            )}
+                        {hasDiscount && (
+                          <div
+                            className={styles.itemPrice}
+                            style={{ textDecoration: "line-through", opacity: 0.6 }}
+                          >
+                            {formatMoney(it.basePriceSnapshot ?? 0)}
                           </div>
                         )}
+                        <div className={styles.itemPrice}>
+                          {formatMoney(it.finalPriceSnapshot ?? 0)}
+                        </div>
                       </div>
                     </div>
                   </li>

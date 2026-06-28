@@ -10,7 +10,6 @@ import {
   Contract,
   GenerateContractPayload,
   Slot,
-  Promotion,
   UserInfo,
   GetPackagesResponse,
   GetBrandsResponse,
@@ -28,7 +27,6 @@ import type { GetSlotResponse } from "../../interfaces/slots";
 import { Spanish } from "flatpickr/dist/l10n/es.js";
 import dynamic from "next/dynamic";
 import { getUsers } from "../../api/services/usersService";
-import { getPromotionsByBrandId } from "../../api/services/promotionsService";
 
 const Flatpickr = dynamic(
   () => import("react-flatpickr").then((mod: any) => mod.default as any),
@@ -44,7 +42,6 @@ type ClientDraft = {
 type PackageLineItem = {
   pkg: GetPackagesResponse;
   quantity: number;
-  promotion: Promotion | null;
 };
 
 type CurrencyCode = "MXN" | "USD";
@@ -88,7 +85,6 @@ const ContractsAddPage = () => {
   const [date, setDate] = useState<string>(() =>
     new Date().toISOString().slice(0, 10),
   );
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [selectedPeriod, setSelectedPeriod] = useState<
     "am_block" | "pm_block" | null
   >(null);
@@ -164,21 +160,6 @@ const ContractsAddPage = () => {
 
     loadPackages();
   }, [selectedBrandId]);
-
-  useEffect(() => {
-    const loadPromotions = async () => {
-      try {
-        const data = await getPromotionsByBrandId({
-          brandId: Number(selectedBrandId),
-        });
-        setPromotions(Array.isArray(data) ? data : []);
-      } catch (e) {
-        console.error("Error loading promotions:", e);
-        setPromotions([]);
-      }
-    };
-    loadPromotions();
-  }, []);
 
   useEffect(() => {
     const fetchSlot = async () => {
@@ -276,14 +257,8 @@ const ContractsAddPage = () => {
     return items.reduce((sum, it) => sum + it.pkg.basePrice * it.quantity, 0);
   }, [items]);
 
-  const discountTotal = useMemo(() => {
-    return items.reduce(
-      (sum, it) =>
-        sum +
-        (it.pkg.basePrice * it.quantity * (it.promotion?.value ?? 0)) / 100,
-      0,
-    );
-  }, [items]);
+  // Packages no longer carry a promotion discount in this flow.
+  const discountTotal = 0;
 
   const handleAddSelectedPackage = () => {
     if (isLocked) return;
@@ -300,13 +275,7 @@ const ContractsAddPage = () => {
         copy[idx] = { ...copy[idx], quantity: copy[idx].quantity + addQty };
         return copy;
       }
-      const promotionForThisPackage = promotions.find(
-        (p) => p.brandId === pkg.brandId,
-      );
-      return [
-        ...prev,
-        { pkg, quantity: addQty, promotion: promotionForThisPackage ?? null },
-      ];
+      return [...prev, { pkg, quantity: addQty }];
     });
 
     setQtyToAdd(1);
@@ -387,19 +356,9 @@ const ContractsAddPage = () => {
         clientName: clientDraft.leadName.trim(),
         clientPhone: clientDraft.leadPhone,
         clientEmail: clientDraft.leadEmail,
-        subtotal: subtotal,
-        discountTotal: discountTotal,
-        total: subtotal - discountTotal,
         packages: items.map((item) => ({
           packageId: item.pkg.id,
           quantity: item.quantity,
-          promotionId: item.promotion?.id,
-          basePriceSnapshot:
-            item.pkg.basePrice * item.quantity -
-            (item.pkg.basePrice *
-              item.quantity *
-              (item.promotion?.value ?? 0)) /
-              100,
         })),
       };
 
@@ -887,38 +846,6 @@ const ContractsAddPage = () => {
                             </span>
                           </div>
                         </div>
-
-                        {promotions.length > 0 &&
-                          items.length > 0 &&
-                          items.map((it) => (
-                            <div className={styles.financialRow}>
-                              <div className={styles.financialLabel}>
-                                {
-                                  promotions.find(
-                                    (p) => p.brandId === it.pkg.brandId,
-                                  )?.name
-                                }
-                              </div>
-                              <div className={styles.discountWrap}>
-                                <span className={styles.discountSubtext}>
-                                  -
-                                  {
-                                    formatCurrencyParts(discountTotal, "MXN")
-                                      .symbol
-                                  }{" "}
-                                  {
-                                    formatCurrencyParts(
-                                      (it.pkg.basePrice *
-                                        it.quantity *
-                                        (it.promotion?.value ?? 0)) /
-                                        100,
-                                      "MXN",
-                                    ).number
-                                  }
-                                </span>
-                              </div>
-                            </div>
-                          ))}
 
                         <div className={styles.financialRow}>
                           <div className={styles.financialLabel}>

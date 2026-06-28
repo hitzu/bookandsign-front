@@ -74,7 +74,9 @@ export function useContractForm({
   const [packages, setPackages] = useState<GetPackagesResponse[]>([]);
   const [extrasCatalog, setExtrasCatalog] = useState<Extra[]>([]);
   const [users, setUsers] = useState<UserInfo[]>([]);
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [activePromotion, setActivePromotion] = useState<Promotion | null>(
+    null,
+  );
   const [slotAvailability, setSlotAvailability] = useState<GetSlotResponse[]>(
     [],
   );
@@ -95,6 +97,8 @@ export function useContractForm({
   const [selectedPackageId, setSelectedPackageId] = useState<number | "">("");
   const [items, setItems] = useState<PackageLineItem[]>([]);
   const [selectedExtraId, setSelectedExtraId] = useState<number | "">("");
+  const [selectedExtraPackageClientRef, setSelectedExtraPackageClientRef] =
+    useState<string>("");
   const [extraItems, setExtraItems] = useState<ExtraLineItem[]>([]);
   const [anticipo, setAnticipo] = useState("500");
   const [formaPago, setFormaPago] = useState<PaymentMethod>("cash");
@@ -164,12 +168,18 @@ export function useContractForm({
       .catch(() => setExtrasCatalog([]));
   }, [selectedBrandId]);
 
-  // Load promotions when brand changes
+  // Load the active promotion when brand changes
   useEffect(() => {
-    if (!selectedBrandId) return;
-    getPromotionsByBrandId({ brandId: Number(selectedBrandId) })
-      .then((data) => setPromotions(Array.isArray(data) ? data : []))
-      .catch(() => setPromotions([]));
+    if (!selectedBrandId) {
+      setActivePromotion(null);
+      return;
+    }
+    getPromotionsByBrandId({
+      brandId: Number(selectedBrandId),
+      status: "active",
+    })
+      .then((data) => setActivePromotion(Array.isArray(data) ? data[0] ?? null : null))
+      .catch(() => setActivePromotion(null));
   }, [selectedBrandId]);
 
   // Load slots for selected date
@@ -227,6 +237,21 @@ export function useContractForm({
       .catch(() => setUsers([]));
   }, []);
 
+  // Auto-select the target package for extras when there's exactly one in the cart.
+  useEffect(() => {
+    if (items.length === 1) {
+      setSelectedExtraPackageClientRef(items[0].clientRef);
+      return;
+    }
+    if (items.length === 0) {
+      setSelectedExtraPackageClientRef("");
+      return;
+    }
+    setSelectedExtraPackageClientRef((current) =>
+      items.some((it) => it.clientRef === current) ? current : "",
+    );
+  }, [items]);
+
   const availabilityByPeriod = useMemo(() => {
     const norm = (p?: string | null) => {
       const s = (p ?? "").toLowerCase().trim();
@@ -246,21 +271,37 @@ export function useContractForm({
     return out;
   }, [slotAvailability]);
 
+  // Tier discount % (display-only hint) for the Nth extra (0-indexed) added to a given package row.
+  const getTierDiscount = (
+    packageClientRef: string | null,
+    positionIndex: number,
+  ): number => {
+    if (!packageClientRef || !activePromotion) return 0;
+    const pkgLine = items.find((it) => it.clientRef === packageClientRef);
+    if (!pkgLine) return 0;
+    const promoPackage = activePromotion.packages?.find(
+      (p) => p.packageId === pkgLine.pkg.id,
+    );
+    return promoPackage?.tiers[positionIndex]?.discountPercentage ?? 0;
+  };
+
   const extrasSubtotal = useMemo(
-    () =>
-      extraItems.reduce((s, it) => s + it.extra.price * it.quantity, 0),
+    () => extraItems.reduce((s, it) => s + it.extra.price * it.quantity, 0),
     [extraItems],
   );
-  const extrasDiscountTotal = useMemo(
-    () =>
-      extraItems.reduce(
-        (s, it) =>
-          s +
-          (it.extra.price * it.quantity * (it.promotion?.value ?? 0)) / 100,
-        0,
-      ),
-    [extraItems],
-  );
+  const extrasDiscountTotal = useMemo(() => {
+    const seenByPackage: Record<string, number> = {};
+    return extraItems.reduce((s, it) => {
+      const key = it.packageClientRef ?? "";
+      const positionIndex = seenByPackage[key] ?? 0;
+      seenByPackage[key] = positionIndex + 1;
+      const discountPercentage = getTierDiscount(
+        it.packageClientRef,
+        positionIndex,
+      );
+      return s + (it.extra.price * it.quantity * discountPercentage) / 100;
+    }, 0);
+  }, [extraItems, activePromotion, items]);
   const subtotal = useMemo(
     () =>
       items.reduce((s, it) => s + it.pkg.basePrice * it.quantity, 0) +
@@ -274,16 +315,20 @@ export function useContractForm({
       "",
     [brands, lockedBrandName, selectedBrandId]
   );
-  const discountTotal = useMemo(
+  const packagesDiscountTotal = useMemo(
     () =>
-      items.reduce(
-        (s, it) =>
+      items.reduce((s, it) => {
+        if (!activePromotion || activePromotion.brandId !== it.pkg.brandId) {
+          return s;
+        }
+        return (
           s +
-          (it.pkg.basePrice * it.quantity * (it.promotion?.value ?? 0)) / 100,
-        0,
-      ) + extrasDiscountTotal,
-    [items, extrasDiscountTotal],
+          (it.pkg.basePrice * it.quantity * activePromotion.value) / 100
+        );
+      }, 0),
+    [items, activePromotion],
   );
+  const discountTotal = packagesDiscountTotal + extrasDiscountTotal;
   const anticipoNum = Math.max(
     0,
     Number((anticipo || "0").replace(/[^\d.]/g, "")) || 0,
@@ -301,8 +346,7 @@ export function useContractForm({
         copy[idx] = { ...copy[idx], quantity: copy[idx].quantity + 1 };
         return copy;
       }
-      const promo = promotions.find((p) => p.brandId === pkg.brandId) ?? null;
-      return [...prev, { pkg, quantity: 1, promotion: promo }];
+      return [...prev, { pkg, quantity: 1, clientRef: `pkg-${pkg.id}` }];
     });
     setSelectedPackageId("");
   };
@@ -311,6 +355,7 @@ export function useContractForm({
     if (isLocked || !selectedExtraId) return;
     const extra = extrasCatalog.find((e) => e.id === Number(selectedExtraId));
     if (!extra) return;
+    const packageClientRef = selectedExtraPackageClientRef || null;
     setExtraItems((prev) => {
       const idx = prev.findIndex((x) => x.extra.id === extra.id);
       if (idx >= 0) {
@@ -318,9 +363,7 @@ export function useContractForm({
         copy[idx] = { ...copy[idx], quantity: copy[idx].quantity + 1 };
         return copy;
       }
-      const promo =
-        promotions.find((p) => p.brandId === extra.brandId) ?? null;
-      return [...prev, { extra, quantity: 1, promotion: promo }];
+      return [...prev, { extra, quantity: 1, packageClientRef }];
     });
     setSelectedExtraId("");
   };
@@ -409,24 +452,15 @@ export function useContractForm({
         clientName: nombre.trim(),
         clientPhone: normalizedPhone || null,
         clientEmail: normalizedEmail || null,
-        subtotal,
-        discountTotal,
-        total: subtotal - discountTotal,
         packages: items.map((it) => ({
           packageId: it.pkg.id,
           quantity: it.quantity,
-          promotionId: it.promotion?.id,
-          basePriceSnapshot:
-            it.pkg.basePrice * it.quantity -
-            (it.pkg.basePrice * it.quantity * (it.promotion?.value ?? 0)) / 100,
+          clientRef: it.clientRef,
         })),
         extras: extraItems.map((it) => ({
           extraId: it.extra.id,
           quantity: it.quantity,
-          promotionId: it.promotion?.id,
-          basePriceSnapshot:
-            it.extra.price * it.quantity -
-            (it.extra.price * it.quantity * (it.promotion?.value ?? 0)) / 100,
+          packageClientRef: it.packageClientRef ?? undefined,
         })),
       };
 
@@ -474,6 +508,7 @@ export function useContractForm({
     setSelectedPackageId("");
     setItems([]);
     setSelectedExtraId("");
+    setSelectedExtraPackageClientRef("");
     setExtraItems([]);
     setAnticipo(String(requiredMinAmountHoldSlot));
     setFormaPago("cash");
@@ -513,9 +548,13 @@ export function useContractForm({
     selectedPackageId,
     setSelectedPackageId,
     items,
+    activePromotion,
     selectedExtraId,
     setSelectedExtraId,
+    selectedExtraPackageClientRef,
+    setSelectedExtraPackageClientRef,
     extraItems,
+    getTierDiscount,
     anticipo,
     setAnticipo,
     formaPago,

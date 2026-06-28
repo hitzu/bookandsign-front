@@ -49,36 +49,37 @@ export const ReservationServicesSection = ({
                   const pkg = it.package;
                   const qty = it.quantity ?? 1;
 
+                  const hasDiscount = (it.discountPercentageSnapshot ?? 0) > 0;
+
                   return (
                     <li key={it.id} className={styles.listItem}>
                       <div className={styles.itemRow}>
                         <div style={{ minWidth: 0 }}>
                           <div className={styles.itemName}>
-                            {pkg?.name ?? "Paquete"}
+                            {it.nameSnapshot ?? pkg?.name ?? "Paquete"}
                             {qty > 1 ? (
                               <span className={styles.itemQty}>×{qty}</span>
                             ) : null}
                           </div>
-                          <div className={styles.itemName}>
-                            {it.promotion?.name ?? "—"}
-                          </div>
+                          {hasDiscount && (
+                            <div className={styles.itemName}>
+                              {it.discountPercentageSnapshot}% off
+                            </div>
+                          )}
                         </div>
 
                         <div style={{ flexShrink: 0, textAlign: "right" }}>
-                          <div className={styles.itemPrice}>
-                            {formatMoney((it.package?.basePrice ?? 0) * qty)}
-                          </div>
-                          {it.promotion && it.promotion.value > 0 && (
-                            <div className={styles.itemPrice}>
-                              -{" "}
-                              {formatMoney(
-                                (it.package.basePrice *
-                                  qty *
-                                  it.promotion.value) /
-                                  100
-                              )}
+                          {hasDiscount && (
+                            <div
+                              className={styles.itemPrice}
+                              style={{ textDecoration: "line-through", opacity: 0.6 }}
+                            >
+                              {formatMoney(it.basePriceSnapshot ?? 0)}
                             </div>
                           )}
+                          <div className={styles.itemPrice}>
+                            {formatMoney(it.finalPriceSnapshot ?? 0)}
+                          </div>
                         </div>
                       </div>
 

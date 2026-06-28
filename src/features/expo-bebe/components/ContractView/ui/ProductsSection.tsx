@@ -14,6 +14,7 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
     selectedPackageId,
     setSelectedPackageId,
     items,
+    activePromotion,
     isLocked,
     handleAgregar,
     incItem,
@@ -57,7 +58,11 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
         <div className={styles.cfEmptyState}>Aún no has agregado paquetes</div>
       ) : (
         <div className={styles.cfProductList}>
-          {items.map((it, i) => (
+          {items.map((it, i) => {
+            const hasPackageDiscount =
+              !!activePromotion && activePromotion.brandId === it.pkg.brandId;
+
+            return (
             <div key={it.pkg.id} className={styles.cfProductItem}>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <span className={styles.cfProductNum}>
@@ -71,6 +76,12 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
                       <span style={{ fontWeight: 400, opacity: 0.7 }}>
                         {" "}
                         ({it.quantity}×)
+                      </span>
+                    )}
+                    {hasPackageDiscount && (
+                      <span style={{ fontWeight: 600, color: "#1a7f37" }}>
+                        {" "}
+                        ({activePromotion.value}% off)
                       </span>
                     )}
                   </div>
@@ -104,7 +115,8 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>

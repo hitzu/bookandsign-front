@@ -40,14 +40,20 @@ const PromotionsList = () => {
         enableColumnFilter: false,
       },
       {
-        header: "Tipo",
+        header: "Estado",
         enableColumnFilter: false,
-        accessorKey: "type",
+        accessorKey: "status",
       },
       {
-        header: "Valor",
+        header: "Descuento paquetes",
         enableColumnFilter: false,
-        accessorKey: "value",
+        accessorFn: (row: Promotion) =>
+          row.type === "percentage" ? `${row.value}%` : `$${row.value}`,
+      },
+      {
+        header: "Paquetes con tiers",
+        enableColumnFilter: false,
+        accessorFn: (row: Promotion) => row.packages?.length ?? 0,
       },
     ],
     []

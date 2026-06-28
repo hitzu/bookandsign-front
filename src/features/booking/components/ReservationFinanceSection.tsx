@@ -123,18 +123,27 @@ export const ReservationFinanceSection = ({
               </span>
             </div>
 
-            <div className={styles.financeRow}>
-              <span>Restante por pagar</span>
-              <span
-                className={[
-                  styles.financeValue,
-                  styles.financeValuePaymentPending,
-                ].join(" ")}
-              >
-                {formatMoney(contract.total - paidAmountFromPayments)}
-                <span className={styles.moveValueText}> + traslado</span>
-              </span>
-            </div>
+            {contract.total - paidAmountFromPayments <= 0 ? (
+              <div className={styles.financeRow}>
+                <span>Estado</span>
+                <span className={[styles.badge, styles.badgeSuccess].join(" ")}>
+                  ✓ Pagado en su totalidad
+                </span>
+              </div>
+            ) : (
+              <div className={styles.financeRow}>
+                <span>Restante por pagar</span>
+                <span
+                  className={[
+                    styles.financeValue,
+                    styles.financeValuePaymentPending,
+                  ].join(" ")}
+                >
+                  {formatMoney(contract.total - paidAmountFromPayments)}
+                  <span className={styles.moveValueText}> + traslado</span>
+                </span>
+              </div>
+            )}
           </div>
         </section>
       </Col>

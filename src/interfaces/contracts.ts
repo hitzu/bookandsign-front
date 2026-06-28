@@ -23,10 +23,11 @@ export interface ContractPackages {
   id: number;
   contractId: number;
   packageId: number;
-  promotionId: number | null;
   quantity: number;
+  nameSnapshot: string;
   basePriceSnapshot: number;
-  source: string;
+  discountPercentageSnapshot: number;
+  finalPriceSnapshot: number;
   package: Package;
   promotion: Promotion | null;
 }
@@ -35,9 +36,12 @@ export interface ContractExtra {
   id: number;
   contractId: number;
   extraId: number;
+  contractPackageId: number;
   quantity: number;
   nameSnapshot: string;
   basePriceSnapshot: number;
+  discountPercentageSnapshot: number;
+  finalPriceSnapshot: number;
   extra: Extra;
   promotion: Promotion | null;
 }
@@ -77,13 +81,13 @@ export interface GenerateContractItem {
   packageId: number;
   quantity: number;
   source?: string;
+  clientRef?: string;
 }
 
 export interface GenerateContractExtra {
   extraId: number;
   quantity: number;
-  promotionId?: number;
-  basePriceSnapshot: number;
+  packageClientRef?: string;
 }
 
 export interface GenerateContractPayload {
@@ -94,9 +98,6 @@ export interface GenerateContractPayload {
   clientName: string;
   clientPhone: string | null;
   clientEmail: string | null;
-  subtotal: number;
-  discountTotal: number;
-  total: number;
   packages: GenerateContractItem[];
   extras?: GenerateContractExtra[];
 }
