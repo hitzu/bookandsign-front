@@ -1,6 +1,8 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "@assets/css/fotobooth.module.css";
+import { EventPageTheme } from "../../../../types/eventPageTheme";
+import { buildThemeVars } from "../../../../utils/themeVars";
 
 export interface GiftModalProps {
   visible: boolean;
@@ -8,6 +10,7 @@ export interface GiftModalProps {
   onShare: () => void;
   handle?: string;
   disclaimer?: string;
+  theme?: EventPageTheme;
 }
 
 const DEFAULT_HANDLE = "@brillipoint";
@@ -23,6 +26,7 @@ const GiftModal = ({
   onShare,
   handle = DEFAULT_HANDLE,
   disclaimer = DEFAULT_DISCLAIMER,
+  theme,
 }: GiftModalProps) => {
   const modalRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -97,6 +101,7 @@ const GiftModal = ({
   return createPortal(
     <div
       className={styles.giftModalOverlay}
+      style={theme ? buildThemeVars(theme) : undefined}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}

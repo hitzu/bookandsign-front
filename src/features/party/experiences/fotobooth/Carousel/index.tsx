@@ -123,6 +123,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
           setIsGiftModalOpen(false);
           void handleShare();
         }}
+        theme={props.theme}
       />
 
       {isShareFallbackOpen && shareFallbackPreviewUrl && (

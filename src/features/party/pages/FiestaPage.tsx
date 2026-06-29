@@ -17,11 +17,15 @@ import {
 import styles from "@assets/css/fotobooth-overview.module.css";
 import {
   getEventGalleryV2,
+  getEventTheme,
   getPublicPhotosByEventToken,
 } from "../../../api/services/partyPublicService";
 import { formatSplashDate } from "../utils/formatSplashDate";
 import { isExpiredEventStatus } from "../utils/eventStatus";
 import { preloadImages } from "../utils/preloadImages";
+import { tokensToEventPageTheme } from "../utils/tokensToEventPageTheme";
+import { buildThemeVars } from "../utils/themeVars";
+import { EventPageTheme } from "../types/eventPageTheme";
 import {
   appendSourceToPath,
   readSourceFromRouter,
@@ -31,7 +35,6 @@ import { EventExpiredPage } from "./EventExpiredPage";
 
 const SPLASH_DURATION_MS = 3200;
 const CRITICAL_COVER_COUNT = 10;
-const READY_REVEAL_MS = 1800;
 
 const getQueryValue = (value?: string | string[]) =>
   Array.isArray(value) ? value[0] : value;
@@ -64,43 +67,21 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
   const [isEmpty, setIsEmpty] = useState(false);
   const [error, setError] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
-  const [isSplashReady, setIsSplashReady] = useState(false);
   const [splashStep, setSplashStep] = useState("Preparando la experiencia");
   const [allPhotos, setAllPhotos] = useState<EventPhoto[]>([]);
   const [allPhotosLoading, setAllPhotosLoading] = useState(false);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [resolvedTheme, setResolvedTheme] = useState<EventPageTheme | null>(
+    null,
+  );
+  const [themeReady, setThemeReady] = useState(false);
 
-  const splashDone = useRef(false);
-  const assetsReady = useRef(false);
-  const readyRevealDone = useRef(false);
   const hasTrackedGalleryOpened = useRef(false);
   const source = readSourceFromRouter(router);
   const resolvedEventToken =
     eventToken ||
     getQueryValue(router.query.eventToken) ||
     getFiestaTokenFromPath(router.asPath);
-
-  const finishSplashIfReady = () => {
-    if (splashDone.current && assetsReady.current && readyRevealDone.current) {
-      setShowSplash(false);
-    }
-  };
-
-  const completeSplashLoading = (showReadyState: boolean) => {
-    assetsReady.current = true;
-
-    if (!showReadyState) {
-      readyRevealDone.current = true;
-      finishSplashIfReady();
-      return;
-    }
-
-    setIsSplashReady(true);
-    window.setTimeout(() => {
-      readyRevealDone.current = true;
-      finishSplashIfReady();
-    }, READY_REVEAL_MS);
-  };
 
   const preloadGalleryCovers = async (
     gallerySessions: GallerySessionItem[],
@@ -135,7 +116,6 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
         setIsExpired(true);
         setError(false);
         setLoading(false);
-        completeSplashLoading(true);
         return;
       }
 
@@ -147,17 +127,32 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
       setSplashStep("Acomodando la galería");
       await preloadGalleryCovers(data.sessions);
       setLoading(false);
-      completeSplashLoading(true);
     } catch {
       setError(true);
       setLoading(false);
-      completeSplashLoading(false);
+    }
+  };
+
+  // Theme travels in its own request, separate from the gallery (different
+  // cache lifecycle — the gallery keeps loading in the background after the
+  // splash ends, the splash only waits on the theme).
+  const fetchTheme = async () => {
+    if (!resolvedEventToken) return;
+
+    try {
+      const { eventTheme } = await getEventTheme(resolvedEventToken);
+      setResolvedTheme(tokensToEventPageTheme(eventTheme.tokens));
+    } catch {
+      setResolvedTheme(null);
+    } finally {
+      setThemeReady(true);
     }
   };
 
   useEffect(() => {
     if (!resolvedEventToken) return;
     fetchGallery();
+    fetchTheme();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resolvedEventToken]);
 
@@ -168,11 +163,6 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEmpty]);
-
-  const handleSplashComplete = () => {
-    splashDone.current = true;
-    finishSplashIfReady();
-  };
 
   const handleShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -266,9 +256,10 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     });
   }, [resolvedEventToken, router.isReady, source]);
 
-  const { Splash, Overview, theme, pageBackground } = getExperience(
+  const { Splash, Overview, theme: fallbackTheme } = getExperience(
     eventData?.eventTheme?.key,
   );
+  const theme = resolvedTheme ?? fallbackTheme;
   const splashDate = formatSplashDate(eventData?.date);
 
   if (showSplash) {
@@ -276,17 +267,22 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
       <Splash
         honoreesNames={eventData?.honoreesNames}
         date={splashDate}
-        isReady={isSplashReady}
+        isReady={themeReady}
         stepLabel={splashStep}
-        onComplete={handleSplashComplete}
+        onComplete={() => setShowSplash(false)}
         duration={SPLASH_DURATION_MS}
+        canFinish={themeReady}
+        theme={theme}
       />
     );
   }
 
   if (loading) {
     return (
-      <div className={styles.centerPage}>
+      <div
+        className={styles.centerPage}
+        style={theme ? buildThemeVars(theme) : undefined}
+      >
         <div className={styles.loaderOrb} />
         <p>Cargando galería del evento...</p>
       </div>
@@ -295,7 +291,10 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
 
   if (error) {
     return (
-      <div className={styles.centerPage}>
+      <div
+        className={styles.centerPage}
+        style={theme ? buildThemeVars(theme) : undefined}
+      >
         <p>No pudimos cargar la galería</p>
         <button className={styles.retryBtn} onClick={fetchGallery}>
           Reintentar
@@ -306,7 +305,10 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
 
   if (!resolvedEventToken) {
     return (
-      <div className={styles.centerPage}>
+      <div
+        className={styles.centerPage}
+        style={theme ? buildThemeVars(theme) : undefined}
+      >
         <div className={styles.loaderOrb} />
         <p>Cargando galería del evento...</p>
       </div>
@@ -364,7 +366,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
         nombreFestejado={eventData?.honoreesNames ?? ""}
         eventToken={resolvedEventToken}
         showNavigationHints
-        backdropColor={pageBackground}
+        backdropColor={theme.pageBackground}
       />
     </>
   );

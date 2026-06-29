@@ -22,6 +22,18 @@ interface SocialMediaCTAProps {
   onClose?: () => void;
 }
 
+const socialBrandClass: Record<SocialPlatform, string> = {
+  instagram: "socialBrandIg",
+  tiktok: "socialBrandTt",
+  facebook: "socialBrandFb",
+};
+
+const pageSocialBrandClass: Record<SocialPlatform, string> = {
+  instagram: "pageSocialBtnIg",
+  tiktok: "pageSocialBtnTt",
+  facebook: "pageSocialBtnFb",
+};
+
 const COPY: Record<
   Context,
   { titulo: string; subtitulo: string; waLabel: string }
@@ -167,6 +179,12 @@ export const SocialMediaCTA = ({
   }, [phone, context, nombreFestejado]);
 
   const { titulo, subtitulo, waLabel } = COPY[context];
+  const getSocialClassName = (baseClassName: string, platform: SocialPlatform) =>
+    `${baseClassName} ${styles[socialBrandClass[platform]]}`;
+  const getPageSocialClassName = (
+    baseClassName: string,
+    platform: SocialPlatform,
+  ) => `${baseClassName} ${styles[pageSocialBrandClass[platform]]}`;
 
   // ── Page variant ─────────────────────────────────────────────────────────────
   if (variant === "page") {
@@ -194,7 +212,10 @@ export const SocialMediaCTA = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => onSocialClick?.("instagram")}
-            className={`${styles.pageSocialBtn} ${styles.pageSocialBtnIg}`}
+            className={getPageSocialClassName(
+              styles.pageSocialBtn,
+              "instagram",
+            )}
           >
             <IconIG /> Instagram
           </a>
@@ -203,7 +224,7 @@ export const SocialMediaCTA = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => onSocialClick?.("tiktok")}
-            className={`${styles.pageSocialBtn} ${styles.pageSocialBtnTt}`}
+            className={getPageSocialClassName(styles.pageSocialBtn, "tiktok")}
           >
             <IconTT /> TikTok
           </a>
@@ -212,7 +233,10 @@ export const SocialMediaCTA = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => onSocialClick?.("facebook")}
-            className={`${styles.pageSocialBtn} ${styles.pageSocialBtnFb}`}
+            className={getPageSocialClassName(
+              styles.pageSocialBtn,
+              "facebook",
+            )}
           >
             <IconFB /> Facebook
           </a>
@@ -257,7 +281,7 @@ export const SocialMediaCTA = ({
             rel="noopener noreferrer"
             onClick={() => onSocialClick?.("instagram")}
             aria-label="Instagram"
-            className={styles.sheetSocialBtn}
+            className={getSocialClassName(styles.sheetSocialBtn, "instagram")}
           >
             <IconIG />
           </a>
@@ -267,7 +291,7 @@ export const SocialMediaCTA = ({
             rel="noopener noreferrer"
             onClick={() => onSocialClick?.("tiktok")}
             aria-label="TikTok"
-            className={styles.sheetSocialBtn}
+            className={getSocialClassName(styles.sheetSocialBtn, "tiktok")}
           >
             <IconTT />
           </a>
@@ -277,7 +301,7 @@ export const SocialMediaCTA = ({
             rel="noopener noreferrer"
             onClick={() => onSocialClick?.("facebook")}
             aria-label="Facebook"
-            className={styles.sheetSocialBtn}
+            className={getSocialClassName(styles.sheetSocialBtn, "facebook")}
           >
             <IconFB />
           </a>
@@ -311,7 +335,7 @@ export const SocialMediaCTA = ({
               rel="noopener noreferrer"
               onClick={() => onSocialClick?.("instagram")}
               aria-label="Instagram"
-              className={styles.compactSocialBtn}
+              className={getSocialClassName(styles.compactSocialBtn, "instagram")}
             >
               <IconIG />
             </a>
@@ -321,7 +345,7 @@ export const SocialMediaCTA = ({
               rel="noopener noreferrer"
               onClick={() => onSocialClick?.("tiktok")}
               aria-label="TikTok"
-              className={styles.compactSocialBtn}
+              className={getSocialClassName(styles.compactSocialBtn, "tiktok")}
             >
               <IconTT />
             </a>
@@ -331,7 +355,7 @@ export const SocialMediaCTA = ({
               rel="noopener noreferrer"
               onClick={() => onSocialClick?.("facebook")}
               aria-label="Facebook"
-              className={styles.compactSocialBtn}
+              className={getSocialClassName(styles.compactSocialBtn, "facebook")}
             >
               <IconFB />
             </a>
@@ -379,7 +403,7 @@ export const SocialMediaCTA = ({
           rel="noopener noreferrer"
           onClick={() => onSocialClick?.("instagram")}
           aria-label="Instagram"
-          className={styles.red}
+          className={getSocialClassName(styles.red, "instagram")}
         >
           <IconIG />
         </a>
@@ -389,7 +413,7 @@ export const SocialMediaCTA = ({
           rel="noopener noreferrer"
           onClick={() => onSocialClick?.("tiktok")}
           aria-label="TikTok"
-          className={styles.red}
+          className={getSocialClassName(styles.red, "tiktok")}
         >
           <IconTT />
         </a>
@@ -399,7 +423,7 @@ export const SocialMediaCTA = ({
           rel="noopener noreferrer"
           onClick={() => onSocialClick?.("facebook")}
           aria-label="Facebook"
-          className={styles.red}
+          className={getSocialClassName(styles.red, "facebook")}
         >
           <IconFB />
         </a>

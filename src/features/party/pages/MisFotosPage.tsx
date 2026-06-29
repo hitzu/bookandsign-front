@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { axiosInstanceWithoutToken } from "../../../api/config/axiosConfig";
@@ -9,29 +9,36 @@ import {
   SessionResponse,
 } from "../../../interfaces/eventGallery";
 import styles from "@assets/css/party-public.module.css";
-import { getEventGallerySessionV2 } from "../../../api/services/partyPublicService";
+import {
+  getEventGallerySessionV2,
+  getEventTheme,
+} from "../../../api/services/partyPublicService";
 import { buildSessionItems, getPhotoItems } from "../utils/buildSessionItems";
 import {
   isExpiredEventStatus,
   isExpiredSessionStatus,
 } from "../utils/eventStatus";
 import { formatSplashDate } from "../utils/formatSplashDate";
+import { tokensToEventPageTheme } from "../utils/tokensToEventPageTheme";
+import { buildThemeVars } from "../utils/themeVars";
+import { EventPageTheme } from "../types/eventPageTheme";
 import { SessionItem } from "../types/session";
 import { readSourceFromRouter } from "../utils/sourceTracking";
 import { EventExpiredPage } from "./EventExpiredPage";
 
 type PageState = "loading" | "ready" | "empty" | "error" | "expired";
 const SPLASH_DURATION_MS = 3200;
-const READY_REVEAL_MS = 1800;
 
 // ─── Empty states ────────────────────────────────────────────────────────────
 
 const EmptyStateEnCamino = ({
   eventData,
   sessionToken,
+  theme,
 }: {
   eventData: SessionEventData | null;
   sessionToken: string;
+  theme?: EventPageTheme;
 }) => {
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -48,7 +55,10 @@ const EmptyStateEnCamino = ({
   }, [sessionToken]);
 
   return (
-    <div className={styles.centerState}>
+    <div
+      className={styles.centerState}
+      style={theme ? buildThemeVars(theme) : undefined}
+    >
       <p className={styles.emptyTitle}>
         Tus fotos del evento de{" "}
         <strong>{eventData?.honoreesNames ?? "tu evento"}</strong> están en
@@ -63,11 +73,16 @@ const EmptyStateEnCamino = ({
 
 const EmptyStateError = ({
   eventData,
+  theme,
 }: {
   eventData: SessionEventData | null;
   sessionToken: string;
+  theme?: EventPageTheme;
 }) => (
-  <div className={styles.centerState}>
+  <div
+    className={styles.centerState}
+    style={theme ? buildThemeVars(theme) : undefined}
+  >
     <p className={styles.emptyTitle}>
       Estamos teniendo problemas de conexión en{" "}
       <strong>{eventData?.honoreesNames ?? "tu evento"}</strong> ✨
@@ -99,34 +114,28 @@ export default function MisFotosPage({
   const [photos, setPhotos] = useState<SessionPhoto[]>([]);
   const [eventData, setEventData] = useState<SessionEventData | null>(null);
   const [showSplash, setShowSplash] = useState(true);
-  const [isSplashReady, setIsSplashReady] = useState(false);
   const [splashStep, setSplashStep] = useState("Preparando la experiencia");
+  const [resolvedTheme, setResolvedTheme] = useState<EventPageTheme | null>(
+    null,
+  );
+  const [themeReady, setThemeReady] = useState(false);
 
-  const splashDone = useRef(false);
-  const assetsReady = useRef(false);
-  const readyRevealDone = useRef(false);
   const source = readSourceFromRouter(router);
 
-  const finishSplashIfReady = () => {
-    if (splashDone.current && assetsReady.current && readyRevealDone.current) {
-      setShowSplash(false);
+  // Theme travels in its own request, separate from the session photos. The
+  // eventToken is only known after the session resolves (no eventToken in
+  // the mis-fotos URL), so this is fired once fetchSession gets eventData.
+  // The splash waits only on this — the session/photos keep loading in the
+  // background and render their own loading state once the splash ends.
+  const fetchTheme = async (eventToken: string) => {
+    try {
+      const { eventTheme } = await getEventTheme(eventToken);
+      setResolvedTheme(tokensToEventPageTheme(eventTheme.tokens));
+    } catch {
+      setResolvedTheme(null);
+    } finally {
+      setThemeReady(true);
     }
-  };
-
-  const completeSplashLoading = (showReadyState: boolean) => {
-    assetsReady.current = true;
-
-    if (!showReadyState) {
-      readyRevealDone.current = true;
-      finishSplashIfReady();
-      return;
-    }
-
-    setIsSplashReady(true);
-    window.setTimeout(() => {
-      readyRevealDone.current = true;
-      finishSplashIfReady();
-    }, READY_REVEAL_MS);
   };
 
   const fetchSession = async () => {
@@ -135,6 +144,12 @@ export default function MisFotosPage({
       const session = await getEventGallerySessionV2(sessionToken);
       setEventData(session?.event ?? null);
 
+      if (session?.event?.eventToken) {
+        void fetchTheme(session.event.eventToken);
+      } else {
+        setThemeReady(true);
+      }
+
       if (
         isExpiredSessionStatus(session.status) ||
         isExpiredEventStatus(session.event?.status)
@@ -142,7 +157,6 @@ export default function MisFotosPage({
         setItems([]);
         setPhotos([]);
         setPageState("expired");
-        completeSplashLoading(true);
         return;
       }
 
@@ -160,7 +174,6 @@ export default function MisFotosPage({
         setItems([]);
         setPhotos([]);
         setPageState("empty");
-        completeSplashLoading(true);
         return;
       }
 
@@ -171,14 +184,13 @@ export default function MisFotosPage({
       );
       setPhotos(orderedPhotos);
       setPageState("ready");
-      completeSplashLoading(true);
     } catch (error) {
+      setThemeReady(true);
       console.error("[MisFotosPage] Failed to load session", {
         sessionToken,
         error,
       });
       setPageState("error");
-      completeSplashLoading(false);
     }
   };
 
@@ -189,14 +201,12 @@ export default function MisFotosPage({
     fetchSession();
   }, [sessionToken]);
 
-  const handleSplashComplete = () => {
-    splashDone.current = true;
-    finishSplashIfReady();
-  };
-
   // El eventType vendrá del backend cuando esté disponible.
   // Por ahora el factory devuelve siempre fotoBoothExperience.
-  const { Splash, Carousel, theme } = getExperience(eventData?.eventTheme?.key);
+  const { Splash, Carousel, theme: fallbackTheme } = getExperience(
+    eventData?.eventTheme?.key,
+  );
+  const theme = resolvedTheme ?? fallbackTheme;
   const splashDate = formatSplashDate(eventData?.date);
 
   if (showSplash) {
@@ -204,23 +214,44 @@ export default function MisFotosPage({
       <Splash
         honoreesNames={eventData?.honoreesNames}
         date={splashDate}
-        isReady={isSplashReady}
+        isReady={themeReady}
         stepLabel={splashStep}
-        onComplete={handleSplashComplete}
+        onComplete={() => setShowSplash(false)}
         duration={SPLASH_DURATION_MS}
+        canFinish={themeReady}
+        theme={theme}
       />
+    );
+  }
+
+  if (pageState === "loading") {
+    return (
+      <div
+        className={styles.centerState}
+        style={theme ? buildThemeVars(theme) : undefined}
+      >
+        <p className={styles.emptyTitle}>Cargando tus fotos...</p>
+      </div>
     );
   }
 
   if (pageState === "empty") {
     return (
-      <EmptyStateEnCamino eventData={eventData} sessionToken={sessionToken} />
+      <EmptyStateEnCamino
+        eventData={eventData}
+        sessionToken={sessionToken}
+        theme={theme}
+      />
     );
   }
 
   if (pageState === "error") {
     return (
-      <EmptyStateError eventData={eventData} sessionToken={sessionToken} />
+      <EmptyStateError
+        eventData={eventData}
+        sessionToken={sessionToken}
+        theme={theme}
+      />
     );
   }
 

@@ -3,6 +3,7 @@ import Image from "next/image";
 import logoExperience from "@assets/images/logo-experience-white.png";
 import styles from "@assets/css/fotobooth.module.css";
 import { SplashProps } from "../types";
+import { buildThemeVars } from "../../utils/themeVars";
 
 const CONFETTI_COLORS = [
   "#ec4899",
@@ -21,12 +22,15 @@ const FotoBoothSplash = ({
   stepLabel = "Preparando la experiencia",
   onComplete,
   duration = 3200,
+  canFinish = true,
+  theme,
 }: SplashProps) => {
   useEffect(() => {
+    if (!canFinish) return;
     const t = setTimeout(onComplete, duration);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [canFinish]);
 
   const confetti = useMemo(
     () =>
@@ -56,7 +60,10 @@ const FotoBoothSplash = ({
   );
 
   return (
-    <div className={styles.screen}>
+    <div
+      className={styles.screen}
+      style={theme ? buildThemeVars(theme) : undefined}
+    >
       <div className={styles.splashBg} />
       <div className={styles.splashBlob1} />
       <div className={styles.splashBlob2} />

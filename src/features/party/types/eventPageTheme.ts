@@ -12,4 +12,6 @@ export interface EventPageTheme {
   surfaceBorderColor?: string;
   surfaceShadow?: string;
   accentGlow?: string;
+  fontHeading?: string;
+  fontBody?: string;
 }

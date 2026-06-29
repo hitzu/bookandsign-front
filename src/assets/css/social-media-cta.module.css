@@ -74,7 +74,9 @@
   text-decoration: none;
   margin-bottom: 16px;
   box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .waBtn:hover {
@@ -108,7 +110,21 @@
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.socialBrandIg {
+  color: #c13584;
+}
+
+.socialBrandTt {
+  color: #111827;
+}
+
+.socialBrandFb {
+  color: #1d4ed8;
 }
 
 .red:hover {
@@ -145,7 +161,7 @@
 }
 
 .pageTitulo {
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   font-size: 22px;
   font-weight: 700;
   color: var(--ep-accent, #be185d);
@@ -172,7 +188,7 @@
   border-radius: 16px;
   background: linear-gradient(135deg, #16a34a, #22c55e);
   border: none;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: #fff;
@@ -187,7 +203,9 @@
   text-decoration: none;
 }
 
-.pageWaBtn:active { transform: scale(0.97); }
+.pageWaBtn:active {
+  transform: scale(0.97);
+}
 
 .pageSocialRow {
   display: flex;
@@ -201,7 +219,7 @@
   border-radius: 10px;
   padding: 0 16px;
   border: none;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -212,10 +230,29 @@
   text-decoration: none;
 }
 
-.pageSocialBtn:active { transform: scale(0.95); }
-.pageSocialBtnIg { background: linear-gradient(135deg, #f9a8d4, #c084fc); color: #be185d; }
-.pageSocialBtnTt { background: #f1f5f9; color: #1a0a12; }
-.pageSocialBtnFb { background: #dbeafe; color: #1d4ed8; }
+.pageSocialBtn:active {
+  transform: scale(0.95);
+}
+.pageSocialBtnIg {
+  background: #fce7f3;
+  color: #c13584;
+  border: 1px solid rgba(193, 53, 132, 0.18);
+  box-shadow: 0 4px 14px rgba(193, 53, 132, 0.1);
+}
+
+.pageSocialBtnTt {
+  background: #f8fafc;
+  color: #111827;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+.pageSocialBtnFb {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid rgba(29, 78, 216, 0.16);
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.1);
+}
 
 .pageTagline {
   font-size: 11px;
@@ -240,30 +277,32 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #fce7f3;
+  background: rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.12);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 12px;
-  color: #ec4899;
+  color: var(--ep-primary-btn-bg, #ec4899);
   transition: transform 0.15s;
 }
 
-.sheetCloseBtn:active { transform: scale(0.9); }
+.sheetCloseBtn:active {
+  transform: scale(0.9);
+}
 
 .sheetTitulo {
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
   font-size: 26px;
   font-weight: 700;
-  color: #be185d;
+  color: var(--ep-accent, #be185d);
   line-height: 1.1;
 }
 
 .sheetSubtitulo {
   font-size: 14px;
-  color: #f9a8d4;
+  color: var(--ep-muted-text, #f9a8d4);
   font-weight: 400;
   line-height: 1.4;
 }
@@ -278,7 +317,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 16px;
   font-weight: 700;
   color: white;
@@ -289,7 +328,9 @@
   text-decoration: none;
 }
 
-.sheetWaBtn:active { transform: scale(0.97); }
+.sheetWaBtn:active {
+  transform: scale(0.97);
+}
 
 .sheetSocialRow {
   display: flex;
@@ -302,18 +343,20 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #fce7f3;
-  border: none;
+  background: rgba(var(--ep-surface-bg-rgb, 252, 231, 243), 0.92);
+  border: 1px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: transform 0.15s;
-  color: #ec4899;
+  color: var(--ep-primary-btn-bg, #ec4899);
   text-decoration: none;
 }
 
-.sheetSocialBtn:active { transform: scale(0.9); }
+.sheetSocialBtn:active {
+  transform: scale(0.9);
+}
 
 /* ── Variant: compact (presencia discreta en sesión) ── */
 
@@ -324,9 +367,13 @@
   gap: 14px;
   padding: 14px 16px;
   border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(252, 231, 243, 0.92));
-  border: 1px solid rgba(236, 72, 153, 0.12);
-  box-shadow: 0 10px 24px rgba(236, 72, 153, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--ep-surface-bg-rgb, 255, 255, 255), 0.88),
+    rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.08)
+  );
+  border: 1px solid rgba(var(--ep-surface-border-rgb, 236, 72, 153), 0.2);
+  box-shadow: 0 10px 24px rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.08);
 }
 
 .compactCopy {
@@ -349,12 +396,12 @@
   font-weight: 800;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(190, 24, 93, 0.46);
+  color: rgba(var(--ep-accent-rgb, 190, 24, 93), 0.46);
 }
 
 .compactTitulo {
   margin: 0;
-  color: #9d174d;
+  color: var(--ep-accent, #9d174d);
   font-size: 14px;
   font-weight: 800;
   line-height: 1.25;
@@ -362,7 +409,7 @@
 
 .compactSubtitulo {
   margin: 0;
-  color: rgba(91, 33, 72, 0.64);
+  color: rgba(var(--ep-text-rgb, 91, 33, 72), 0.64);
   font-size: 12px;
   line-height: 1.4;
 }
@@ -377,7 +424,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-family: 'DM Sans', 'Public Sans', sans-serif;
+  font-family: "DM Sans", "Public Sans", sans-serif;
   font-size: 12px;
   font-weight: 800;
   color: #fff;
@@ -395,14 +442,13 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #fff;
-  border: 1px solid rgba(236, 72, 153, 0.14);
-  color: #ec4899;
+  background: rgba(var(--ep-surface-bg-rgb, 255, 255, 255), 0.96);
+  border: 1px solid transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.08);
+  box-shadow: 0 4px 14px rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.08);
 }
 
 @media (max-width: 480px) {

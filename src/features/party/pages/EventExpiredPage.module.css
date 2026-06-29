@@ -4,12 +4,7 @@
     max(28px, env(safe-area-inset-top, 28px))
     clamp(16px, 4vw, 32px)
     max(28px, env(safe-area-inset-bottom, 28px));
-  background:
-    var(
-      --ep-surface-bg,
-      linear-gradient(160deg, rgba(252, 231, 243, 0.94) 0%, rgba(245, 230, 255, 0.94) 100%)
-    ),
-    var(--ep-page-bg, #fff5f7);
+  background: var(--ep-page-bg, #fff5f7);
   color: var(--ep-text, #1a0a12);
 }
 

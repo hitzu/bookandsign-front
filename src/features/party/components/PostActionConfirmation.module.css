@@ -30,7 +30,7 @@
 
 .title {
   margin: 0;
-  color: #831843;
+  color: var(--ep-text, #831843);
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -38,7 +38,7 @@
 
 .subtitle {
   margin: 10px 0 0;
-  color: #7f1d1d;
+  color: var(--ep-muted-text, #7f1d1d);
   font-size: 15px;
   font-weight: 600;
   line-height: 1.45;
@@ -55,7 +55,11 @@
   margin-top: 20px;
   border: none;
   border-radius: 999px;
-  background: linear-gradient(135deg, #be185d, #7e22ce);
+  background: linear-gradient(
+    135deg,
+    var(--ep-primary-btn-bg, #be185d),
+    var(--ep-secondary-btn-bg, #7e22ce)
+  );
   color: #ffffff;
   font-size: 16px;
   font-weight: 800;

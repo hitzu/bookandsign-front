@@ -11,6 +11,9 @@ export interface SplashProps {
   stepLabel?: string;
   onComplete: () => void;
   duration?: number;
+  /** Gate before starting the completion timer — splash waits while this is false. */
+  canFinish?: boolean;
+  theme?: EventPageTheme;
 }
 
 export interface CarouselProps {

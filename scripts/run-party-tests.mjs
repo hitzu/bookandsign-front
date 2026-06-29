@@ -63,10 +63,12 @@ try {
     "src/features/party/utils/mediaActions.ts",
     "src/features/party/utils/sessionShare.ts",
     "src/features/party/utils/sourceTracking.ts",
+    "src/features/party/utils/tokensToEventPageTheme.ts",
     "src/features/party/utils/__tests__/eventStatus.test.ts",
     "src/features/party/utils/__tests__/mediaActions.test.ts",
     "src/features/party/utils/__tests__/sessionShare.test.ts",
     "src/features/party/utils/__tests__/sourceTracking.test.ts",
+    "src/features/party/utils/__tests__/tokensToEventPageTheme.test.ts",
   ]);
 
   const testFiles = await collectTestFiles(outDir);

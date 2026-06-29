@@ -55,7 +55,7 @@ const IconStack = () => (
       width="8"
       height="6.5"
       rx="1.5"
-      stroke="#ec4899"
+      stroke="var(--ep-primary-btn-bg, #ec4899)"
       strokeWidth="1.3"
     />
     <rect
@@ -64,7 +64,7 @@ const IconStack = () => (
       width="8"
       height="6.5"
       rx="1.5"
-      stroke="rgba(236,72,153,0.4)"
+      stroke="var(--ep-primary-btn-bg, rgba(236,72,153,0.4))"
       strokeWidth="1.1"
     />
   </svg>
@@ -76,7 +76,7 @@ const IconCamera = () => (
     height="32"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="rgba(236,72,153,0.3)"
+    stroke="var(--ep-primary-btn-bg, rgba(236,72,153,0.3))"
     strokeWidth="1.4"
     strokeLinecap="round"
     strokeLinejoin="round"

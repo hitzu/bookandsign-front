@@ -9,9 +9,13 @@ import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import {
   getPublicEventByToken,
   getEventPhrases,
+  getEventTheme,
 } from "../../../api/services/partyPublicService";
 import { SocialMediaCTA } from "../components/SocialMediaCTA";
 import { readSourceFromRouter } from "../utils/sourceTracking";
+import { tokensToEventPageTheme } from "../utils/tokensToEventPageTheme";
+import { buildThemeVars } from "../utils/themeVars";
+import { EventPageTheme } from "../types/eventPageTheme";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -139,7 +143,9 @@ function Sparkles() {
             top: `${sp.top}%`,
             left: `${sp.left}%`,
             fontSize: sp.size,
-            color: sp.rose ? "#ec4899" : "#a855f7",
+            color: sp.rose
+              ? "var(--ep-primary-btn-bg, #ec4899)"
+              : "var(--ep-secondary-btn-bg, #a855f7)",
             animationDelay: `${sp.delay}s`,
             animationDuration: `${sp.dur}s`,
           }}
@@ -152,7 +158,9 @@ function Sparkles() {
 }
 
 function PersonSilhouette({ n, selected }: { n: number; selected: boolean }) {
-  const color = selected ? "#fff" : "#be185d";
+  const color = selected
+    ? "var(--ep-primary-btn-text, #fff)"
+    : "var(--ep-accent, #be185d)";
   const opacity = selected ? 1 : 0.55;
   const W = n === 1 ? 14 : n === 2 ? 22 : n === 3 ? 28 : 34;
   const positions: { x: number }[] =
@@ -198,6 +206,9 @@ const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
   const [focusedStep, setFocusedStep] = useState(0);
   const [eventName, setEventName] = useState<string | null>(null);
   const [phrases, setPhrases] = useState<EventPhraseResponse[]>([]);
+  const [resolvedTheme, setResolvedTheme] = useState<EventPageTheme | null>(
+    null,
+  );
   const hasTracked = useRef(false);
   const stepsScrollRef = useRef<HTMLDivElement>(null);
   const stepElRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -224,6 +235,19 @@ const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
       .catch(() => {});
 
     return () => controller.abort();
+  }, [resolvedToken]);
+
+  // Theme travels in its own request, separate from event/phrases data.
+  useEffect(() => {
+    if (!resolvedToken || isRoutePlaceholder(resolvedToken)) return;
+
+    getEventTheme(resolvedToken)
+      .then(({ eventTheme }) => {
+        setResolvedTheme(tokensToEventPageTheme(eventTheme.tokens));
+      })
+      .catch(() => {
+        setResolvedTheme(null);
+      });
   }, [resolvedToken]);
 
   useEffect(() => {
@@ -280,7 +304,10 @@ const InspirationPublicPage = ({ eventToken }: InspirationPublicPageProps) => {
   const visiblePoses = POSES[poseGroup];
 
   return (
-    <div className={styles.pageRoot}>
+    <div
+      className={styles.pageRoot}
+      style={resolvedTheme ? buildThemeVars(resolvedTheme) : undefined}
+    >
       <Head>
         <title>Inspiración{eventName ? ` - ${eventName}` : ""}</title>
       </Head>
