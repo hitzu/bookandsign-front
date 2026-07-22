@@ -1,5 +1,6 @@
 import React from "react";
 import { EventPhoto } from "../../../interfaces";
+import { getEventPhotoDisplayUrl } from "@shared/utils/photoDisplayUrl";
 import styles from "@assets/css/party-public.module.css";
 
 type DesktopTabletLandingProps = {
@@ -39,7 +40,7 @@ const DesktopTabletLanding = ({
         <div className={styles.heroShell}>
           <div className={styles.heroPrimary}>
             <img
-              src={heroPhoto.publicUrl}
+              src={getEventPhotoDisplayUrl(heroPhoto)}
               alt={heroTitle}
               className={styles.coverImage}
             />
@@ -92,7 +93,7 @@ const DesktopTabletLanding = ({
                 aria-label={`Ver foto ${index + 1}`}
               >
                 <img
-                  src={photo.publicUrl}
+                  src={getEventPhotoDisplayUrl(photo)}
                   alt={`Preview ${index + 1}`}
                   className={styles.previewImage}
                   loading="lazy"

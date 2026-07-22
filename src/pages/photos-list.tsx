@@ -7,6 +7,7 @@ import React, {
 import Layout from "@layout/index";
 import { EventPhoto } from "../interfaces";
 import { getEventPhotos, deletePhotoById } from "../api/services/photosService";
+import { getEventPhotoDisplayUrl } from "@shared/utils/photoDisplayUrl";
 import TableContainer from "@common/TableContainer";
 import BreadcrumbItem from "@common/BreadcrumbItem";
 import { Card, Col, Row, Form, InputGroup, Button } from "react-bootstrap";
@@ -82,7 +83,7 @@ const PhotosList = () => {
         accessorKey: "publicUrl",
         enableColumnFilter: false,
         cell: (cellProps: any) => {
-          const url = cellProps.row.original.publicUrl;
+          const url = getEventPhotoDisplayUrl(cellProps.row.original);
           return (
             <div className="d-flex align-items-center">
               {url ? (

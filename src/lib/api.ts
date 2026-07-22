@@ -80,6 +80,7 @@ export interface EventData {
 export interface EventPhoto {
   id: string;
   publicUrl: string;
+  minimizedPublicUrl?: string | null;
   createdAt?: string;
 }
 
@@ -120,6 +121,7 @@ export async function fetchEvent(
   const photos: EventPhoto[] = (rawArray ?? []).map((p: Record<string, unknown>) => ({
     id: String(p.id ?? ""),
     publicUrl: String(p.publicUrl ?? ""),
+    minimizedPublicUrl: (p.minimizedPublicUrl as string | null | undefined) ?? null,
     createdAt: p.createdAt as string | undefined,
   }));
 

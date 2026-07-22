@@ -24,6 +24,7 @@ export const buildFallbackItems = (photoUrls: string[]): SessionItem[] =>
   photoUrls.map((src, index) => ({
     type: "photo",
     src,
+    originalSrc: src,
     alt: `Foto ${index + 1}`,
     index,
   }));

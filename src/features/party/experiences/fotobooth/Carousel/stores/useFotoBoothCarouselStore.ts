@@ -5,7 +5,6 @@ import { CtaSource, ItemLoadState } from "../types";
 type FotoBoothCarouselState = {
   index: number;
   activeEffect: EffectName;
-  gifHintVisible: boolean;
   isGeneratingAsset: boolean;
   isSuccessCtaOpen: boolean;
   successCtaSource: CtaSource;
@@ -20,7 +19,6 @@ type FotoBoothCarouselState = {
   closeSuccessCta: () => void;
   openShareFallback: (file: File, previewUrl: string) => void;
   closeShareFallback: () => void;
-  setGifHintVisible: (gifHintVisible: boolean) => void;
   markItemLoaded: (index: number) => void;
   markItemError: (index: number) => void;
   retryItem: (index: number) => void;
@@ -30,7 +28,6 @@ type FotoBoothCarouselState = {
 const initialState = {
   index: 0,
   activeEffect: "original" as EffectName,
-  gifHintVisible: false,
   isGeneratingAsset: false,
   isSuccessCtaOpen: false,
   successCtaSource: "download" as CtaSource,
@@ -52,7 +49,6 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
         isShareFallbackOpen: false,
         shareFallbackFile: null,
         shareFallbackPreviewUrl: null,
-        gifHintVisible: false,
       }),
     setActiveEffect: (activeEffect) => set({ activeEffect }),
     setIsGeneratingAsset: (isGeneratingAsset) => set({ isGeneratingAsset }),
@@ -80,10 +76,8 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
         shareFallbackFile: null,
         shareFallbackPreviewUrl: null,
       }),
-    setGifHintVisible: (gifHintVisible) => set({ gifHintVisible }),
     markItemLoaded: (index) =>
       set((state) => ({
-        gifHintVisible: false,
         itemStates: {
           ...state.itemStates,
           [index]: {
@@ -94,7 +88,6 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
       })),
     markItemError: (index) =>
       set((state) => ({
-        gifHintVisible: false,
         itemStates: {
           ...state.itemStates,
           [index]: {
@@ -105,7 +98,6 @@ export const useFotoBoothCarouselStore = create<FotoBoothCarouselState>(
       })),
     retryItem: (index) =>
       set((state) => ({
-        gifHintVisible: false,
         itemStates: {
           ...state.itemStates,
           [index]: {

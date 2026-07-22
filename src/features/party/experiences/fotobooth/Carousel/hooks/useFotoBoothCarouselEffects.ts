@@ -14,7 +14,6 @@ type UseFotoBoothCarouselEffectsParams = Pick<
   index: number;
   items: SessionItem[];
   shareFallbackPreviewUrl: string | null;
-  setGifHintVisible: (gifHintVisible: boolean) => void;
 };
 
 export const useFotoBoothCarouselEffects = ({
@@ -27,7 +26,6 @@ export const useFotoBoothCarouselEffects = ({
   source = "direct",
   shareFallbackPreviewUrl,
   sessionToken,
-  setGifHintVisible,
 }: UseFotoBoothCarouselEffectsParams) => {
   const hasTrackedSessionView = useRef(false);
   const viewedItemIndexes = useRef(new Set<number>());
@@ -53,7 +51,6 @@ export const useFotoBoothCarouselEffects = ({
         session_id: sessionToken,
         photoCount: photos.length,
         itemCount: items.length,
-        hasGif: items.some((item) => item.type === "gif"),
       },
     });
   }, [eventToken, items, photos.length, sessionToken, source]);
@@ -72,21 +69,6 @@ export const useFotoBoothCarouselEffects = ({
       },
     });
   }, [activeItem?.type, eventToken, index, sessionToken, source]);
-
-  useEffect(() => {
-    if (activeItem?.type !== "gif" || activeItemStatus === "loaded") {
-      setGifHintVisible(false);
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setGifHintVisible(true);
-    }, 3000);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [activeItem?.type, activeItemStatus, setGifHintVisible]);
 
   useEffect(() => {
     if (activeItemStatus !== "loaded") return;

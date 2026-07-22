@@ -163,7 +163,10 @@ export default function MisFotosPage({
       const sessionItems = buildSessionItems(session);
       const orderedPhotos: SessionPhoto[] = getPhotoItems(sessionItems).map(
         (item) => ({
-          url: item.src,
+          // `SessionPhoto.url` is contractually the ORIGINAL — never the
+          // coalesced display value — so downstream consumers that fall
+          // back to `photos` never silently degrade to the minimized image.
+          url: item.originalSrc,
           position: item.photoPosition ?? item.index,
         }),
       );
@@ -177,11 +180,7 @@ export default function MisFotosPage({
         return;
       }
 
-      setSplashStep(
-        sessionItems.some((item) => item.type === "gif")
-          ? "Preparando tu video"
-          : "Revelando tus fotos",
-      );
+      setSplashStep("Revelando tus fotos");
       setPhotos(orderedPhotos);
       setPageState("ready");
     } catch (error) {

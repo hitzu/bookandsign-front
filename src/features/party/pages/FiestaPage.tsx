@@ -260,6 +260,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     eventData?.eventTheme?.key,
   );
   const theme = resolvedTheme ?? fallbackTheme;
+  const themeVars = theme ? buildThemeVars(theme) : undefined;
   const splashDate = formatSplashDate(eventData?.date);
 
   if (showSplash) {
@@ -281,7 +282,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     return (
       <div
         className={styles.centerPage}
-        style={theme ? buildThemeVars(theme) : undefined}
+        style={themeVars}
       >
         <div className={styles.loaderOrb} />
         <p>Cargando galería del evento...</p>
@@ -293,7 +294,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     return (
       <div
         className={styles.centerPage}
-        style={theme ? buildThemeVars(theme) : undefined}
+        style={themeVars}
       >
         <p>No pudimos cargar la galería</p>
         <button className={styles.retryBtn} onClick={fetchGallery}>
@@ -307,7 +308,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
     return (
       <div
         className={styles.centerPage}
-        style={theme ? buildThemeVars(theme) : undefined}
+        style={themeVars}
       >
         <div className={styles.loaderOrb} />
         <p>Cargando galería del evento...</p>
@@ -367,6 +368,7 @@ export default function FiestaPage({ eventToken }: { eventToken?: string }) {
         eventToken={resolvedEventToken}
         showNavigationHints
         backdropColor={theme.pageBackground}
+        themeVars={themeVars}
       />
     </>
   );

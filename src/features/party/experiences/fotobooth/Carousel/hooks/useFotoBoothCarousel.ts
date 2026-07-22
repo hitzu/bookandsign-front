@@ -46,7 +46,6 @@ export const useFotoBoothCarousel = ({
   const {
     index,
     activeEffect,
-    gifHintVisible,
     isGeneratingAsset,
     isSuccessCtaOpen,
     successCtaSource,
@@ -60,7 +59,6 @@ export const useFotoBoothCarousel = ({
     closeSuccessCta,
     openShareFallback,
     closeShareFallback,
-    setGifHintVisible,
     markItemLoaded,
     markItemError,
     retryItem,
@@ -102,13 +100,10 @@ export const useFotoBoothCarousel = ({
     }
 
     return fetchRemoteFile(
-      activeItem.src,
+      activeItem.originalSrc,
       buildUniqueDownloadFilename(
         "brillipoint",
-        getFileExtensionFromUrl(
-          activeItem.src,
-          activeItem.type === "gif" ? "gif" : "jpg",
-        ),
+        getFileExtensionFromUrl(activeItem.originalSrc, "jpg"),
       ),
     );
   };
@@ -176,13 +171,10 @@ export const useFotoBoothCarousel = ({
     setIsGeneratingAsset(true);
     try {
       await downloadPhoto(
-        activeItem.src,
+        activeItem.originalSrc,
         buildUniqueDownloadFilename(
           eventData.honoreesNames || "brillipoint",
-          getFileExtensionFromUrl(
-            activeItem.src,
-            activeItem.type === "gif" ? "gif" : "jpg",
-          ),
+          getFileExtensionFromUrl(activeItem.originalSrc, "jpg"),
         ),
       );
       handleDownloadSuccess();
@@ -254,7 +246,6 @@ export const useFotoBoothCarousel = ({
     closeShareFallback,
     closeSuccessCta,
     formattedDate,
-    gifHintVisible,
     goTo,
     handleCopySessionLink,
     handleFallbackDownload,
@@ -274,7 +265,6 @@ export const useFotoBoothCarousel = ({
     isShareFallbackOpen,
     isSuccessCtaOpen,
     items: normalizedItems,
-    setGifHintVisible,
     shareFallbackPreviewUrl,
     successCtaSource,
   };

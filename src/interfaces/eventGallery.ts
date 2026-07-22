@@ -16,6 +16,7 @@ export type SessionStatus = GalleryStatus | typeof EVENT_ACCESS_STATUS.COMPLETE;
 
 export interface SessionPhoto {
   url: string;
+  minimizedUrl?: string | null;
   position: number;
 }
 
@@ -39,7 +40,6 @@ export interface SessionEventData {
 export interface SessionResponse {
   sessionToken: string;
   status: SessionStatus;
-  gifUrl?: string | null;
   photos: SessionPhoto[];
   event: SessionEventData;
 }

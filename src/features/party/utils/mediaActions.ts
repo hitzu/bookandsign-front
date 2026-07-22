@@ -22,7 +22,7 @@ const normalizeExtension = (extension: string) => {
   return sanitized || "jpg";
 };
 
-const inferMimeTypeFromExtension = (extension: string) => {
+export const inferMimeTypeFromExtension = (extension: string) => {
   switch (normalizeExtension(extension)) {
     case "jpg":
     case "jpeg":
@@ -31,8 +31,6 @@ const inferMimeTypeFromExtension = (extension: string) => {
       return "image/png";
     case "webp":
       return "image/webp";
-    case "gif":
-      return "image/gif";
     case "mp4":
       return "video/mp4";
     default:

@@ -1,5 +1,6 @@
 import React from "react";
 import { EventPhoto } from "../../../interfaces";
+import { getEventPhotoDisplayUrl } from "@shared/utils/photoDisplayUrl";
 import styles from "@assets/css/party-public.module.css";
 
 type PhotoGridProps = {
@@ -68,7 +69,7 @@ const PhotoGrid = ({
             aria-label={`Abrir idea ${index + 1}`}
           >
             <img
-              src={photo.publicUrl}
+              src={getEventPhotoDisplayUrl(photo)}
               alt={`Idea para foto ${index + 1}`}
               className={styles.inspirationGridImage}
               loading="lazy"

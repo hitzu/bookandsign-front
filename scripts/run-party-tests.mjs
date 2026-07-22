@@ -22,11 +22,12 @@ const collectTestFiles = async (directory) => {
   return nestedFiles.flat();
 };
 
-const run = (command, args) => {
+const run = (command, args, extraEnv = {}) => {
   const result = spawnSync(command, args, {
     cwd: process.cwd(),
     encoding: "utf8",
     stdio: "pipe",
+    env: { ...process.env, ...extraEnv },
   });
 
   if (result.stdout) process.stdout.write(result.stdout);
@@ -64,16 +65,25 @@ try {
     "src/features/party/utils/sessionShare.ts",
     "src/features/party/utils/sourceTracking.ts",
     "src/features/party/utils/tokensToEventPageTheme.ts",
+    "src/features/party/utils/buildSessionItems.ts",
+    "src/features/party/experiences/fotobooth/Carousel/stores/useFotoBoothCarouselStore.ts",
     "src/features/party/utils/__tests__/eventStatus.test.ts",
     "src/features/party/utils/__tests__/mediaActions.test.ts",
     "src/features/party/utils/__tests__/sessionShare.test.ts",
     "src/features/party/utils/__tests__/sourceTracking.test.ts",
     "src/features/party/utils/__tests__/tokensToEventPageTheme.test.ts",
+    "src/features/party/utils/__tests__/buildSessionItems.test.ts",
+    "src/features/party/experiences/fotobooth/Carousel/stores/__tests__/useFotoBoothCarouselStore.test.ts",
   ]);
 
   const testFiles = await collectTestFiles(outDir);
 
-  run("node", ["--test", ...testFiles]);
+  // Compiled files land in a scratch tmpdir with no node_modules chain of
+  // its own — point Node's CommonJS resolver back at the project's
+  // node_modules so runtime deps (e.g. zustand) resolve.
+  run("node", ["--test", ...testFiles], {
+    NODE_PATH: join(process.cwd(), "node_modules"),
+  });
 } finally {
   await rm(outDir, { force: true, recursive: true });
 }

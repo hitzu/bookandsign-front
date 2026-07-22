@@ -4,6 +4,7 @@ export interface EventPhoto {
   id: number;
   storagePath: string;
   publicUrl: string;
+  minimizedPublicUrl?: string | null;
   consentAt: string;
   createdAt: string;
 }
@@ -12,6 +13,7 @@ export interface EventPhotoResponse {
   id: number;
   storagePath: string;
   publicUrl: string;
+  minimizedPublicUrl?: string | null;
   consentAt: string;
   createdAt: string;
 }

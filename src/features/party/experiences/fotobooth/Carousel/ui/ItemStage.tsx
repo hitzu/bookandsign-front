@@ -8,7 +8,6 @@ type ItemStageProps = {
   activeEffect: EffectName;
   activeIndex: number;
   canNavigate: boolean;
-  gifHintVisible: boolean;
   itemState: ItemLoadState;
   items: SessionItem[];
   onGoTo: (index: number) => void;
@@ -23,7 +22,6 @@ const ItemStage = ({
   activeEffect,
   activeIndex,
   canNavigate,
-  gifHintVisible,
   itemState,
   items,
   onGoTo,
@@ -61,14 +59,6 @@ const ItemStage = ({
                   {currentState.status !== "loaded" && (
                     <div className={styles.viewerSkeleton}>
                       <div className={styles.viewerSkeletonShimmer} />
-                      {isActive &&
-                        item.type === "gif" &&
-                        currentState.status !== "error" &&
-                        gifHintVisible && (
-                          <div className={styles.viewerHint}>
-                            Preparando tu video...
-                          </div>
-                        )}
                     </div>
                   )}
 
@@ -119,7 +109,7 @@ const ItemStage = ({
             onClick={() => onGoTo(activeIndex - 1)}
             aria-label="Foto anterior"
           >
-            <svg width="12" height="16" viewBox="0 0 12 16" fill="#ec4899">
+            <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor">
               <polygon points="12,0 0,8 12,16" />
             </svg>
           </button>
@@ -128,7 +118,7 @@ const ItemStage = ({
             onClick={() => onGoTo(activeIndex + 1)}
             aria-label="Foto siguiente"
           >
-            <svg width="12" height="16" viewBox="0 0 12 16" fill="#ec4899">
+            <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor">
               <polygon points="0,0 12,8 0,16" />
             </svg>
           </button>

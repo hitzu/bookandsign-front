@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { shareUrl } from "../mediaActions";
+import { inferMimeTypeFromExtension, shareUrl } from "../mediaActions";
 
 const setNavigator = (value: unknown) => {
   Object.defineProperty(globalThis, "navigator", {
@@ -51,4 +51,12 @@ test("shareUrl copies fallback text when native share is unavailable", async () 
     copiedText,
     "Mira mis fotos de Christian 📸 https://example.com/sesion",
   );
+});
+
+test("inferMimeTypeFromExtension resolves jpg to image/jpeg", () => {
+  assert.equal(inferMimeTypeFromExtension("jpg"), "image/jpeg");
+});
+
+test("inferMimeTypeFromExtension no longer special-cases gif (GIF feature removed)", () => {
+  assert.equal(inferMimeTypeFromExtension("gif"), "application/octet-stream");
 });

@@ -1,5 +1,6 @@
 import React from "react";
 import { EventPhoto } from "../../../interfaces";
+import { getEventPhotoDisplayUrl } from "@shared/utils/photoDisplayUrl";
 import styles from "@assets/css/party-public.module.css";
 
 type MasonryGridMobileProps = {
@@ -27,7 +28,7 @@ const MasonryGridMobile = ({
             aria-label={`Abrir foto ${index + 1}`}
           >
             <img
-              src={photo.publicUrl}
+              src={getEventPhotoDisplayUrl(photo)}
               alt={`Foto del evento ${index + 1}`}
               className={styles.mobileMasonryImage}
               loading="lazy"

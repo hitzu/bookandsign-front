@@ -28,7 +28,9 @@ const SessionCarousel = ({ photos, eventData }: SessionCarouselProps) => {
     "download",
   );
 
-  const slides = photos.map((p) => ({ src: p.url }));
+  // Display coalesces to the minimized image when available; download
+  // (handleDownload/handleShare below) always uses the original `p.url`.
+  const slides = photos.map((p) => ({ src: p.minimizedUrl || p.url }));
 
   const handleDownload = async () => {
     await downloadPhoto(

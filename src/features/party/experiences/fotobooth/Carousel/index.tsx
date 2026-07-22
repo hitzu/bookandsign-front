@@ -23,7 +23,6 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     canOpenGallery,
     closeShareFallback,
     closeSuccessCta,
-    gifHintVisible,
     goTo,
     handleCopySessionLink,
     handleFallbackDownload,
@@ -43,7 +42,6 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     isShareFallbackOpen,
     isSuccessCtaOpen,
     items,
-    setGifHintVisible,
     shareFallbackPreviewUrl,
     successCtaSource,
   } = useFotoBoothCarousel(props);
@@ -58,7 +56,6 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     source: props.source,
     shareFallbackPreviewUrl,
     sessionToken: props.sessionToken,
-    setGifHintVisible,
   });
 
   return (
@@ -77,7 +74,6 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         activeEffect={activeEffect}
         activeIndex={index}
         canNavigate={canNavigate}
-        gifHintVisible={gifHintVisible}
         itemState={activeItemState}
         items={items}
         onGoTo={goTo}

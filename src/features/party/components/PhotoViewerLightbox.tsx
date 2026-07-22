@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Lightbox, { type ControllerRef } from "yet-another-react-lightbox";
+import Lightbox, {
+  type ControllerRef,
+  type SlotStyles,
+} from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { EventPhoto, AnalyticsAction } from "../../../interfaces";
+import { getEventPhotoDisplayUrl } from "@shared/utils/photoDisplayUrl";
 import styles from "@assets/css/party-public.module.css";
 import { sharePhoto } from "../utils/mediaActions";
 import { trackEvent } from "../../../api/services/eventAnalyticsService";
@@ -24,6 +28,7 @@ type PhotoViewerLightboxProps = {
   showMediaActions?: boolean;
   showNavigationHints?: boolean;
   backdropColor?: string;
+  themeVars?: React.CSSProperties;
 };
 
 const PhotoViewerLightbox = ({
@@ -41,6 +46,7 @@ const PhotoViewerLightbox = ({
   showMediaActions = true,
   showNavigationHints = false,
   backdropColor,
+  themeVars,
 }: PhotoViewerLightboxProps) => {
   const [currentIndex, setCurrentIndex] = React.useState(activeIndex ?? 0);
   const [hintVisible, setHintVisible] = useState(false);
@@ -93,7 +99,7 @@ const PhotoViewerLightbox = ({
   }, [isOpen, onClose, dispatch]);
 
   const slides = photos.map((p) => ({
-    src: p.publicUrl,
+    src: getEventPhotoDisplayUrl(p),
     alt: eventTitle,
   }));
 
@@ -120,6 +126,13 @@ const PhotoViewerLightbox = ({
   const showNavigationUi = showNavigationHints && canNavigate;
   const showActions = showMediaActions && currentPhoto;
   const showControls = showNavigationUi || showActions;
+  const lightboxRootStyles = {
+    ...(themeVars ?? {}),
+    ...(backdropColor
+      ? { ["--yarl__color_backdrop" as string]: backdropColor }
+      : {}),
+  } as React.CSSProperties;
+  const lightboxStyles = { root: lightboxRootStyles } as SlotStyles;
 
   const handleClose = useCallback(() => {
     if (modalStateRef.current !== "gallery-photo") {
@@ -159,15 +172,7 @@ const PhotoViewerLightbox = ({
       }}
       controller={{ closeOnBackdropClick: true, ref: controllerRef }}
       className={styles.yarlDarkOverlay}
-      styles={
-        backdropColor
-          ? {
-              root: {
-                ["--yarl__color_backdrop" as any]: backdropColor,
-              },
-            }
-          : undefined
-      }
+      styles={lightboxStyles}
       render={{
         buttonClose: () => (
           <button
