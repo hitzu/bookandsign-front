@@ -9,10 +9,13 @@ export const ReservationFinanceSection = ({
   contract,
   payments,
   paidAmount,
+  showTransportNote,
 }: {
   contract: Contract;
   payments: Payment[];
   paidAmount: number;
+  /** Venue-only brands (Lusso) never quote a transport fee on top of the balance. */
+  showTransportNote: boolean;
 }) => {
   const formatMoney = (amount: number) => {
     const n = Number.isFinite(amount) ? amount : 0;
@@ -140,7 +143,9 @@ export const ReservationFinanceSection = ({
                   ].join(" ")}
                 >
                   {formatMoney(contract.total - paidAmountFromPayments)}
-                  <span className={styles.moveValueText}> + traslado</span>
+                  {showTransportNote && (
+                    <span className={styles.moveValueText}> + traslado</span>
+                  )}
                 </span>
               </div>
             )}

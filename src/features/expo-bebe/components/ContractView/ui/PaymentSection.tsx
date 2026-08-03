@@ -2,6 +2,7 @@ import styles from "@assets/css/expo-bebe.module.css";
 import type { PaymentMethod } from "../../../../../interfaces";
 import { SectionHead } from "../../SectionHead";
 import type { ContractFormVM } from "../hooks/useContractForm";
+import { brandIncludesTransportFee } from "@shared/constants/brands";
 
 export function PaymentSection({ vm }: { vm: ContractFormVM }) {
   const {
@@ -16,8 +17,11 @@ export function PaymentSection({ vm }: { vm: ContractFormVM }) {
     setFormaPago,
     isLocked,
     requiredMinAmountHoldSlot,
+    selectedBrandId,
     fmtPrice,
   } = vm;
+
+  const showTransportNote = brandIncludesTransportFee(Number(selectedBrandId));
 
   return (
     <section className={styles.panel}>
@@ -173,7 +177,9 @@ export function PaymentSection({ vm }: { vm: ContractFormVM }) {
             <span className={styles.cfSummaryRestante}>
               $ {fmtPrice(subtotal - discountTotal - anticipoNum)}
             </span>
-            <span className={styles.cfSummaryRestanteNote}>+ traslado</span>
+            {showTransportNote && (
+              <span className={styles.cfSummaryRestanteNote}>+ traslado</span>
+            )}
           </div>
         </div>
       </div>

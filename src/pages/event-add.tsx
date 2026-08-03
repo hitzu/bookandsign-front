@@ -33,6 +33,7 @@ interface EventFormValues {
   delegateName: string;
   photoCount: string;
   printTemplates: string;
+  printTemplate: string;
 }
 
 const PHOTO_COUNT_OPTIONS = ["1", "2", "3", "4", "5"];
@@ -104,6 +105,7 @@ const validationSchema = yup.object().shape({
   serviceEndsAt: yup.string().optional(),
   delegateName: yup.string().optional(),
   photoCount: yup.number().integer().min(1).max(5).optional(),
+  printTemplate: yup.string().optional(),
   printTemplates: yup
     .string()
     .test(
@@ -176,6 +178,7 @@ const EventAdd = () => {
       delegateName: "",
       photoCount: "2",
       printTemplates: "",
+      printTemplate: "",
     },
     validationSchema,
     onSubmit: async (values) => {
@@ -212,6 +215,9 @@ const EventAdd = () => {
             : {}),
           ...(values.printTemplates.trim()
             ? { printTemplates: parsePrintTemplates(values.printTemplates) }
+            : {}),
+          ...(values.printTemplate.trim()
+            ? { printTemplate: values.printTemplate }
             : {}),
         };
 
@@ -346,9 +352,6 @@ const EventAdd = () => {
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                </Row>
-
-                <Row>
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Tema del evento</Form.Label>
@@ -391,25 +394,23 @@ const EventAdd = () => {
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>
-                </Row>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>Clave del evento</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Ej: 20"
-                    name="key"
-                    value={formik.values.key}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur("key")}
-                    isInvalid={formik.touched.key && !!formik.errors.key}
-                  />
-                  <Form.Control.Feedback type="invalid">
-                    {formik.errors.key}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Clave del evento</Form.Label>
+                      <Form.Control
+                        type="text"
+                        placeholder="Ej: 20"
+                        name="key"
+                        value={formik.values.key}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("key")}
+                        isInvalid={formik.touched.key && !!formik.errors.key}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.key}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label>Nombres de festejados</Form.Label>
@@ -530,6 +531,28 @@ const EventAdd = () => {
                       />
                       <Form.Control.Feedback type="invalid">
                         {formik.errors.serviceEndsAt}
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Template de BPS</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="printTemplate"
+                        value={formik.values.printTemplate}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur("printTemplate")}
+                        isInvalid={
+                          formik.touched.printTemplate &&
+                          !!formik.errors.printTemplate
+                        }
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        {formik.errors.printTemplate}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Col>

@@ -29,6 +29,7 @@ import type { ExtraLineItem, PackageLineItem } from "../../../types";
 import type { ExpoBebeBrandKey } from "../../../types";
 import type { ContractPeriod } from "../../../utils/calendar";
 import { formatSkuDate, normalizeSkuText } from "../../../utils/sku";
+import { clampQuantity } from "../../../utils/quantity";
 import {
   LUSSO_BRAND_ID,
   brandBlockedMessage,
@@ -368,35 +369,19 @@ export function useContractForm({
     setSelectedExtraId("");
   };
 
-  const incExtraItem = (id: number) =>
+  const setExtraItemQuantity = (id: number, quantity: number) =>
     setExtraItems((prev) =>
       prev.map((it) =>
-        it.extra.id === id ? { ...it, quantity: it.quantity + 1 } : it,
-      ),
-    );
-  const decExtraItem = (id: number) =>
-    setExtraItems((prev) =>
-      prev.map((it) =>
-        it.extra.id === id
-          ? { ...it, quantity: Math.max(1, it.quantity - 1) }
-          : it,
+        it.extra.id === id ? { ...it, quantity: clampQuantity(quantity) } : it,
       ),
     );
   const removeExtraItem = (id: number) =>
     setExtraItems((prev) => prev.filter((it) => it.extra.id !== id));
 
-  const incItem = (id: number) =>
+  const setItemQuantity = (id: number, quantity: number) =>
     setItems((prev) =>
       prev.map((it) =>
-        it.pkg.id === id ? { ...it, quantity: it.quantity + 1 } : it,
-      ),
-    );
-  const decItem = (id: number) =>
-    setItems((prev) =>
-      prev.map((it) =>
-        it.pkg.id === id
-          ? { ...it, quantity: Math.max(1, it.quantity - 1) }
-          : it,
+        it.pkg.id === id ? { ...it, quantity: clampQuantity(quantity) } : it,
       ),
     );
   const removeItem = (id: number) =>
@@ -581,12 +566,10 @@ export function useContractForm({
     contractLink,
     // handlers
     handleAgregar,
-    incItem,
-    decItem,
+    setItemQuantity,
     removeItem,
     handleAgregarExtra,
-    incExtraItem,
-    decExtraItem,
+    setExtraItemQuantity,
     removeExtraItem,
     handleSubmit,
     resetForm,

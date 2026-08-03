@@ -27,6 +27,7 @@ import { ReservationFinanceSection } from "../components/ReservationFinanceSecti
 import { ReservationNotesSection } from "../components/ReservationNotesSection";
 import { PreparationSection } from "../components/PreparationSection";
 import { parseLocalDate } from "@common/dates";
+import { brandIncludesTransportFee } from "@shared/constants/brands";
 
 type Props = {
   token?: string;
@@ -61,6 +62,18 @@ const ReservationPublicPage = ({ token }: Props) => {
   const halfwayDate = (start: Date, end: Date): Date => {
     return new Date(start.getTime() + (end.getTime() - start.getTime()) / 2);
   };
+
+  // Brand of this reservation: the URL hint wins, otherwise it is derived from
+  // the contracted packages. Single definition, used for terms and pricing copy.
+  const reservationBrandId = useMemo(() => {
+    const rawBrandId = router.query.brandId ?? router.query.brand;
+    const queryBrandId = Number(
+      Array.isArray(rawBrandId) ? rawBrandId[0] : rawBrandId,
+    );
+    return queryBrandId > 0
+      ? queryBrandId
+      : (data?.packages?.[0]?.package?.brandId ?? 0);
+  }, [router.query.brand, router.query.brandId, data?.packages]);
 
   useEffect(() => {
     const loadContract = async () => {
@@ -127,13 +140,6 @@ const ReservationPublicPage = ({ token }: Props) => {
         try {
           const notes = await getPublicNotes(data?.contract?.id, "contract");
           setNotes([...notes]);
-          const rawBrandId = router.query.brandId ?? router.query.brand;
-          const pathBrandId = Number(
-            Array.isArray(rawBrandId) ? rawBrandId[0] : rawBrandId,
-          );
-          const brandId =
-            pathBrandId > 0 ? pathBrandId : data.packages[0]?.package?.brandId;
-
           const packagePromises = data.packages.map((currentPackage) =>
             getPublicTerms({
               targetId: currentPackage.package.id,
@@ -142,7 +148,9 @@ const ReservationPublicPage = ({ token }: Props) => {
           );
           const [globalResult, brandResult, packageResults] = await Promise.all([
             getTerms({ termScope: "global" }).catch(() => []),
-            brandId ? getPublicBrandTerms(brandId) : Promise.resolve([]),
+            reservationBrandId
+              ? getPublicBrandTerms(reservationBrandId)
+              : Promise.resolve([]),
             Promise.all(packagePromises),
           ]);
 
@@ -157,7 +165,7 @@ const ReservationPublicPage = ({ token }: Props) => {
     } catch (error) {
       console.error("Error loading notes:", error);
     }
-  }, [data?.contract, data?.packages, router.query.brand, router.query.brandId]);
+  }, [data?.contract, data?.packages, reservationBrandId]);
 
   const items = data?.packages ?? [];
   const extraItems = data?.extras ?? [];
@@ -173,6 +181,15 @@ const ReservationPublicPage = ({ token }: Props) => {
   const hasBrillipoint = useMemo(() => {
     return packagesForPrep.some((p) => p.brandId === 2);
   }, [packagesForPrep]);
+
+  // Transport is quoted on top of the balance only when something in the
+  // contract is delivered off-site. Derived from what was actually sold, not
+  // from the URL hint, since this is a money statement.
+  const showTransportNote = useMemo(() => {
+    const contracted = data?.packages ?? [];
+    if (contracted.length === 0) return true;
+    return contracted.some((p) => brandIncludesTransportFee(p.package?.brandId));
+  }, [data?.packages]);
 
   const packageTerms = useMemo((): GetTermsResponse[] => {
     const dedup = new Map<number, GetTermsResponse>();
@@ -216,6 +233,7 @@ const ReservationPublicPage = ({ token }: Props) => {
                   contract={data.contract}
                   payments={data.payments ?? []}
                   paidAmount={data.paidAmount ?? 0}
+                  showTransportNote={showTransportNote}
                 />
                 <ReservationNotesSection notes={notes} />
               </>

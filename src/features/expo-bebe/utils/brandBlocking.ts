@@ -7,7 +7,8 @@
  * has a Lusso event, Lusso is no longer offered that month.
  */
 
-export const LUSSO_BRAND_ID = 4;
+export { LUSSO_BRAND_ID } from "@shared/constants/brands";
+import { LUSSO_BRAND_ID } from "@shared/constants/brands";
 
 /**
  * Brands that occupy the whole venue for the day. If either slot of a day is

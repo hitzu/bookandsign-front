@@ -2,6 +2,7 @@ import styles from "@assets/css/expo-bebe.module.css";
 import { IconPlus } from "../../Icons";
 import { SectionHead } from "../../SectionHead";
 import type { ContractFormVM } from "../hooks/useContractForm";
+import { QuantityStepper } from "./QuantityStepper";
 
 export function ProductsSection({ vm }: { vm: ContractFormVM }) {
   const {
@@ -17,8 +18,7 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
     activePromotion,
     isLocked,
     handleAgregar,
-    incItem,
-    decItem,
+    setItemQuantity,
     removeItem,
   } = vm;
 
@@ -88,31 +88,12 @@ export function ProductsSection({ vm }: { vm: ContractFormVM }) {
                 </div>
               </div>
               {!isLocked && (
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <button
-                    type="button"
-                    className={styles.cfQtyBtn}
-                    onClick={() => decItem(it.pkg.id)}
-                  >
-                    −
-                  </button>
-                  <span className={styles.cfQtyVal}>{it.quantity}</span>
-                  <button
-                    type="button"
-                    className={styles.cfQtyBtn}
-                    onClick={() => incItem(it.pkg.id)}
-                  >
-                    +
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.cfRemoveBtn}
-                    onClick={() => removeItem(it.pkg.id)}
-                    aria-label="Eliminar"
-                  >
-                    ×
-                  </button>
-                </div>
+                <QuantityStepper
+                  value={it.quantity}
+                  itemName={it.pkg.name}
+                  onChange={(quantity) => setItemQuantity(it.pkg.id, quantity)}
+                  onRemove={() => removeItem(it.pkg.id)}
+                />
               )}
             </div>
             );

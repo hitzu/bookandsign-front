@@ -1705,6 +1705,24 @@
   color: var(--eb-ink);
 }
 
+.cfQtyInput {
+  width: 48px;
+  padding: 3px 4px;
+  border: 1.5px solid var(--eb-line-strong);
+  border-radius: 8px;
+  background: var(--eb-paper);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--eb-ink);
+}
+
+.cfQtyInput:focus {
+  outline: none;
+  border-color: var(--eb-ink);
+}
+
 .cfError {
   background: var(--oc-bg);
   color: var(--oc-ink);

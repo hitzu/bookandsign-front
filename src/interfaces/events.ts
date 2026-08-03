@@ -37,6 +37,7 @@ export interface Event {
   serviceTypeId?: number;
   serviceType?: string;
   printTemplates?: EventPrintTemplate[];
+  printTemplate?: string;
   createdAt: string;
   updatedAt: string;
   eventTheme?: EventThemes;
@@ -57,6 +58,7 @@ export interface CreateEventPayload {
   delegateName?: string;
   photoCount?: number;
   printTemplates?: EventPrintTemplate[];
+  printTemplate?: string;
 }
 
 export interface UpdateEventPayload {
@@ -73,6 +75,7 @@ export interface UpdateEventPayload {
   delegateName?: string;
   photoCount?: number;
   printTemplates?: EventPrintTemplate[];
+  printTemplate?: string;
 }
 
 export type EventPhraseResponse = {

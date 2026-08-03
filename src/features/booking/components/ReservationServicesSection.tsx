@@ -48,6 +48,9 @@ export const ReservationServicesSection = ({
                   const qty = it.quantity ?? 1;
 
                   const hasDiscount = (it.discountPercentageSnapshot ?? 0) > 0;
+                  // Snapshots store the unit price but the final price is already
+                  // the line total, so the struck-through price must be scaled too.
+                  const baseLineTotal = (it.basePriceSnapshot ?? 0) * qty;
 
                   return (
                     <li key={it.id} className={styles.listItem}>
@@ -72,7 +75,7 @@ export const ReservationServicesSection = ({
                               className={styles.itemPrice}
                               style={{ textDecoration: "line-through", opacity: 0.6 }}
                             >
-                              {formatMoney(it.basePriceSnapshot ?? 0)}
+                              {formatMoney(baseLineTotal)}
                             </div>
                           )}
                           <div className={styles.itemPrice}>

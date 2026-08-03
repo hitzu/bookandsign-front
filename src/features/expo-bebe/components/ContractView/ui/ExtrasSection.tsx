@@ -2,6 +2,7 @@ import styles from "@assets/css/expo-bebe.module.css";
 import { IconPlus } from "../../Icons";
 import { SectionHead } from "../../SectionHead";
 import type { ContractFormVM } from "../hooks/useContractForm";
+import { QuantityStepper } from "./QuantityStepper";
 
 export function ExtrasSection({ vm }: { vm: ContractFormVM }) {
   const {
@@ -15,8 +16,7 @@ export function ExtrasSection({ vm }: { vm: ContractFormVM }) {
     getTierDiscount,
     isLocked,
     handleAgregarExtra,
-    incExtraItem,
-    decExtraItem,
+    setExtraItemQuantity,
     removeExtraItem,
   } = vm;
 
@@ -128,31 +128,14 @@ export function ExtrasSection({ vm }: { vm: ContractFormVM }) {
                 </div>
               </div>
               {!isLocked && (
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <button
-                    type="button"
-                    className={styles.cfQtyBtn}
-                    onClick={() => decExtraItem(it.extra.id)}
-                  >
-                    −
-                  </button>
-                  <span className={styles.cfQtyVal}>{it.quantity}</span>
-                  <button
-                    type="button"
-                    className={styles.cfQtyBtn}
-                    onClick={() => incExtraItem(it.extra.id)}
-                  >
-                    +
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.cfRemoveBtn}
-                    onClick={() => removeExtraItem(it.extra.id)}
-                    aria-label="Eliminar"
-                  >
-                    ×
-                  </button>
-                </div>
+                <QuantityStepper
+                  value={it.quantity}
+                  itemName={it.extra.name}
+                  onChange={(quantity) =>
+                    setExtraItemQuantity(it.extra.id, quantity)
+                  }
+                  onRemove={() => removeExtraItem(it.extra.id)}
+                />
               )}
               </div>
             );
