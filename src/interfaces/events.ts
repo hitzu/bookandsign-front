@@ -1,11 +1,12 @@
 import { EventThemes } from "./eventThemes";
 
-export interface EventPrintTemplate {
-  type: string;
-  template: string;
-  icon?: string;
-  border?: string;
-}
+export type EventPrintTemplate =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: EventPrintTemplate }
+  | EventPrintTemplate[];
 
 export interface GetEventServiceTypesResponse {
   id: number;
@@ -36,7 +37,7 @@ export interface Event {
   photoCount?: number;
   serviceTypeId?: number;
   serviceType?: string;
-  printTemplates?: EventPrintTemplate[];
+  printTemplates?: EventPrintTemplate;
   printTemplate?: string;
   createdAt: string;
   updatedAt: string;
@@ -57,7 +58,7 @@ export interface CreateEventPayload {
   serviceEndsAt?: string;
   delegateName?: string;
   photoCount?: number;
-  printTemplates?: EventPrintTemplate[];
+  printTemplates?: EventPrintTemplate;
   printTemplate?: string;
 }
 
@@ -74,7 +75,7 @@ export interface UpdateEventPayload {
   serviceEndsAt?: string;
   delegateName?: string;
   photoCount?: number;
-  printTemplates?: EventPrintTemplate[];
+  printTemplates?: EventPrintTemplate;
   printTemplate?: string;
 }
 

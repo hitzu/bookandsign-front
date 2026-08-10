@@ -39,69 +39,25 @@ interface EventFormValues {
 }
 
 const PHOTO_COUNT_OPTIONS = ["1", "2", "3", "4", "5"];
+const PRINT_TEMPLATES_EXAMPLE = `[
+  {"template_id": "polaroid"},
+  {"template_id": "polaroid"}
+]`;
 
 const parsePrintTemplates = (
   value: string,
-): EventPrintTemplate[] | undefined => {
+): EventPrintTemplate | undefined => {
   const trimmedValue = value.trim();
 
   if (!trimmedValue) return undefined;
 
-  const parsedValue: unknown = JSON.parse(trimmedValue);
-
-  if (!Array.isArray(parsedValue)) {
-    throw new Error("Las plantillas deben ser un arreglo JSON");
-  }
-
-  return parsedValue.map((item, index) => {
-    if (!item || typeof item !== "object") {
-      throw new Error(`La plantilla #${index + 1} debe ser un objeto`);
-    }
-
-    const template = item as Record<string, unknown>;
-
-    if (typeof template.type !== "string" || !template.type.trim()) {
-      throw new Error(`La plantilla #${index + 1} requiere un campo "type"`);
-    }
-
-    if (
-      typeof template.template !== "string" ||
-      !template.template.trim()
-    ) {
-      throw new Error(
-        `La plantilla #${index + 1} requiere un campo "template"`,
-      );
-    }
-
-    if (template.icon != null && typeof template.icon !== "string") {
-      throw new Error(
-        `La plantilla #${index + 1} tiene un "icon" inválido`,
-      );
-    }
-
-    if (template.border != null && typeof template.border !== "string") {
-      throw new Error(
-        `La plantilla #${index + 1} tiene un "border" inválido`,
-      );
-    }
-
-    return {
-      type: template.type.trim(),
-      template: template.template.trim(),
-      ...(typeof template.icon === "string" && template.icon.trim()
-        ? { icon: template.icon.trim() }
-        : {}),
-      ...(typeof template.border === "string" && template.border.trim()
-        ? { border: template.border.trim() }
-        : {}),
-    };
-  });
+  return JSON.parse(trimmedValue) as EventPrintTemplate;
 };
 
 const formatPrintTemplates = (
-  printTemplates?: EventPrintTemplate[],
+  printTemplates?: EventPrintTemplate,
 ): string =>
-  printTemplates?.length ? JSON.stringify(printTemplates, null, 2) : "";
+  printTemplates == null ? "" : JSON.stringify(printTemplates, null, 2);
 
 const validationSchema = yup.object().shape({
   key: yup.string().required("La clave del evento es requerida"),
@@ -642,10 +598,16 @@ const EventEdit = () => {
 
                 <Form.Group className="mb-3">
                   <Form.Label>Plantillas de impresión (JSON)</Form.Label>
+                  <Form.Text className="text-muted d-block mb-2">
+                    Acepta cualquier JSON válido. Ejemplo:
+                  </Form.Text>
+                  <pre className="bg-light border rounded p-2 mb-2">
+                    <code>{PRINT_TEMPLATES_EXAMPLE}</code>
+                  </pre>
                   <Form.Control
                     as="textarea"
                     rows={6}
-                    placeholder='[{"type":"polaroid","template":"polaroid_rc_2","icon":"rings","border":"led"}]'
+                    placeholder={PRINT_TEMPLATES_EXAMPLE}
                     name="printTemplates"
                     value={formik.values.printTemplates}
                     onChange={formik.handleChange}
