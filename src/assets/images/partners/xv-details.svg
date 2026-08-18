@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title desc">
+  <title id="title">XV years celebration details</title>
+  <desc id="desc">Decorative table with soft rose, champagne and pearl details.</desc>
+  <rect width="900" height="900" fill="#d9c1ba"/><rect x="58" y="70" width="784" height="760" rx="30" fill="#f6ebe6"/>
+  <ellipse cx="450" cy="690" rx="285" ry="70" fill="#b28b82"/><path d="M260 630c45-180 115-230 190-20M640 630c-45-180-115-230-190-20" fill="none" stroke="#9d7169" stroke-width="14"/>
+  <circle cx="330" cy="310" r="92" fill="#e7b9b3"/><circle cx="450" cy="240" r="88" fill="#c79b91"/><circle cx="570" cy="310" r="92" fill="#e7b9b3"/>
+  <rect x="280" y="405" width="340" height="210" rx="18" fill="#fffaf5" stroke="#b68c7e" stroke-width="6"/><circle cx="365" cy="510" r="32" fill="#c7a56e"/><circle cx="535" cy="510" r="32" fill="#c7a56e"/><path d="M420 475h60M420 520h60" stroke="#a77970" stroke-width="7"/>
+</svg>

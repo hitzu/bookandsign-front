@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">XV years celebration with rose and champagne details</title>
+  <desc id="desc">Editorial celebration composition with a soft rose backdrop, lights and a keepsake table.</desc>
+  <rect width="1200" height="900" fill="#e4d2c9"/><rect x="75" y="65" width="1050" height="770" rx="20" fill="#f7eee9" stroke="#bd9e91" stroke-width="5"/>
+  <path d="M180 700c90-330 235-330 325 0M695 700c80-330 225-330 325 0" fill="none" stroke="#c19b91" stroke-width="28" opacity=".75"/>
+  <circle cx="325" cy="240" r="80" fill="#e4b9ad"/><circle cx="450" cy="185" r="54" fill="#c99083"/><circle cx="780" cy="205" r="65" fill="#c99083"/><circle cx="895" cy="260" r="82" fill="#e4b9ad"/>
+  <path d="M325 315v260M450 240v335M780 270v305M895 340v235" stroke="#a77970" stroke-width="8"/>
+  <rect x="355" y="520" width="490" height="145" rx="20" fill="#fffaf5" stroke="#b68c7e" stroke-width="5"/><circle cx="455" cy="592" r="26" fill="#c69a72"/><circle cx="745" cy="592" r="26" fill="#c69a72"/>
+  <path d="M505 570h190M505 615h145" stroke="#a77970" stroke-width="7"/>
+</svg>

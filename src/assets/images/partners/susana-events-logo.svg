@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 180" role="img" aria-labelledby="title desc">
+  <title id="title">Susana Events</title>
+  <desc id="desc">Editorial wordmark for Susana Events wedding studio.</desc>
+  <rect width="620" height="180" fill="none"/>
+  <circle cx="84" cy="90" r="54" fill="none" stroke="#8b7350" stroke-width="2"/>
+  <path d="M106 62c-9-13-33-13-38 3-5 16 13 22 25 28 12 6 17 16 11 27-8 14-34 13-45-2" fill="none" stroke="#8b7350" stroke-width="4" stroke-linecap="round"/>
+  <text x="164" y="90" fill="#24211d" font-family="Georgia, serif" font-size="48" letter-spacing="2">Susana</text>
+  <text x="168" y="126" fill="#8b7350" font-family="Arial, sans-serif" font-size="16" letter-spacing="7">EVENTS</text>
+  <path d="M168 143h270" stroke="#c8a978" stroke-width="1"/>
+</svg>

@@ -1,0 +1,41 @@
+.statePage {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  overflow-x: hidden;
+  background: var(--partner-main-background, #0b0b15);
+  color: var(--partner-text-primary, #ffffff);
+  font-family: var(--partner-font-body, "Public Sans", system-ui, sans-serif);
+  padding: 1rem;
+}
+
+.stateCard {
+  width: min(620px, 100%);
+  border: 1px solid var(--partner-surface-border, rgba(190, 198, 255, 0.16));
+  border-radius: 1.35rem;
+  background: var(--partner-surface-card, rgba(20, 21, 38, 0.72));
+  box-shadow: var(--partner-surface-shadow, 0 24px 70px rgba(9, 8, 26, 0.42));
+  padding: clamp(1.4rem, 6vw, 2.5rem);
+  backdrop-filter: blur(10px);
+}
+
+.stateCard h1 {
+  margin: 0;
+  color: var(--partner-text-primary, #ffffff);
+  font-family: var(--partner-font-heading, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(2.35rem, 7vw, 4.8rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.stateCard p {
+  color: var(--partner-text-secondary, rgba(234, 237, 255, 0.9));
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  line-height: 1.75;
+}
+
+.stateMeta {
+  color: var(--partner-text-muted, rgba(234, 237, 255, 0.68));
+  font-size: 0.92rem;
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Wedding celebration in warm ivory and champagne tones</title>
+  <desc id="desc">Editorial composition with arched windows, flowing fabric, flowers and a champagne table.</desc>
+  <rect width="1200" height="900" fill="#e8e0d3"/>
+  <rect x="55" y="60" width="1090" height="780" rx="12" fill="#f7f2e9" stroke="#c9bda9" stroke-width="4"/>
+  <path d="M125 710V290c0-150 220-150 220 0v420M487 710V220c0-170 226-170 226 0v490M850 710V290c0-150 225-150 225 0v420" fill="none" stroke="#756858" stroke-width="18"/>
+  <path d="M150 180c95 75 95 190 0 265M1045 180c-95 75-95 190 0 265" fill="none" stroke="#fffdf8" stroke-width="48" opacity=".9"/>
+  <path d="M110 690c180-125 305-95 470 5 140-95 285-120 510-5v120H110Z" fill="#d5c6ad"/>
+  <path d="M250 620c75-110 170-110 245 0M695 620c70-110 170-110 245 0" fill="none" stroke="#a38b66" stroke-width="13"/>
+  <circle cx="600" cy="470" r="92" fill="#c6a879" opacity=".85"/><circle cx="600" cy="470" r="67" fill="#f7f2e9"/>
+  <path d="M555 470h90M600 425v90" stroke="#a38b66" stroke-width="6"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 900" role="img" aria-labelledby="title desc">
+  <title id="title">Wedding details in champagne tones</title>
+  <desc id="desc">A curated table with flowers, cards and warm metallic details.</desc>
+  <rect width="900" height="900" fill="#d8c7a8"/><rect x="65" y="80" width="770" height="740" rx="24" fill="#f5efe5"/>
+  <ellipse cx="450" cy="675" rx="300" ry="80" fill="#b5a184"/><rect x="255" y="330" width="390" height="315" rx="18" fill="#fffdf8" stroke="#8e785b" stroke-width="6"/>
+  <circle cx="325" cy="285" r="85" fill="#91a08a"/><circle cx="390" cy="255" r="72" fill="#b7c4ad"/><circle cx="520" cy="250" r="84" fill="#d9c6a7"/><circle cx="590" cy="295" r="80" fill="#a6b29b"/>
+  <path d="M325 360v-95M390 360V220M520 360V210M590 360V235" stroke="#6e745d" stroke-width="10"/>
+  <path d="M335 495h230M335 540h180" stroke="#9b8567" stroke-width="7"/>
+  <circle cx="450" cy="610" r="17" fill="#c7a56e"/>
+</svg>
