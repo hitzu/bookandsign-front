@@ -526,44 +526,6 @@
   right: -4px;
 }
 
-/* Dots */
-
-.dotsRow {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-  padding: 12px 0 8px;
-  flex-shrink: 0;
-}
-
-.dotButton {
-  padding: 0;
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dotButtonActive {
-  transform: none;
-}
-
-.dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.18);
-  transition: all 0.3s ease;
-}
-
-.dotActive {
-  background: var(--ep-gradient-primary);
-  width: 18px;
-  border-radius: 3px;
-  box-shadow: 0 0 8px rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.4);
-}
-
 .effectsRail {
   display: flex;
   gap: 10px;
@@ -909,70 +871,41 @@
   box-shadow: 0 6px 24px rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.2);
 }
 
-.benefitBanner {
-  margin: 0 20px 10px;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.sessionInlineCta {
+  position: relative;
+  padding: 0 16px max(12px, env(safe-area-inset-bottom, 12px));
+  flex-shrink: 0;
+}
+
+.giftTeaser {
+  position: absolute;
+  top: -14px;
+  right: 22px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
   border: 1px solid rgba(var(--ep-surface-border-rgb, 111, 122, 106), 0.32);
-  border-radius: 10px;
-  background: linear-gradient(
-    135deg,
-    rgba(var(--ep-surface-bg-rgb, 255, 253, 247), 0.92) 0%,
-    rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.08) 100%
-  );
-  text-align: left;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  background: rgba(var(--ep-surface-bg-rgb, 255, 253, 247), 0.96);
+  box-shadow: 0 6px 16px rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.22);
   cursor: pointer;
+  z-index: 1;
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease;
 }
 
-.benefitBanner:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(var(--ep-primary-btn-bg-rgb, 236, 72, 153), 0.12);
+.giftTeaser:hover {
+  transform: translateY(-1px) scale(1.05);
 }
 
-.benefitBanner:active {
-  transform: scale(0.99);
-}
-
-.benefitBannerIcon {
-  flex: 0 0 auto;
-  font-size: 22px;
-  line-height: 1;
-}
-
-.benefitBannerCopy {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.benefitBannerTitle {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ep-text, #72243e);
-  line-height: 1.25;
-}
-
-.benefitBannerSubtitle {
-  font-size: 11px;
-  color: var(--ep-muted-text, #993556);
-  line-height: 1.3;
-}
-
-.benefitBannerChevron {
-  flex: 0 0 auto;
-  font-size: 16px;
-  color: var(--ep-primary-btn-bg, #d4537e);
-}
-
-.sessionInlineCta {
-  padding: 0 16px max(12px, env(safe-area-inset-bottom, 12px));
-  flex-shrink: 0;
+.giftTeaser:active {
+  transform: scale(0.95);
 }
 
 /* ── Success CTA ───────────────────────────────────────────────── */
@@ -1288,11 +1221,6 @@
 }
 
 @media (max-width: 480px) {
-  .benefitBanner {
-    margin-left: 16px;
-    margin-right: 16px;
-  }
-
   .giftModalCard {
     width: min(100%, 320px);
   }

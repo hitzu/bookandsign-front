@@ -224,6 +224,12 @@ export const useFotoBoothCarousel = ({
     });
   };
 
+  const handleSessionCtaVisible = () => {
+    trackSessionEvent(AnalyticsAction.SESSION_SOCIAL_CTA_VIEWED, {
+      surface: "session_page",
+    });
+  };
+
   const handleSessionWhatsAppClick = () => {
     trackSessionEvent(AnalyticsAction.SESSION_WHATSAPP_CLICKED, {
       surface: "session_page",
@@ -257,6 +263,7 @@ export const useFotoBoothCarousel = ({
     handlePointerStart,
     handleRetry: retryItem,
     handleSave,
+    handleSessionCtaVisible,
     handleSessionSocialClick,
     handleSessionWhatsAppClick,
     handleShare,

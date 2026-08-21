@@ -125,28 +125,6 @@ const ItemStage = ({
         </>
       )}
     </div>
-
-    {items.length > 1 && (
-      <div className={styles.dotsRow}>
-        {items.map((item, itemIndex) => (
-          <button
-            key={`${item.type}-${itemIndex}`}
-            type="button"
-            className={`${styles.dotButton} ${
-              itemIndex === activeIndex ? styles.dotButtonActive : ""
-            }`}
-            onClick={() => onGoTo(itemIndex)}
-            aria-label={`Ir al elemento ${itemIndex + 1}`}
-          >
-            <span
-              className={`${styles.dot} ${
-                itemIndex === activeIndex ? styles.dotActive : ""
-              }`}
-            />
-          </button>
-        ))}
-      </div>
-    )}
   </>
 );
 

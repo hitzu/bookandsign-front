@@ -4,7 +4,6 @@ import { CarouselProps } from "../../types";
 import { useFotoBoothCarousel } from "./hooks/useFotoBoothCarousel";
 import { useFotoBoothCarouselEffects } from "./hooks/useFotoBoothCarouselEffects";
 import ActionBar from "./ui/ActionBar";
-import BenefitBanner from "./ui/BenefitBanner";
 import CarouselHeader from "./ui/CarouselHeader";
 import GiftModal from "./ui/GiftModal";
 import ItemStage from "./ui/ItemStage";
@@ -34,6 +33,7 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     handlePointerStart,
     handleRetry,
     handleSave,
+    handleSessionCtaVisible,
     handleSessionSocialClick,
     handleSessionWhatsAppClick,
     handleShare,
@@ -84,25 +84,21 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         onRetry={handleRetry}
       />
 
-      <ActionBar
-        isBusy={isGeneratingAsset}
-        onSave={handleSave}
-        onShare={handleShare}
-      />
-
-      <BenefitBanner
-        titulo="Beneficio especial"
-        subtitulo="Comparte y gana un regalo"
-        onPress={() => {
-          handleOpenRewardPromo();
-          setIsGiftModalOpen(true);
-        }}
-      />
-
       <SessionInlineCta
         eventName={props.eventData.honoreesNames}
         onWAClick={handleSessionWhatsAppClick}
         onSocialClick={handleSessionSocialClick}
+        onGiftPress={() => {
+          handleOpenRewardPromo();
+          setIsGiftModalOpen(true);
+        }}
+        onCtaVisible={handleSessionCtaVisible}
+      />
+
+      <ActionBar
+        isBusy={isGeneratingAsset}
+        onSave={handleSave}
+        onShare={handleShare}
       />
 
       <SuccessCtaModal

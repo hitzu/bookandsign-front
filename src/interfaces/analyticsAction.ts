@@ -27,4 +27,5 @@ export enum AnalyticsAction {
   FIESTA_SOCIAL_CLICKED = "fiesta_social_clicked",
   SESSION_WHATSAPP_CLICKED = "session_whatsapp_clicked",
   SESSION_SOCIAL_CLICKED = "session_social_clicked",
+  SESSION_SOCIAL_CTA_VIEWED = "session_social_cta_viewed",
 }
