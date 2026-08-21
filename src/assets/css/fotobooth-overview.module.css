@@ -428,38 +428,10 @@
   );
 }
 
-/* ─── Sessions header ────────────────────────────────────────────────────── */
-
-.sessionsHeader {
-  padding: 18px 0 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.sessionsDot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    var(--ep-primary-btn-bg, #ec4899),
-    var(--ep-secondary-btn-bg, #a855f7)
-  );
-  flex-shrink: 0;
-}
-
-.sessionsLabel {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(var(--ep-accent-rgb, 190, 24, 93), 0.45);
-  letter-spacing: 0.04em;
-}
-
 .viewAllBtn {
   width: 100%;
   min-height: 50px;
-  margin: 0 0 14px;
+  margin: 14px 0;
   border: none;
   border-radius: 999px;
   background: var(--ep-gradient-primary);

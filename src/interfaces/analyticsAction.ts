@@ -28,4 +28,5 @@ export enum AnalyticsAction {
   SESSION_WHATSAPP_CLICKED = "session_whatsapp_clicked",
   SESSION_SOCIAL_CLICKED = "session_social_clicked",
   SESSION_SOCIAL_CTA_VIEWED = "session_social_cta_viewed",
+  POST_ACTION_CTA_VIEWED = "post_action_cta_viewed",
 }

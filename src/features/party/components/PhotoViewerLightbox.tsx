@@ -11,6 +11,7 @@ import { sharePhoto } from "../utils/mediaActions";
 import { trackEvent } from "../../../api/services/eventAnalyticsService";
 import { useModalStateMachine } from "../hooks/useModalStateMachine";
 import { PostActionConfirmation } from "./PostActionConfirmation";
+import { SocialPlatform } from "./SocialMediaCTA";
 
 type PhotoViewerLightboxProps = {
   isOpen: boolean;
@@ -148,6 +149,24 @@ const PhotoViewerLightbox = ({
       onClose();
     }
   }, [onClose, dispatch, reset]);
+
+  const handlePostActionWaClick = useCallback(() => {
+    if (!eventToken) return;
+    trackEvent(AnalyticsAction.CTA_WA_POST_DOWNLOAD, eventToken, {
+      surface: "gallery_lightbox",
+    });
+  }, [eventToken]);
+
+  const handlePostActionSocialClick = useCallback(
+    (platform: SocialPlatform) => {
+      if (!eventToken) return;
+      trackEvent(AnalyticsAction.SESSION_SOCIAL_CLICKED, eventToken, {
+        surface: "gallery_lightbox",
+        metadata: { platform },
+      });
+    },
+    [eventToken],
+  );
 
   const handlePrev = useCallback(() => {
     controllerRef.current?.prev();
@@ -319,6 +338,23 @@ const PhotoViewerLightbox = ({
                           onClose={() =>
                             dispatch({ type: "RETURN_TO_GALLERY" })
                           }
+                          nombreFestejado={eventTitle}
+                          onWAClick={handlePostActionWaClick}
+                          onSocialClick={handlePostActionSocialClick}
+                        />
+                      </div>
+                    )}
+
+                    {modalState === "post-share" && (
+                      <div className={styles.modalEndState}>
+                        <PostActionConfirmation
+                          source="share"
+                          onClose={() =>
+                            dispatch({ type: "RETURN_TO_GALLERY" })
+                          }
+                          nombreFestejado={eventTitle}
+                          onWAClick={handlePostActionWaClick}
+                          onSocialClick={handlePostActionSocialClick}
                         />
                       </div>
                     )}

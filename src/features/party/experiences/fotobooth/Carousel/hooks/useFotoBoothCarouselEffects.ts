@@ -4,6 +4,7 @@ import { CarouselProps } from "../../../types";
 import { AnalyticsAction } from "../../../../../../interfaces";
 import { trackEvent } from "../../../../../../api/services/eventAnalyticsService";
 import { useFotoBoothCarouselStore } from "../stores/useFotoBoothCarouselStore";
+import { CtaSource } from "../types";
 
 type UseFotoBoothCarouselEffectsParams = Pick<
   CarouselProps,
@@ -12,8 +13,10 @@ type UseFotoBoothCarouselEffectsParams = Pick<
   activeItem: SessionItem | null;
   activeItemStatus: "idle" | "loaded" | "error";
   index: number;
+  isSuccessCtaOpen: boolean;
   items: SessionItem[];
   shareFallbackPreviewUrl: string | null;
+  successCtaSource: CtaSource;
 };
 
 export const useFotoBoothCarouselEffects = ({
@@ -21,16 +24,19 @@ export const useFotoBoothCarouselEffects = ({
   activeItemStatus,
   eventToken,
   index,
+  isSuccessCtaOpen,
   items,
   photos,
   source = "direct",
   shareFallbackPreviewUrl,
   sessionToken,
+  successCtaSource,
 }: UseFotoBoothCarouselEffectsParams) => {
   const hasTrackedSessionView = useRef(false);
   const viewedItemIndexes = useRef(new Set<number>());
   const preloadedItemIndexes = useRef(new Set<number>());
   const previousFallbackPreviewUrl = useRef<string | null>(null);
+  const hasTrackedCurrentCta = useRef(false);
   const reset = useFotoBoothCarouselStore((state) => state.reset);
 
   useEffect(() => {
@@ -83,6 +89,26 @@ export const useFotoBoothCarouselEffects = ({
       image.src = item.src;
     });
   }, [activeItemStatus, index, items]);
+
+  useEffect(() => {
+    if (!eventToken) return;
+    if (!isSuccessCtaOpen) {
+      hasTrackedCurrentCta.current = false;
+      return;
+    }
+    if (hasTrackedCurrentCta.current) return;
+    hasTrackedCurrentCta.current = true;
+
+    trackEvent(AnalyticsAction.POST_ACTION_CTA_VIEWED, eventToken, {
+      sessionId: sessionToken,
+      surface: "post_action_confirmation",
+      metadata: {
+        source,
+        session_id: sessionToken,
+        ctaSource: successCtaSource,
+      },
+    });
+  }, [eventToken, isSuccessCtaOpen, sessionToken, source, successCtaSource]);
 
   useEffect(() => {
     if (

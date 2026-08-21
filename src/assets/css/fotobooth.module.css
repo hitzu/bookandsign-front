@@ -923,18 +923,6 @@
   animation: fadeIn 0.3s ease both;
 }
 
-.successCtaModal {
-  width: min(100%, 420px);
-  background: linear-gradient(
-    180deg,
-    rgba(var(--ep-surface-bg-rgb, 255, 253, 247), 0.98) 0%,
-    #ffffff 100%
-  );
-  border-radius: 28px;
-  padding: 22px 18px 18px;
-  box-shadow: 0 20px 60px rgba(88, 28, 63, 0.22);
-}
-
 .giftModalOverlay {
   position: fixed;
   inset: 0;

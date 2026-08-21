@@ -45,10 +45,15 @@ function modalReducer(
       if (event.type === "CLOSE_SHARE_CONFIRM")
         return { ...current, state: "gallery-photo" };
       if (event.type === "SHARE_SUCCESS")
-        return { ...current, state: "gallery-photo" };
+        return { ...current, state: "post-share" };
       break;
 
     case "post-download":
+      if (event.type === "RETURN_TO_GALLERY")
+        return { ...current, state: "gallery-photo" };
+      break;
+
+    case "post-share":
       if (event.type === "RETURN_TO_GALLERY")
         return { ...current, state: "gallery-photo" };
       break;

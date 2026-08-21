@@ -264,6 +264,16 @@ const FotoBoothOverview = ({
     });
   };
 
+  const socialCta = (
+    <SocialMediaCTA
+      context="eventOverview"
+      variant="page"
+      nombreFestejado={eventData?.honoreesNames ?? ""}
+      onWAClick={handleGalleryWaClick}
+      onSocialClick={handleGallerySocialClick}
+    />
+  );
+
   return (
     <div className={styles.page} style={theme ? buildThemeVars(theme) : undefined}>
       {!isEmpty && (
@@ -335,13 +345,8 @@ const FotoBoothOverview = ({
           </div>
         ) : (
           <>
-            <div className={styles.sessionsHeader}>
-              <div className={styles.sessionsDot} />
-              <p className={styles.sessionsLabel}>
-                {sessions.length}{" "}
-                {sessions.length === 1 ? "sesión" : "sesiones"} en este evento
-              </p>
-            </div>
+            {socialCta}
+
             {onViewAllPhotos && (
               <button
                 type="button"
@@ -382,13 +387,7 @@ const FotoBoothOverview = ({
           </div>
         )}
 
-        <SocialMediaCTA
-          context="eventOverview"
-          variant="page"
-          nombreFestejado={eventData?.honoreesNames ?? ""}
-          onWAClick={handleGalleryWaClick}
-          onSocialClick={handleGallerySocialClick}
-        />
+        {isEmpty && socialCta}
       </div>
     </div>
   );

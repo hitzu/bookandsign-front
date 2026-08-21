@@ -20,6 +20,7 @@ interface SocialMediaCTAProps {
   onWAClick?: () => void;
   onSocialClick?: (platform: SocialPlatform) => void;
   onClose?: () => void;
+  contentAlign?: "left" | "center";
 }
 
 const socialBrandClass: Record<SocialPlatform, string> = {
@@ -160,6 +161,7 @@ export const SocialMediaCTA = ({
   onWAClick,
   onSocialClick,
   onClose,
+  contentAlign,
 }: SocialMediaCTAProps) => {
   const phone = useMemo(() => {
     const raw = (
@@ -251,7 +253,10 @@ export const SocialMediaCTA = ({
   // ── Sheet variant ─────────────────────────────────────────────────────────────
   if (variant === "sheet") {
     return (
-      <div className={styles.sheetContent}>
+      <div
+        className={styles.sheetContent}
+        style={contentAlign ? { textAlign: contentAlign } : undefined}
+      >
         {onClose && (
           <button
             type="button"

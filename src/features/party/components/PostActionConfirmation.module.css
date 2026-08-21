@@ -61,6 +61,12 @@
   font-weight: 800;
 }
 
+.ctaWrapper {
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(var(--ep-surface-border-rgb, 111, 122, 106), 0.18);
+}
+
 .continueBtn {
   width: 100%;
   min-height: 46px;

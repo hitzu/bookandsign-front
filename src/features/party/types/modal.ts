@@ -2,6 +2,7 @@ export type ModalState =
   | "gallery-photo"
   | "share-confirm"
   | "post-download"
+  | "post-share"
   | "personalize-editor"
   | "personalize-exit-confirm"
   | "personalize-final"

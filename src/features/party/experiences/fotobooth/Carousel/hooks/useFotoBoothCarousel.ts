@@ -230,6 +230,21 @@ export const useFotoBoothCarousel = ({
     });
   };
 
+  const handleSuccessCtaWhatsAppClick = () => {
+    trackSessionEvent(AnalyticsAction.CTA_WA_POST_DOWNLOAD, {
+      surface: "post_action_confirmation",
+      ctaSource: successCtaSource,
+    });
+  };
+
+  const handleSuccessCtaSocialClick = (platform: SocialPlatform) => {
+    trackSessionEvent(AnalyticsAction.SESSION_SOCIAL_CLICKED, {
+      surface: "post_action_confirmation",
+      platform,
+      ctaSource: successCtaSource,
+    });
+  };
+
   const handleSessionWhatsAppClick = () => {
     trackSessionEvent(AnalyticsAction.SESSION_WHATSAPP_CLICKED, {
       surface: "session_page",
@@ -267,6 +282,8 @@ export const useFotoBoothCarousel = ({
     handleSessionSocialClick,
     handleSessionWhatsAppClick,
     handleShare,
+    handleSuccessCtaSocialClick,
+    handleSuccessCtaWhatsAppClick,
     index,
     isGeneratingAsset,
     isShareFallbackOpen,

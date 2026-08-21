@@ -37,6 +37,8 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     handleSessionSocialClick,
     handleSessionWhatsAppClick,
     handleShare,
+    handleSuccessCtaSocialClick,
+    handleSuccessCtaWhatsAppClick,
     index,
     isGeneratingAsset,
     isShareFallbackOpen,
@@ -51,11 +53,13 @@ const FotoBoothCarousel = (props: CarouselProps) => {
     activeItemStatus: activeItemState.status,
     eventToken: props.eventToken ?? props.eventData.eventToken,
     index,
+    isSuccessCtaOpen,
     items,
     photos: props.photos,
     source: props.source,
     shareFallbackPreviewUrl,
     sessionToken: props.sessionToken,
+    successCtaSource,
   });
 
   return (
@@ -105,6 +109,8 @@ const FotoBoothCarousel = (props: CarouselProps) => {
         eventName={props.eventData.honoreesNames}
         isOpen={isSuccessCtaOpen}
         onClose={closeSuccessCta}
+        onSocialClick={handleSuccessCtaSocialClick}
+        onWAClick={handleSuccessCtaWhatsAppClick}
         source={successCtaSource}
       />
 
