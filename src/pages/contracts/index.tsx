@@ -12,7 +12,7 @@ import BreadcrumbItem from "@common/BreadcrumbItem";
 import { Card, Col, Row, Form } from "react-bootstrap";
 import DeleteModal from "@common/DeleteModal";
 import FinalizeModal from "@common/FinalizeModal";
-import { PaymentsModal } from "../../features/contracts";
+import { CreateNoteModal, PaymentsModal } from "../../features/contracts";
 import {
   deleteContractById,
   finalizeContract,
@@ -28,6 +28,8 @@ const ContractsListPage = () => {
   const [finalizeId, setFinalizeId] = useState<number>(0);
   const [showPaymentsModal, setShowPaymentsModal] = useState<boolean>(false);
   const [paymentsContractId, setPaymentsContractId] = useState<number>(0);
+  const [showNoteModal, setShowNoteModal] = useState<boolean>(false);
+  const [noteContractId, setNoteContractId] = useState<number>(0);
   const [includeFinalized, setIncludeFinalized] = useState<boolean>(false);
 
   const fetchContracts = useCallback(async () => {
@@ -93,6 +95,16 @@ const ContractsListPage = () => {
   const handlePaymentsClose = () => {
     setShowPaymentsModal(false);
     setPaymentsContractId(0);
+  };
+
+  const handleCreateNote = useCallback((id: number) => {
+    setNoteContractId(id);
+    setShowNoteModal(true);
+  }, []);
+
+  const handleNoteClose = () => {
+    setShowNoteModal(false);
+    setNoteContractId(0);
   };
 
   const columns = useMemo(
@@ -167,6 +179,20 @@ const ContractsListPage = () => {
                 <li
                   className="list-inline-item align-bottom"
                   data-bs-toggle="tooltip"
+                  title="Crear nota"
+                >
+                  <Link
+                    href="#!"
+                    className="avtar avtar-xs btn-link-warning btn-pc-default"
+                    onClick={() => handleCreateNote(cellProps.row.original.id)}
+                    aria-label="Crear nota para el evento"
+                  >
+                    <i className="ti ti-note f-18"></i>
+                  </Link>
+                </li>
+                <li
+                  className="list-inline-item align-bottom"
+                  data-bs-toggle="tooltip"
                   title="Delete"
                 >
                   <Link
@@ -184,7 +210,7 @@ const ContractsListPage = () => {
         },
       },
     ],
-    [handleDelete, handleFinalize, handlePayments],
+    [handleDelete, handleFinalize, handlePayments, handleCreateNote],
   );
 
   return (
@@ -203,6 +229,11 @@ const ContractsListPage = () => {
         show={showPaymentsModal}
         handleClose={handlePaymentsClose}
         contractId={paymentsContractId}
+      />
+      <CreateNoteModal
+        show={showNoteModal}
+        handleClose={handleNoteClose}
+        contractId={noteContractId}
       />
 
       <BreadcrumbItem mainTitle="Contratos" subTitle="Lista de contratos" />

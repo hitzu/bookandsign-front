@@ -64,19 +64,23 @@ export const ReservationFinanceSection = ({
             className={styles.sectionBody}
             style={{ display: "grid", gap: "0.75rem" }}
           >
-            <div className={styles.financeRow}>
-              <span>Subtotal</span>
-              <span className={styles.financeValue}>
-                {formatMoney(contract.subtotal)}
-              </span>
-            </div>
+            {contract.discountTotal > 0 && (
+              <div className={styles.financeRow}>
+                <span>Subtotal</span>
+                <span className={styles.financeValue}>
+                  {formatMoney(contract.subtotal)}
+                </span>
+              </div>
+            )}
 
-            <div className={styles.financeRow}>
-              <span>Descuentos</span>
-              <span className={styles.financeDiscount}>
-                –{formatMoney(contract.discountTotal)}
-              </span>
-            </div>
+            {contract.discountTotal > 0 && (
+              <div className={styles.financeRow}>
+                <span>Descuentos</span>
+                <span className={styles.financeDiscount}>
+                  –{formatMoney(contract.discountTotal)}
+                </span>
+              </div>
+            )}
 
             <div className={styles.divider} />
 

@@ -43,7 +43,7 @@ import {
 import { getBookedBrandIdsByMonth } from "../../../services/monthBrandUsage";
 
 const pad = (n: number) => String(n).padStart(2, "0");
-const DEFAULT_MIN_AMOUNT_HOLD_SLOT = 500;
+const DEFAULT_MIN_AMOUNT_HOLD_SLOT = 200;
 
 interface UseContractFormOptions {
   brandKey?: ExpoBebeBrandKey;

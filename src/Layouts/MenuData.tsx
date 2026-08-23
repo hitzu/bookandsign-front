@@ -255,8 +255,8 @@ const menuItems = [
       },
       {
         id: "expo-bebe-glitter-bar",
-        label: "Glitter Bar",
-        link: "/expo-bebe?brandId=2",
+        label: "Expo tu bebe Glitter Bar",
+        link: "/expo-bebe?brandId=1",
         dataPage: "expo-bebe",
       },
     ],
