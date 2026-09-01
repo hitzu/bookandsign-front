@@ -55,9 +55,9 @@ const COPY: Record<
     waLabel: "Quiero esto en mi evento",
   },
   eventOverview: {
-    titulo: "¿Quieres esto en tu propio evento?",
-    subtitulo: "Reserva tu fecha o pide información personalizada por WhatsApp",
-    waLabel: "Reservar fecha",
+    titulo: "¿Y si las próximas fotos son las tuyas?",
+    subtitulo: "Una experiencia personalizada que tus invitados van a recordar.",
+    waLabel: "Reservar mi fecha",
   },
   eventBooking: {
     titulo: "¿Quieres esto en tu fiesta?",
